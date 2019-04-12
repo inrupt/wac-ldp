@@ -1,13 +1,14 @@
 import * as http from 'http'
 import Debug from 'debug'
+import BlobTreeInMem from './BlobTreeInMem'
+import makeHandler from './app'
 
 const debug = Debug('server')
 const port = 8080
 
-const handler = (req, res) => {
-  res.writeHead(200)
-  res.end('todo: implement')
-}
+
+const storage = new BlobTreeInMem() // singleton in-memory storage
+const handler = makeHandler(storage)
 
 const server = http.createServer(handler)
 
