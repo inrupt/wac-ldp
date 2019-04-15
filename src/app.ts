@@ -2,7 +2,7 @@ import * as http from 'http'
 import Debug from 'debug'
 const debug = Debug('app')
 
-import { BlobTree } from './BlobTree'
+import { BlobTree, Path } from './BlobTree'
 import { LdpParser, LdpTask, TaskType } from './processors/LdpParser'
 import { DetermineWebId } from './processors/DetermineWebId'
 
@@ -20,6 +20,8 @@ import { BlobDeleter } from './processors/BlobDeleter'
 import { Responder, LdpResponse } from './processors/Responder'
 import Processor from './processors/Processor'
 import { AclReader } from './processors/AclReader'
+import { AgentCheckTask, DetermineAllowedModeForAgent } from './processors/DetermineAllowedModesForAgent'
+import { OriginCheckTask, DetermineAllowedModeForOrigin } from './processors/DetermineAllowedModesForOrigin'
 
 export default (storage: BlobTree) => {
   const processors = {
@@ -29,6 +31,8 @@ export default (storage: BlobTree) => {
     parseLdp: new LdpParser(),
     determineWebId: new DetermineWebId(),
     readAcl: new AclReader(storage),
+    determineAllowedModesForAgent: new DetermineAllowedModeForAgent(storage),
+    determineAllowedModesForOrigin: new DetermineAllowedModeForOrigin(storage),
 
     // step 2, execute:
     // input type: LdpTask
@@ -55,10 +59,36 @@ export default (storage: BlobTree) => {
     try {
       const ldpTask: LdpTask = await processors.parseLdp.process(req)
       debug('parsed', ldpTask)
+
       const webId = await processors.determineWebId.process(ldpTask)
       debug('webId', webId)
-      const aclGraph = await processors.readAcl.process(ldpTask.path)
+
+      let baseResourcePath: Path
+      let resourceIsAclDocument
+      if (ldpTask.path.asString().substr(-4) === '.acl') {
+        // editing an ACL file requires acl:Control on the base resource
+        const aclPathStr: string = ldpTask.path.asString()
+        baseResourcePath = new Path(aclPathStr.substring(0, aclPathStr.length - 4))
+        resourceIsAclDocument = true
+      } else {
+        baseResourcePath = ldpTask.path
+        resourceIsAclDocument = false
+      }
+      const aclGraph = await processors.readAcl.process(baseResourcePath)
       debug('aclGraph', aclGraph)
+
+      const allowedModesForAgent = processors.determineAllowedModesForAgent.process({
+        agent: webId,
+        aclGraph
+      } as AgentCheckTask)
+      debug('allowedModesForAgent', allowedModesForAgent)
+
+      const allowedModesForOrigin = processors.determineAllowedModesForOrigin.process({
+        origin: ldpTask.origin,
+        aclGraph
+      } as OriginCheckTask)
+      debug('allowedModesForOrigin', allowedModesForOrigin)
+
       const requestProcessor: Processor = processors[ldpTask.ldpTaskType]
       response = await requestProcessor.process(ldpTask)
       debug('executed', response)
