@@ -19,6 +19,7 @@ import { BlobDeleter } from './processors/BlobDeleter'
 
 import { Responder, LdpResponse } from './processors/Responder'
 import Processor from './processors/Processor'
+import { AclReader } from './processors/AclReader'
 
 export default (storage: BlobTree) => {
   const processors = {
@@ -27,6 +28,8 @@ export default (storage: BlobTree) => {
     // output type: LdpTask
     parseLdp: new LdpParser(),
     determineWebId: new DetermineWebId(),
+    readAcl: new AclReader(storage),
+
     // step 2, execute:
     // input type: LdpTask
     // output type: LdpResponse
@@ -54,6 +57,8 @@ export default (storage: BlobTree) => {
       debug('parsed', ldpTask)
       const webId = await processors.determineWebId.process(ldpTask)
       debug('webId', webId)
+      const aclGraph = await processors.readAcl.process(ldpTask.path)
+      debug('aclGraph', aclGraph)
       const requestProcessor: Processor = processors[ldpTask.ldpTaskType]
       response = await requestProcessor.process(ldpTask)
       debug('executed', response)
