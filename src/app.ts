@@ -4,6 +4,7 @@ const debug = Debug('app')
 
 import { BlobTree } from './BlobTree'
 import { LdpParser, LdpTask, TaskType } from './processors/LdpParser'
+import { DetermineWebId } from './processors/DetermineWebId'
 
 import { ContainerReader } from './processors/ContainerReader'
 import { ContainerMemberAdder } from './processors/ContainerMemberAdder'
@@ -25,7 +26,7 @@ export default (storage: BlobTree) => {
     // input type: http.IncomingMessage
     // output type: LdpTask
     parseLdp: new LdpParser(),
-
+    determineWebId: new DetermineWebId(),
     // step 2, execute:
     // input type: LdpTask
     // output type: LdpResponse
@@ -51,6 +52,8 @@ export default (storage: BlobTree) => {
     try {
       const ldpTask: LdpTask = await processors.parseLdp.process(req)
       debug('parsed', ldpTask)
+      const webId = await processors.determineWebId.process(ldpTask)
+      debug('webId', webId)
       const requestProcessor: Processor = processors[ldpTask.ldpTaskType]
       response = await requestProcessor.process(ldpTask)
       debug('executed', response)

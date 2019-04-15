@@ -115,6 +115,15 @@ export class LdpParser implements Processor {
     }
   }
 
+  determineAccessToken (httpReq: http.IncomingMessage): string | undefined {
+    try {
+      return httpReq.headers['authorization'].substring('Bearer '.length)
+    } catch (error) {
+      debug('no bearer token found') // TODO: allow other ways of providing a PoP token
+    }
+    return undefined
+  }
+
   async process (httpReq: http.IncomingMessage) {
     debug('LdpParserTask!')
     let errorCode = null // todo actually use this. maybe with try-catch?
@@ -128,6 +137,7 @@ export class LdpParser implements Processor {
       ifNoneMatch: this.determineIfNoneMatch(httpReq),
       asJsonLd: this.determineAsJsonLd(httpReq),
       ldpTaskType: this.determineTaskType(httpReq),
+      bearerToken: this.determineAccessToken(httpReq),
       requestBody: undefined,
       path: new Path(httpReq.url)
     } as LdpTask
@@ -166,6 +176,7 @@ export class LdpTask {
   contentType: string | undefined
   ifMatch: string | undefined
   ifNoneMatch: Array<string> | undefined
+  bearerToken: string | undefined
   ldpTaskType: TaskType
   path: Path
   requestBody: string

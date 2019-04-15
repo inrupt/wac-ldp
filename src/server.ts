@@ -6,7 +6,6 @@ import makeHandler from './app'
 const debug = Debug('server')
 const port = 8080
 
-
 const storage = new BlobTreeInMem() // singleton in-memory storage
 const handler = makeHandler(storage)
 
