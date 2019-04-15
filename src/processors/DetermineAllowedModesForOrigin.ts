@@ -5,7 +5,7 @@ import Processor from './Processor'
 import Debug from 'debug'
 import { LdpTask } from './LdpParser'
 import StorageProcessor from './StorageProcessor'
-import { AccessMode } from './DetermineAllowedModesForAgent'
+import { AccessModes } from './DetermineAllowedModesForAgent'
 
 const debug = Debug('DetermineAllowedModeForAgent')
 
@@ -15,7 +15,12 @@ export interface OriginCheckTask {
 }
 
 export class DetermineAllowedModeForOrigin extends StorageProcessor implements Processor {
-  async process (task: OriginCheckTask): Promise<Array<AccessMode>> {
-    return []
+  async process (task: OriginCheckTask): Promise<AccessModes> {
+    return {
+      read: false,
+      write: false,
+      append: false,
+      control: false
+    }
   }
 }

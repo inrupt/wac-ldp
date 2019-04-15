@@ -13,15 +13,20 @@ export interface AgentCheckTask {
   aclGraph: any
 }
 
-export enum AccessMode {
-  read,
-  write,
-  append,
-  control
+export interface AccessModes {
+  read: Boolean
+  write: Boolean
+  append: Boolean
+  control: Boolean
 }
 
 export class DetermineAllowedModeForAgent extends StorageProcessor implements Processor {
-  async process (task: AgentCheckTask): Promise<Array<AccessMode>> {
-    return []
+  async process (task: AgentCheckTask): Promise<AccessModes> {
+    return {
+      read: false,
+      write: false,
+      append: false,
+      control: false
+    }
   }
 }
