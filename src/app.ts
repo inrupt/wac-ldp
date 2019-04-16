@@ -3,7 +3,7 @@ import Debug from 'debug'
 const debug = Debug('app')
 
 import { BlobTree } from './lib/storage/BlobTree'
-import { LdpParser, LdpTask, TaskType } from './processors/LdpParser'
+import { LdpParser, LdpTask, TaskType } from './lib/api/http/LdpParser'
 
 import { ContainerReader } from './processors/ContainerReader'
 import { ContainerMemberAdder } from './processors/ContainerMemberAdder'
@@ -16,7 +16,7 @@ import { BlobWriter } from './processors/BlobWriter'
 import { BlobUpdater } from './processors/BlobUpdater'
 import { BlobDeleter } from './processors/BlobDeleter'
 
-import { Responder, LdpResponse } from './processors/Responder'
+import { Responder, LdpResponse } from './lib/api/http/Responder'
 import Processor from './processors/Processor'
 
 export default (storage: BlobTree) => {

@@ -1,8 +1,8 @@
 import * as http from 'http'
 import Debug from 'debug'
-import Processor from './Processor'
+import Processor from '../../../processors/Processor'
 import { LdpResponse, ResultType, ErrorResult } from './Responder'
-import { Path } from '../lib/storage/BlobTree'
+import { Path } from '../../storage/BlobTree'
 
 const debug = Debug('LdpParser')
 
