@@ -31,7 +31,7 @@ export class LdpResponse {
 }
 
 export async function sendHttpResponse (task: LdpResponse, httpRes: http.ServerResponse) {
-  debug('ResponderAndReleaserTask!')
+  debug('sendHttpResponse!')
 
   const responses = {
     [ResultType.OkayWithBody]: {
