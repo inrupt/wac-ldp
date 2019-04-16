@@ -34,7 +34,7 @@ function toFormat (containerUrl: string, fileNames: Array<string>, contentType: 
   })
 }
 
-export default async function membersListAsResourceData (containerUrl, fileNames, asJsonLd): Promise<ResourceData> {
+export async function membersListAsResourceData (containerUrl, fileNames, asJsonLd): Promise<ResourceData> {
   debug('membersListAsResourceData', containerUrl, fileNames, asJsonLd)
   const contentType = (asJsonLd ? 'application/ld+json' : 'text/turtle')
   return makeResourceData(contentType, await toFormat(containerUrl, fileNames, contentType))

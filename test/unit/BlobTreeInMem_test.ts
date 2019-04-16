@@ -1,6 +1,6 @@
 import { expect } from 'chai'
 import 'mocha'
-import BlobTreeInMem from '../../src/lib/storage/BlobTreeInMem'
+import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { BlobTree, Path } from '../../src/lib/storage/BlobTree'
 import { Blob } from '../../src/lib/storage/Blob'
 import { Container } from '../../src/lib/storage/Container'
