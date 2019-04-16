@@ -5,32 +5,31 @@ const debug = Debug('app')
 import { BlobTree } from './lib/storage/BlobTree'
 import { parseHttpRequest, LdpTask, TaskType } from './lib/api/http/HttpParser'
 
-import { ContainerReader } from './lib/operations/ContainerReader'
-import { ContainerMemberAdder } from './lib/operations/ContainerMemberAdder'
-import { ContainerDeleter } from './lib/operations/ContainerDeleter'
+import { readContainer } from './lib/operations/readContainer'
+import { addContainerMember } from './lib/operations/addContainerMember'
+import { deleteContainer } from './lib/operations/deleteContainer'
 
-import { GlobReader } from './lib/operations/GlobReader'
+import { readGlob } from './lib/operations/readGlob'
 
-import { BlobReader } from './lib/operations/BlobReader'
-import { BlobWriter } from './lib/operations/BlobWriter'
-import { BlobUpdater } from './lib/operations/BlobUpdater'
-import { BlobDeleter } from './lib/operations/BlobDeleter'
+import { readBlob } from './lib/operations/readBlob'
+import { writeBlob } from './lib/operations/writeBlob'
+import { updateBlob } from './lib/operations/updateBlob'
+import { deleteBlob } from './lib/operations/deleteBlob'
 
 import { sendHttpResponse, LdpResponse } from './lib/api/http/HttpResponder'
-import Processor from './processors/Processor'
 
 export default (storage: BlobTree) => {
   const processors = {
-    // input type: LdpTask
+    // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.containerRead]: new ContainerReader(storage),
-    [TaskType.containerDelete]: new ContainerDeleter(storage),
-    [TaskType.containerMemberAdd]: new ContainerMemberAdder(storage),
-    [TaskType.globRead]: new GlobReader(storage),
-    [TaskType.blobRead]: new BlobReader(storage),
-    [TaskType.blobWrite]: new BlobWriter(storage),
-    [TaskType.blobUpdate]: new BlobUpdater(storage),
-    [TaskType.blobDelete]: new BlobDeleter(storage)
+    [TaskType.containerRead]: readContainer,
+    [TaskType.containerDelete]: deleteContainer,
+    [TaskType.containerMemberAdd]: addContainerMember,
+    [TaskType.globRead]: readGlob,
+    [TaskType.blobRead]: readBlob,
+    [TaskType.blobWrite]: writeBlob,
+    [TaskType.blobUpdate]: updateBlob,
+    [TaskType.blobDelete]: deleteBlob
   }
 
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
@@ -40,8 +39,11 @@ export default (storage: BlobTree) => {
     try {
       const ldpTask: LdpTask = await parseHttpRequest(httpReq)
       debug('parsed', ldpTask)
-      const requestProcessor: Processor = processors[ldpTask.ldpTaskType]
-      response = await requestProcessor.process(ldpTask)
+      switch (ldpTask.ldpTaskType) {
+        case TaskType.containerRead: return
+      }
+      const requestProcessor = processors[ldpTask.ldpTaskType]
+      const response: LdpResponse = await requestProcessor.apply(null, [ldpTask, storage])
       debug('executed', response)
     } catch (error) {
       debug('errored', error)
