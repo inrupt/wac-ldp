@@ -6,8 +6,11 @@ export class Path {
   constructor (str: string) {
     this.parts = str.split('/').filter(x => !!x.length)
   }
-  asString (): string {
+  toString (): string {
     return this.parts.join('/')
+  }
+  toContainerPathPrefix (): string {
+    return this.toString() + '/'
   }
 }
 

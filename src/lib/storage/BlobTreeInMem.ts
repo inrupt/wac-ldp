@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { Node } from './Node'
-import { Container } from './Container'
+import { Container, Member } from './Container'
 import { Blob } from './Blob'
 import { BlobTree, Path } from './BlobTree'
 
@@ -15,40 +15,37 @@ class NodeInMem {
     this.tree = tree
     debug('constructed node', path, tree)
   }
-  exists () {
-    throw new Error('overwrite me')
-  }
 }
-
-const PLACEHOLDER_MEMBER_NAME = '.placeholder'
 
 class ContainerInMem extends NodeInMem implements Container {
   getDescendents () {
-    const containerPathPrefix = this.path.asString() + '/'
-    return Object.keys(this.tree.kv).filter(x => {
-      return (x.length > containerPathPrefix.length)
-    }).filter(x => {
-      return (x.substr(0, containerPathPrefix.length) === containerPathPrefix
-      )
-    })
+    const containerPathPrefix = this.path.toContainerPathPrefix()
+    return Object.keys(this.tree.kv).filter(x => (
+      (x.length > containerPathPrefix.length) && // x is longer than container/path/prefix/
+      (x.substr(0, containerPathPrefix.length) === containerPathPrefix) // x srtarts with container/path/prefix/
+    ))
   }
   getMembers () {
     const listAbsolutePaths = this.getDescendents()
-    const prefixLength = this.path.asString().length + 1
+    const prefixLength = this.path.toString().length + 1
     const listRelativePaths = listAbsolutePaths.map(x => x.substring(prefixLength))
-    const distinct = (value, index, self) => {
-      return self.indexOf(value) === index
-    }
-    const memberNames = listRelativePaths.map(x => {
+    const memberMap = {}
+    listRelativePaths.map(x => {
       const parts = x.split('/')
       if (parts.length === 1) { // member blob
-        return x
-      } else {
-        return parts[0] + '/'
+        memberMap[x] = false
+      } else { // sub container
+        memberMap[parts[0]] = true
       }
-    }).filter(distinct).filter(x => (x !== PLACEHOLDER_MEMBER_NAME))
-    debug('getMembers', this.path, this.tree.kv, listAbsolutePaths, listRelativePaths, memberNames)
-    return Promise.resolve(memberNames)
+    })
+    const members = Object.keys(memberMap).map(name => {
+      return {
+        name,
+        isContainer: memberMap[name]
+      } as Member
+    })
+    debug('getMembers', this.path, this.tree.kv, listAbsolutePaths, listRelativePaths, memberMap, members)
+    return Promise.resolve(members)
   }
   delete () {
     this.getDescendents().map(x => {
@@ -57,7 +54,7 @@ class ContainerInMem extends NodeInMem implements Container {
     return Promise.resolve()
   }
   exists () {
-    debug('checking exists', this.path.asString(), Object.keys(this.tree.kv))
+    debug('checking exists', this.path.toString(), Object.keys(this.tree.kv))
     return (!!this.getDescendents().length)
   }
 }
@@ -65,21 +62,21 @@ class ContainerInMem extends NodeInMem implements Container {
 class BlobInMem extends NodeInMem implements Blob {
   getData () {
     debug('reading resource', this.path, this.tree.kv)
-    return Promise.resolve(this.tree.kv[this.path.asString()])
+    return Promise.resolve(this.tree.kv[this.path.toString()])
   }
-  setData (data: Buffer) {
+  setData (data: ReadableStream) {
     debug('setData', this.path)
-    this.tree.kv[this.path.asString()] = data
-    debug('this.tree.kv after setData', this.tree.kv, this.path, this.path.asString())
+    this.tree.kv[this.path.toString()] = data
+    debug('this.tree.kv after setData', this.tree.kv, this.path, this.path.toString())
     return Promise.resolve()
   }
   delete () {
-    delete this.tree.kv[this.path.asString()]
+    delete this.tree.kv[this.path.toString()]
     return Promise.resolve()
   }
   exists () {
-    debug('checking exists', this.path.asString(), Object.keys(this.tree.kv))
-    return (!!this.tree.kv.hasOwnProperty(this.path.asString()))
+    debug('checking exists', this.path.toString(), Object.keys(this.tree.kv))
+    return (!!this.tree.kv.hasOwnProperty(this.path.toString()))
   }
 }
 
