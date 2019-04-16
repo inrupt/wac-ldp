@@ -27,4 +27,10 @@ describe('Path', () => {
     const p = new Path(['a', '..', 'b'])
     expect(p.toString()).to.equal('a/../b')
   })
+  it('does not allow slashes', function () {
+    function shouldThrow () {
+      return new Path(['a', '/', 'b'])
+    }
+    expect(shouldThrow).to.throw()
+  })
 })
