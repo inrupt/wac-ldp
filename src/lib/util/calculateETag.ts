@@ -1,5 +1,6 @@
 import * as crypto from 'crypto'
 
+// TODO: make this configurable
 const secret = 'abcdefg'
 
 export default function calculateETag (text: string) {
