@@ -4,7 +4,7 @@
   "description": "A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.",
   "main": "dist/app.js",
   "dependencies": {
-    "@types/debug": "^4.1.3",
+    "@types/debug": "^4.1.4",
     "@types/node": "^11.12.1",
     "debug": "^4.1.1"
   },
@@ -13,7 +13,7 @@
     "@types/mocha": "^5.2.6",
     "@types/sinon": "^7.0.11",
     "chai": "^4.2.0",
-    "mocha": "^6.1.2",
+    "mocha": "^6.1.3",
     "sinon": "^7.3.1",
     "ts-node-dev": "^1.0.0-pre.32",
     "tslint": "^5.15.0",
