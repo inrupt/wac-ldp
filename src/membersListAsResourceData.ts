@@ -1,49 +1,41 @@
 import * as Stream from 'stream'
 import Debug from 'debug'
 import { makeResourceData, ResourceData } from './ResourceData'
+import Formats from 'rdf-formats-common'
+import rdf from 'rdf-ext'
+
+const formats = Formats()
 const debug = Debug('membersListAsResourceData')
 
-// NOTE: This is a temporary file, will be replaced in
-// https://github.com/inrupt/wac-ldp/pull/14
-
-const NEWLINE = '\r\n'
-
-function toTurtle (containerUrl: string, fileNames: Array<string>): string {
-  debug('folderDescription', fileNames)
-
-  const prefixes = [
-    '@prefix ldp: <http://www.w3.org/ns/ldp#>.'
-  ]
-  const memberRefs = fileNames.map(filename => `<${filename}>`)
-  const containerItem = [
-    `<${containerUrl}>`,
-    `    ldp:contains ${memberRefs.join(', ')};`
-  ].join(NEWLINE)
-  return [
-    prefixes.join(NEWLINE),
-    containerItem
-  ].join(NEWLINE + NEWLINE) + NEWLINE
+function toRdf (containerUrl: string, fileNames: Array<string>): ReadableStream {
+  const dataset = new rdf.dataset()
+  fileNames.map(fileName => {
+    dataset.add(rdf.quad(
+      rdf.namedNode(containerUrl),
+      rdf.namedNode('http://www.w3.org/ns/ldp#contains'),
+      rdf.namedNode(containerUrl + fileName)))
+  })
+  return dataset.toStream()
 }
 
-function toJsonLd (containerUrl: string, fileNames: Array<string>): string {
-  return JSON.stringify({
-    '@id': containerUrl,
-    'contains': fileNames.map(fileName => containerUrl + fileName),
-    '@context': {
-      'contains': {
-        '@id': 'http://www.w3.org/ns/ldp#contains',
-        '@type': '@id'
-      },
-      'ldp': 'http://www.w3.org/ns/ldp#'
-    }
+function toFormat (containerUrl: string, fileNames: Array<string>, contentType: string): Promise<string> {
+  const serializerJsonLd = formats.serializers[ contentType ]
+  const input = toRdf(containerUrl, fileNames)
+  const output = serializerJsonLd.import(input)
+  return new Promise(resolve => {
+    let str = ''
+    output.on('data', chunk => {
+      debug('chunk', chunk)
+      str += chunk.toString()
+    })
+    output.on('end', () => {
+      resolve(str)
+    })
   })
 }
 
-export function membersListAsResourceData (containerUrl, fileNames, asJsonLd): ResourceData {
+export default async function membersListAsResourceData (containerUrl, fileNames, asJsonLd): Promise<ResourceData> {
   debug('membersListAsResourceData', containerUrl, fileNames, asJsonLd)
-  if (asJsonLd) {
-    return makeResourceData('application/ld+json', toJsonLd(containerUrl, fileNames))
-  } else {
-    return makeResourceData('text/turtle', toTurtle(containerUrl, fileNames))
-  }
+  const contentType = (asJsonLd ? 'application/ld+json' : 'text/turtle')
+  return makeResourceData(contentType, await toFormat(containerUrl, fileNames, contentType))
 }

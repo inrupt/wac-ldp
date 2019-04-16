@@ -10,7 +10,7 @@ export async function readContainer (task: WacLdpTask, storage: BlobTree): Promi
   debug('operation readContainer!')
   const container = storage.getContainer(task.path)
   const membersList = await container.getMembers()
-  const resourceData = membersListAsResourceData(task.path, membersList, task.asJsonLd)
+  const resourceData = await membersListAsResourceData(task.path, membersList, task.asJsonLd)
   return {
     resultType: (task.omitBody ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
     resourceData,
