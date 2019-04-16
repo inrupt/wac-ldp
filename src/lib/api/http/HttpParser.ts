@@ -1,10 +1,10 @@
 import * as http from 'http'
 import Debug from 'debug'
 import Processor from '../../../processors/Processor'
-import { LdpResponse, ResultType, ErrorResult } from './Responder'
+import { LdpResponse, ResultType, ErrorResult } from './HttpResponder'
 import { Path } from '../../storage/BlobTree'
 
-const debug = Debug('LdpParser')
+const debug = Debug('HttpParser')
 
 export enum TaskType {
   containerRead,
