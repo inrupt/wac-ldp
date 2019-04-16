@@ -3,7 +3,7 @@ import Debug from 'debug'
 const debug = Debug('app')
 
 import { BlobTree } from './lib/storage/BlobTree'
-import { parseHttpRequest, LdpTask, TaskType } from './lib/api/http/HttpParser'
+import { parseHttpRequest, WacLdpTask, TaskType } from './lib/api/http/HttpParser'
 
 import { readContainer } from './lib/operations/readContainer'
 import { addContainerMember } from './lib/operations/addContainerMember'
@@ -16,7 +16,7 @@ import { writeBlob } from './lib/operations/writeBlob'
 import { updateBlob } from './lib/operations/updateBlob'
 import { deleteBlob } from './lib/operations/deleteBlob'
 
-import { sendHttpResponse, LdpResponse } from './lib/api/http/HttpResponder'
+import { sendHttpResponse, WacLdpResponse } from './lib/api/http/HttpResponder'
 
 export function makeHandler (storage: BlobTree) {
   const processors = {
@@ -35,19 +35,19 @@ export function makeHandler (storage: BlobTree) {
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
-    let response: LdpResponse
+    let response: WacLdpResponse
     try {
-      const ldpTask: LdpTask = await parseHttpRequest(httpReq)
+      const ldpTask: WacLdpTask = await parseHttpRequest(httpReq)
       debug('parsed', ldpTask)
       switch (ldpTask.ldpTaskType) {
         case TaskType.containerRead: return
       }
       const requestProcessor = processors[ldpTask.ldpTaskType]
-      const response: LdpResponse = await requestProcessor.apply(null, [ldpTask, storage])
+      const response: WacLdpResponse = await requestProcessor.apply(null, [ldpTask, storage])
       debug('executed', response)
     } catch (error) {
       debug('errored', error)
-      response = error as LdpResponse
+      response = error as WacLdpResponse
     }
     try {
       return sendHttpResponse(response, httpRes)

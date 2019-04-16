@@ -23,7 +23,7 @@ export class ErrorResult extends Error {
     this.resultType = resultType
   }
 }
-export class LdpResponse {
+export class WacLdpResponse {
   resultType: ResultType
   resourceData: ResourceData | undefined
   createdLocation: string | undefined
@@ -68,7 +68,7 @@ const responses = {
   }
 }
 
-export async function sendHttpResponse (task: LdpResponse, httpRes: http.ServerResponse) {
+export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!')
 
   debug(task.resultType, responses)
