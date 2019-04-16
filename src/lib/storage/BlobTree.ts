@@ -2,12 +2,17 @@ import { Container } from './Container'
 import { Blob } from './Blob'
 
 export class Path {
-  parts: Array<string>
-  constructor (str: string) {
-    this.parts = str.split('/').filter(x => !!x.length)
+  segments: Array<string>
+  constructor (segments: Array<string>) {
+    segments.map(segment => {
+      if (segment.indexOf('/') !== -1) {
+        throw new Error('No slashes allowed in path segments!')
+      }
+    })
+    this.segments = segments
   }
   toString (): string {
-    return this.parts.join('/')
+    return this.segments.join('/')
   }
   toContainerPathPrefix (): string {
     return this.toString() + '/'
