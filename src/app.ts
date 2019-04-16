@@ -3,7 +3,7 @@ import Debug from 'debug'
 const debug = Debug('app')
 
 import { BlobTree } from './lib/storage/BlobTree'
-import { LdpParser, LdpTask, TaskType } from './lib/api/http/LdpParser'
+import { parseHttpRequest, LdpTask, TaskType } from './lib/api/http/LdpParser'
 
 import { ContainerReader } from './lib/operations/ContainerReader'
 import { ContainerMemberAdder } from './lib/operations/ContainerMemberAdder'
@@ -21,10 +21,6 @@ import Processor from './processors/Processor'
 
 export default (storage: BlobTree) => {
   const processors = {
-    // step 1, parse:
-    // input type: http.IncomingMessage
-    // output type: LdpTask
-    parseLdp: new LdpParser(),
 
     // step 2, execute:
     // input type: LdpTask
@@ -49,7 +45,7 @@ export default (storage: BlobTree) => {
 
     let response: LdpResponse
     try {
-      const ldpTask: LdpTask = await processors.parseLdp.process(req)
+      const ldpTask: LdpTask = await parseHttpRequest(req)
       debug('parsed', ldpTask)
       const requestProcessor: Processor = processors[ldpTask.ldpTaskType]
       response = await requestProcessor.process(ldpTask)
