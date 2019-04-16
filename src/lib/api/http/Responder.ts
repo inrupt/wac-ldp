@@ -1,7 +1,7 @@
 import * as http from 'http'
 import Debug from 'debug'
-import Processor from './Processor'
-import { ResourceData } from '../ResourceData'
+import Processor from '../../../processors/Processor'
+import { ResourceData } from '../../../ResourceData'
 const debug = Debug('ResponderAndReleaser')
 
 export enum ResultType {
