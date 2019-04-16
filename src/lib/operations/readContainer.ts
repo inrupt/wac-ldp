@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import { LdpResponse, ResultType } from '../api/http/HttpResponder'
 import { LdpTask } from '../api/http/HttpParser'
-import membersListAsResourceData from '../../membersListAsResourceData'
+import { membersListAsResourceData } from '../../membersListAsResourceData'
 import { BlobTree } from '../storage/BlobTree'
 
 const debug = Debug('readContainer')

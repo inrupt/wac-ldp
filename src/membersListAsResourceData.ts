@@ -5,7 +5,7 @@ const debug = Debug('membersListAsResourceData')
 
 // NOTE: This is a temporary file, will be replaced in
 // https://github.com/inrupt/wac-ldp/pull/14
- 
+
 const NEWLINE = '\r\n'
 
 function toTurtle (containerUrl: string, fileNames: Array<string>): string {
@@ -39,7 +39,7 @@ function toJsonLd (containerUrl: string, fileNames: Array<string>): string {
   })
 }
 
-export default function membersListAsResourceData (containerUrl, fileNames, asJsonLd): ResourceData {
+export function membersListAsResourceData (containerUrl, fileNames, asJsonLd): ResourceData {
   debug('membersListAsResourceData', containerUrl, fileNames, asJsonLd)
   if (asJsonLd) {
     return makeResourceData('application/ld+json', toJsonLd(containerUrl, fileNames))
