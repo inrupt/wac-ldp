@@ -3,6 +3,9 @@ import Debug from 'debug'
 import { makeResourceData, ResourceData } from './ResourceData'
 const debug = Debug('membersListAsResourceData')
 
+// NOTE: This is a temporary file, will be replaced in
+// https://github.com/inrupt/wac-ldp/pull/14
+ 
 const NEWLINE = '\r\n'
 
 function toTurtle (containerUrl: string, fileNames: Array<string>): string {
