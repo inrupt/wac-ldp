@@ -5,16 +5,16 @@ const debug = Debug('app')
 import { BlobTree } from './lib/storage/BlobTree'
 import { LdpParser, LdpTask, TaskType } from './lib/api/http/LdpParser'
 
-import { ContainerReader } from './processors/ContainerReader'
-import { ContainerMemberAdder } from './processors/ContainerMemberAdder'
-import { ContainerDeleter } from './processors/ContainerDeleter'
+import { ContainerReader } from './lib/operations/ContainerReader'
+import { ContainerMemberAdder } from './lib/operations/ContainerMemberAdder'
+import { ContainerDeleter } from './lib/operations/ContainerDeleter'
 
-import { GlobReader } from './processors/GlobReader'
+import { GlobReader } from './lib/operations/GlobReader'
 
-import { BlobReader } from './processors/BlobReader'
-import { BlobWriter } from './processors/BlobWriter'
-import { BlobUpdater } from './processors/BlobUpdater'
-import { BlobDeleter } from './processors/BlobDeleter'
+import { BlobReader } from './lib/operations/BlobReader'
+import { BlobWriter } from './lib/operations/BlobWriter'
+import { BlobUpdater } from './lib/operations/BlobUpdater'
+import { BlobDeleter } from './lib/operations/BlobDeleter'
 
 import { Responder, LdpResponse } from './lib/api/http/Responder'
 import Processor from './processors/Processor'
