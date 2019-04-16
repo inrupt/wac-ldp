@@ -44,7 +44,7 @@
     "Justin Bingham (https://github.com/justinwb)",
     "Sebastien Dubois (https://github.com/dsebastien)"
   ],
-  "license": "ISC",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/inrupt/wac-ldp/issues"
   },
