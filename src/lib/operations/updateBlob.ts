@@ -6,7 +6,7 @@ import { BlobTree } from '../storage/BlobTree'
 const debug = Debug('updateBlob')
 
 export async function updateBlob (task: LdpTask, storage: BlobTree): Promise<LdpResponse> {
-  debug('LdpParserResult updateBlob!')
+  debug('operation updateBlob!')
   // TODO: implement
   return {
     resultType: ResultType.OkayWithoutBody

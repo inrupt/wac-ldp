@@ -7,9 +7,9 @@ import { fromStream } from '../../ResourceData'
 const debug = Debug('deleteBlob')
 
 export async function deleteBlob (task: LdpTask, storage: BlobTree): Promise<LdpResponse> {
-  debug('LdpParserResult ResourceDeleter!')
+  debug('operation deleteBlob!')
   const blob = storage.getBlob(task.path)
-  // FIXME: duplicate code with ResourceWriter. use inheritence with common ancestor?
+  // FIXME: duplicate code with writeBlob. use inheritence with common ancestor?
   if (task.ifMatch) {
     const resourceData = await fromStream(await blob.getData())
     if (resourceData.etag !== task.ifMatch) {

@@ -6,7 +6,7 @@ import { makeResourceData, fromStream, toStream } from '../../ResourceData'
 
 const debug = Debug('writeBlob')
 export async function writeBlob (task: LdpTask, storage: BlobTree) {
-  debug('LdpParserResult ResourceWriter!')
+  debug('operation writeBlob!')
   const blob = storage.getBlob(task.path)
   // FIXME: duplicate code with ResourceWriter. use inheritence with common ancestor?
   if (task.ifMatch) {

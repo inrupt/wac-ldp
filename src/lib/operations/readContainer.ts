@@ -4,9 +4,10 @@ import { LdpTask } from '../api/http/HttpParser'
 import membersListAsResourceData from '../../membersListAsResourceData'
 import { BlobTree } from '../storage/BlobTree'
 
-const debug = Debug('ContainerReader')
+const debug = Debug('readContainer')
 
 export async function readContainer (task: LdpTask, storage: BlobTree): Promise<LdpResponse> {
+  debug('operation readContainer!')
   const container = storage.getContainer(task.path)
   const membersList = await container.getMembers()
   const resourceData = membersListAsResourceData(task.path, membersList, task.asJsonLd)

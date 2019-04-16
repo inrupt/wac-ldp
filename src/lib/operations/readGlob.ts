@@ -3,10 +3,10 @@ import { LdpResponse, ResultType } from '../api/http/HttpResponder'
 import { BlobTree } from '../storage/BlobTree'
 import { LdpTask } from '../api/http/HttpParser'
 
-const debug = Debug('GlobReader')
+const debug = Debug('readGlob')
 
 export async function readGlob (task: LdpTask, storage: BlobTree): Promise<LdpResponse> {
-  debug('LdpParserResult GlobReader!')
+  debug('operation readGlob!')
   // TODO: implement
   return {
     resultType: ResultType.OkayWithBody
