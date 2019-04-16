@@ -1,9 +1,9 @@
 import Debug from 'debug'
-import StorageProcessor from './StorageProcessor'
-import Processor from './Processor'
-import { LdpResponse, ResultType } from '../lib/api/http/Responder'
-import { LdpTask } from '../lib/api/http/LdpParser'
-import membersListAsResourceData from '../membersListAsResourceData'
+import StorageProcessor from '../../processors/StorageProcessor'
+import Processor from '../../processors/Processor'
+import { LdpResponse, ResultType } from '../api/http/Responder'
+import { LdpTask } from '../api/http/LdpParser'
+import membersListAsResourceData from '../../membersListAsResourceData'
 
 const debug = Debug('ContainerReader')
 
