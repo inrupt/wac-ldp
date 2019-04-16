@@ -10,3 +10,4 @@ Contributors:
 * Jackson Morgan
 * Pat McBennett
 * Justin Bingham
+* Sebastien Dubois
