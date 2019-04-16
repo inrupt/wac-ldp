@@ -1,6 +1,5 @@
 import * as http from 'http'
 import Debug from 'debug'
-import Processor from '../../../processors/Processor'
 import { LdpResponse, ResultType, ErrorResult } from './HttpResponder'
 import { Path } from '../../storage/BlobTree'
 
