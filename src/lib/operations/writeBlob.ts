@@ -1,11 +1,11 @@
 import Debug from 'debug'
-import { LdpResponse, ResultType } from '../api/http/HttpResponder'
-import { LdpTask } from '../api/http/HttpParser'
+import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
+import { WacLdpTask } from '../api/http/HttpParser'
 import { BlobTree } from '../storage/BlobTree'
 import { makeResourceData, fromStream, toStream } from '../../ResourceData'
 
 const debug = Debug('writeBlob')
-export async function writeBlob (task: LdpTask, storage: BlobTree) {
+export async function writeBlob (task: WacLdpTask, storage: BlobTree) {
   debug('operation writeBlob!')
   const blob = storage.getBlob(task.path)
   // FIXME: duplicate code with ResourceWriter. use inheritence with common ancestor?
@@ -14,12 +14,12 @@ export async function writeBlob (task: LdpTask, storage: BlobTree) {
     if (resourceData.etag !== task.ifMatch) {
       return {
         resultType: ResultType.PreconditionFailed
-      } as LdpResponse
+      } as WacLdpResponse
     }
   }
   const resultType = (blob.exists() ? ResultType.OkayWithoutBody : ResultType.Created)
   await blob.setData(toStream(makeResourceData(task.contentType, task.requestBody)))
   return {
     resultType
-  } as LdpResponse
+  } as WacLdpResponse
 }

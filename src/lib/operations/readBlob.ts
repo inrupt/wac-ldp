@@ -1,6 +1,6 @@
 import Debug from 'debug'
-import { LdpResponse, ResultType } from '../api/http/HttpResponder'
-import { LdpTask } from '../api/http/HttpParser'
+import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
+import { WacLdpTask } from '../api/http/HttpParser'
 import { BlobTree } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 
@@ -24,7 +24,7 @@ async function fromStream (stream: ReadableStream): Promise<any> {
   return obj
 }
 
-async function executeTask (task: LdpTask, resource: Blob): Promise<LdpResponse> {
+async function executeTask (task: WacLdpTask, resource: Blob): Promise<WacLdpResponse> {
   let result = {
   } as any
   if (!resource.exists()) {
@@ -40,10 +40,10 @@ async function executeTask (task: LdpTask, resource: Blob): Promise<LdpResponse>
   } else {
     result.resultType = ResultType.OkayWithBody
   }
-  return result as LdpResponse
+  return result as WacLdpResponse
 }
 
-export async function readBlob (task: LdpTask, storage: BlobTree): Promise<LdpResponse> {
+export async function readBlob (task: WacLdpTask, storage: BlobTree): Promise<WacLdpResponse> {
   debug('operation readBlob!')
   const resource = storage.getBlob(task.path)
   const result = await this.executeTask(task, resource)

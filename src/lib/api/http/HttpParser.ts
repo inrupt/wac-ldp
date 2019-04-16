@@ -1,6 +1,6 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { LdpResponse, ResultType, ErrorResult } from './HttpResponder'
+import { WacLdpResponse, ResultType, ErrorResult } from './HttpResponder'
 import { Path } from '../../storage/BlobTree'
 
 const debug = Debug('HttpParser')
@@ -94,7 +94,7 @@ function determineAsJsonLd (httpReq: http.IncomingMessage): boolean {
 }
 
 // parse the http request to extract some basic info (e.g. is it a container?)
-export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<LdpTask> {
+export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<WacLdpTask> {
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
   const parsedTask = {
@@ -109,7 +109,7 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     ldpTaskType: this.determineTaskType(httpReq),
     requestBody: undefined,
     path: new Path(('root' + httpReq.url).split('/'))
-  } as LdpTask
+  } as WacLdpTask
   await new Promise(resolve => {
     parsedTask.requestBody = ''
     httpReq.on('data', chunk => {
@@ -135,7 +135,7 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
   }
 }
 
-export class LdpTask {
+export class WacLdpTask {
   mayIncreaseDiskUsage: boolean
   isContainer: boolean
   omitBody: boolean
