@@ -30,50 +30,50 @@ export class LdpResponse {
   isContainer: boolean
 }
 
+const responses = {
+  [ResultType.OkayWithBody]: {
+    responseStatus: 200
+  },
+  [ResultType.CouldNotParse]: {
+    responseStatus: 405,
+    responseBody: 'Method not allowed'
+  },
+  [ResultType.AccessDenied]: {
+    responseStatus: 401,
+    responseBody: 'Access denied'
+  },
+  [ResultType.PreconditionFailed]: {
+    responseStatus: 412,
+    responseBody: 'Precondition failed'
+  },
+  [ResultType.NotFound]: {
+    responseStatus: 404,
+    responseBody: 'Not found'
+  },
+  [ResultType.NotModified]: {
+    responseStatus: 304,
+    responseBody: 'Not modified'
+  },
+  [ResultType.Created]: {
+    responseStatus: 201,
+    responseBody: 'Created'
+  },
+  [ResultType.OkayWithoutBody]: {
+    responseStatus: 204,
+    responseBody: 'No Content'
+  },
+  [ResultType.InternalServerError]: {
+    responseStatus: 500,
+    responseBody: 'Internal server error'
+  }
+}
+
 export async function sendHttpResponse (task: LdpResponse, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!')
 
-  const responses = {
-    [ResultType.OkayWithBody]: {
-      responseStatus: 200,
-      responseBody: task.resourceData ? task.resourceData.body : ''
-    },
-    [ResultType.CouldNotParse]: {
-      responseStatus: 405,
-      responseBody: 'Method not allowed'
-    },
-    [ResultType.AccessDenied]: {
-      responseStatus: 401,
-      responseBody: 'Access denied'
-    },
-    [ResultType.PreconditionFailed]: {
-      responseStatus: 412,
-      responseBody: 'Precondition failed'
-    },
-    [ResultType.NotFound]: {
-      responseStatus: 404,
-      responseBody: 'Not found'
-    },
-    [ResultType.NotModified]: {
-      responseStatus: 304,
-      responseBody: 'Not modified'
-    },
-    [ResultType.Created]: {
-      responseStatus: 201,
-      responseBody: 'Created'
-    },
-    [ResultType.OkayWithoutBody]: {
-      responseStatus: 204,
-      responseBody: 'No Content'
-    },
-    [ResultType.InternalServerError]: {
-      responseStatus: 500,
-      responseBody: 'Internal server error'
-    }
-  }
   debug(task.resultType, responses)
   const responseStatus = responses[task.resultType].responseStatus
-  const responseBody = responses[task.resultType].responseBody
+  const responseBody = responses[task.resultType].responseBody || (task.resourceData ? task.resourceData.body : '')
 
   const types: Array<string> = [
     '<http://www.w3.org/ns/ldp#Resource>; rel="type"'
