@@ -80,7 +80,7 @@ class BlobInMem extends NodeInMem implements Blob {
   }
 }
 
-export default class BlobTreeInMem {
+export class BlobTreeInMem {
   kv: any
 
   constructor () {

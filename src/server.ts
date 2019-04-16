@@ -1,7 +1,7 @@
 import * as http from 'http'
 import Debug from 'debug'
-import BlobTreeInMem from './lib/storage/BlobTreeInMem'
-import makeHandler from './app'
+import { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
+import { makeHandler } from './app'
 import { BlobTree } from './lib/storage/BlobTree'
 
 const debug = Debug('server')

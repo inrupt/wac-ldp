@@ -1,5 +1,5 @@
 import streamifier from 'streamifier'
-import calculateETag from './lib/util/calculateETag'
+import { calculateETag } from './lib/util/calculateETag'
 
 export interface ResourceData {
   body: string

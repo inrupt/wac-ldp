@@ -18,7 +18,7 @@ import { deleteBlob } from './lib/operations/deleteBlob'
 
 import { sendHttpResponse, LdpResponse } from './lib/api/http/HttpResponder'
 
-export default (storage: BlobTree) => {
+export function makeHandler (storage: BlobTree) {
   const processors = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
