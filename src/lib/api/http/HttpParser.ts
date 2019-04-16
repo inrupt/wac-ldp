@@ -17,56 +17,40 @@ export enum TaskType {
   unknown
 }
 
-function getContainerTask (method: string): TaskType {
-  if (method === 'OPTIONS' || method === 'HEAD' || method === 'GET') {
-    return TaskType.containerRead
-  }
-  if (method === 'POST' || method === 'PUT') {
-    return TaskType.containerMemberAdd
-  }
-  if (method === 'DELETE') {
-    return TaskType.containerDelete
-  }
-  return TaskType.unknown
-}
-
-function getGlobTask (method: string): TaskType {
-  if (method === 'OPTIONS' || method === 'HEAD' || method === 'GET') {
-    return TaskType.globRead
-  }
-  return TaskType.unknown
-}
-
-function getBlobTask (method: string): TaskType {
-  if (method === 'OPTIONS' || method === 'HEAD' || method === 'GET') {
-    return TaskType.blobRead
-  }
-  if (method === 'PUT') {
-    return TaskType.blobWrite
-  }
-  if (method === 'PUT') {
-    return TaskType.blobUpdate
-  }
-  if (method === 'DELETE') {
-    return TaskType.blobDelete
-  }
-  debug('unknown http method', method)
-  return TaskType.unknown
-}
-
 function determineTaskType (httpReq: http.IncomingMessage): TaskType {
   // if the URL end with a / then the path indicates a container
   // if the URL end with /* then the path indicates a glob
   // in all other cases, the path indicates a blob
 
-  const lastUrlChar = httpReq.url.substr(-1)
-  if (lastUrlChar === '/') {
-    return this.getContainerTask(httpReq.method)
-  } else if (lastUrlChar === '*') {
-    return this.getGlobTask(httpReq.method)
-  } else {
-    return this.getBlobTask(httpReq.method)
+  let lastUrlChar = httpReq.url.substr(-1)
+  if (['/', '*'].indexOf(lastUrlChar) === -1) {
+    lastUrlChar = '(other)'
   }
+
+  const methodMap = {
+    '/': {
+      OPTIONS: TaskType.containerRead,
+      HEAD: TaskType.containerRead,
+      GET: TaskType.containerRead,
+      POST: TaskType.containerMemberAdd,
+      PUT: TaskType.containerMemberAdd,
+      DELETE: TaskType.containerDelete
+    },
+    '*': {
+      OPTIONS: TaskType.globRead,
+      HEAD: TaskType.globRead,
+      GET: TaskType.globRead
+    },
+    '(other)': {
+      OPTIONS: TaskType.blobRead,
+      HEAD: TaskType.blobRead,
+      GET: TaskType.blobRead,
+      PUT: TaskType.blobWrite,
+      PATCH: TaskType.blobUpdate,
+      DELETE: TaskType.blobDelete
+    }
+  }
+  return methodMap[lastUrlChar][httpReq.method] || TaskType.unknown
 }
 
 function determineOrigin (httpReq: http.IncomingMessage): string | undefined {
