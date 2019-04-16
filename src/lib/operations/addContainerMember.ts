@@ -8,12 +8,12 @@ import { makeResourceData, toStream } from '../../ResourceData'
 const debug = Debug('addContainerMember')
 
 export async function addContainerMember (task: LdpTask, storage: BlobTree) {
-  debug('LdpParserResult addContainerMember!')
-  const resourcePath = task.path + uuid()
-  const resource = storage.getBlob(resourcePath)
-  await resource.setData(toStream(makeResourceData(task.contentType, task.requestBody)))
+  debug('operation addContainerMember!')
+  const blobPath = task.path + uuid()
+  const blob = storage.getBlob(blobPath)
+  await blob.setData(toStream(makeResourceData(task.contentType, task.requestBody)))
   return {
     resultType: ResultType.Created,
-    createdLocation: resourcePath
+    createdLocation: blobPath
   } as LdpResponse
 }

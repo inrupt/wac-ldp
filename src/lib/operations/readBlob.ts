@@ -4,7 +4,7 @@ import { LdpTask } from '../api/http/HttpParser'
 import { BlobTree } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 
-const debug = Debug('ResourceReader')
+const debug = Debug('readBlob')
 
 async function fromStream (stream: ReadableStream): Promise<any> {
   let readResult
@@ -44,7 +44,7 @@ async function executeTask (task: LdpTask, resource: Blob): Promise<LdpResponse>
 }
 
 export async function readBlob (task: LdpTask, storage: BlobTree): Promise<LdpResponse> {
-  debug('LdpParserResult ResourceReader!')
+  debug('operation readBlob!')
   const resource = storage.getBlob(task.path)
   const result = await this.executeTask(task, resource)
   return result
