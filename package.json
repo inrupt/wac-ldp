@@ -10,7 +10,6 @@
     "debug": "^4.1.1",
     "rdf-ext": "^1.2.2",
     "rdf-formats-common": "^1.4.0",
-    "streamifier": "^0.1.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
