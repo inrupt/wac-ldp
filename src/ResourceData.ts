@@ -1,4 +1,4 @@
-import streamifier from 'streamifier'
+import convert from 'buffer-to-stream'
 import { calculateETag } from './lib/util/calculateETag'
 
 export interface ResourceData {
@@ -16,13 +16,24 @@ export function makeResourceData (contentType: string, body: string): ResourceDa
 }
 
 // Generic stream conversion function, not really related to ResourceData specifically, but included here for convenience
-export function toStream (obj: any): ReadableStream {
+export function toStream (obj: any): any {
   const buffer = Buffer.from(JSON.stringify(obj))
-  return streamifier.createReadStream(buffer)
+  return convert(buffer)
 }
 
 // Generic stream conversion function, not really related to ResourceData specifically, but included here for convenience
-export async function fromStream (stream: ReadableStream): Promise<any> {
+export async function fromStream (stream: any): Promise<any> {
+  const bufs = []
+  return new Promise(resolve => {
+    stream.on('data', function (d) {
+      bufs.push(d)
+    })
+    stream.on('end', function () {
+      const str = Buffer.concat(bufs).toString()
+      resolve(JSON.parse(str))
+    })
+  })
+
   let readResult
   let str = ''
   let value
