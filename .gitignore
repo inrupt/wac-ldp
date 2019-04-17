@@ -8,9 +8,6 @@ yarn-error.log*
 # TypeScript build result
 dist
 
-# VSCode
-.vscode
-
 # Runtime data
 pids
 *.pid
@@ -68,3 +65,4 @@ typings/
 
 # IDEs
 .idea
+.vscode
