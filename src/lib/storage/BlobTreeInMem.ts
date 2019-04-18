@@ -96,6 +96,6 @@ export class BlobTreeInMem {
   }
   on (eventName: string, eventHandler: (event: any) => void) {
     // TODO: implement
-    debug('adding event handler', eventName, eventHandler)
+    // debug('adding event handler', eventName, eventHandler)
   }
 }

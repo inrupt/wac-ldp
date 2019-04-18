@@ -33,20 +33,4 @@ export async function fromStream (stream: any): Promise<any> {
       resolve(JSON.parse(str))
     })
   })
-
-  let readResult
-  let str = ''
-  let value
-  const reader = stream.getReader()
-  do {
-    readResult = await reader.read()
-    str += readResult.value
-  } while (!readResult.done)
-  let obj
-  try {
-    obj = JSON.parse(str)
-  } catch (error) {
-    throw new Error('string in stream is not JSON')
-  }
-  return obj
 }
