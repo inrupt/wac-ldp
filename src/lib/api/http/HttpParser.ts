@@ -10,7 +10,6 @@ export enum TaskType {
   containerMemberAdd,
   containerDelete,
   globRead,
-  blobCreate,
   blobRead,
   blobWrite,
   blobUpdate,
