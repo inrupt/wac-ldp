@@ -3,7 +3,7 @@ import uuid from 'uuid/v4'
 import Debug from 'debug'
 const debug = Debug('app')
 
-import { BlobTree } from './lib/storage/BlobTree'
+import { BlobTree, Path } from './lib/storage/BlobTree'
 import { Node } from './lib/storage/Node'
 
 import { parseHttpRequest, WacLdpTask, TaskType } from './lib/api/http/HttpParser'
@@ -22,6 +22,10 @@ import { unknownOperation } from './lib/operations/unknownOperation'
 
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from './lib/api/http/HttpResponder'
 import { getBlobAndCheckETag } from './lib/operations/getBlobAndCheckETag'
+import { OriginCheckTask, determineAllowedModesForOrigin } from './lib/auth/determineAllowedModesForOrigin'
+import { AgentCheckTask, determineAllowedModesForAgent } from './lib/auth/determineAllowedModesForAgent'
+import { determineWebId } from './lib/auth/determineWebId'
+import { readAcl, ACL_SUFFIX } from './lib/auth/readAcl'
 
 export function makeHandler (storage: BlobTree) {
   const operations = {
@@ -43,7 +47,6 @@ export function makeHandler (storage: BlobTree) {
     let response: WacLdpResponse
     try {
       const ldpTask: WacLdpTask = await parseHttpRequest(httpReq)
-      let node: Node
       // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
       if (ldpTask.ldpTaskType === TaskType.containerMemberAdd) {
         debug('converting', ldpTask)
@@ -52,6 +55,37 @@ export function makeHandler (storage: BlobTree) {
         ldpTask.isContainer = false
         debug('converted', ldpTask)
       }
+      debug('parsed', ldpTask)
+
+      const webId = await determineWebId(ldpTask.bearerToken)
+      debug('webId', webId)
+
+      let baseResourcePath: Path
+      let resourceIsAclDocument
+      if (ldpTask.path.hasSuffix(ACL_SUFFIX)) {
+        // editing an ACL file requires acl:Control on the base resource
+        baseResourcePath = ldpTask.path.removeSuffix(ACL_SUFFIX)
+        resourceIsAclDocument = true
+      } else {
+        baseResourcePath = ldpTask.path
+        resourceIsAclDocument = false
+      }
+      const aclGraph = await readAcl(baseResourcePath)
+      debug('aclGraph', aclGraph)
+
+      const allowedModesForAgent = determineAllowedModesForAgent({
+        agent: webId,
+        aclGraph
+      } as AgentCheckTask)
+      debug('allowedModesForAgent', allowedModesForAgent)
+
+      const allowedModesForOrigin = determineAllowedModesForOrigin({
+        origin: ldpTask.origin,
+        aclGraph
+      } as OriginCheckTask)
+      debug('allowedModesForOrigin', allowedModesForOrigin)
+
+      let node: Node
       if (ldpTask.isContainer) {
         node = storage.getContainer(ldpTask.path)
       } else {
@@ -59,7 +93,6 @@ export function makeHandler (storage: BlobTree) {
         node = await getBlobAndCheckETag(ldpTask, storage)
       }
 
-      debug('parsed', ldpTask)
       debug('operation', {
         // acting on a container node:
         [TaskType.containerRead]: 'readContainer',

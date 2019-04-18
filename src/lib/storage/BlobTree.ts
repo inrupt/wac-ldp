@@ -48,6 +48,22 @@ export class Path {
     parentSegments.pop()
     return new Path(parentSegments)
   }
+  hasSuffix (suffix: string) {
+    const lastSegment = this.segments[this.segments.length - 1]
+    return (lastSegment.substr(-suffix.length) === suffix)
+  }
+  removeSuffix (suffix: string) {
+    const withoutSuffixSegments: Array<string> = copyStringArray(this.segments)
+    const remainingLength: number = withoutSuffixSegments[withoutSuffixSegments.length - 1].length - suffix.length
+    const withoutSuffix: string = withoutSuffixSegments[withoutSuffixSegments.length - 1].substring(0, remainingLength)
+    withoutSuffixSegments[withoutSuffixSegments.length - 1] = withoutSuffix
+    return new Path(withoutSuffixSegments)
+  }
+  appendSuffix (suffix: string) {
+    const withSuffixSegments: Array<string> = copyStringArray(this.segments)
+    withSuffixSegments[withSuffixSegments.length - 1] += suffix
+    return new Path(withSuffixSegments)
+  }
 }
 
 // throws:

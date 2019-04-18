@@ -103,6 +103,15 @@ function determineAsJsonLd (httpReq: http.IncomingMessage): boolean {
   }
 }
 
+function determineBearerToken (httpReq: http.IncomingMessage): string | undefined {
+  try {
+    return httpReq.headers['authorization'].substring('Bearer '.length)
+  } catch (error) {
+    debug('no bearer token found') // TODO: allow other ways of providing a PoP token
+  }
+  return undefined
+}
+
 // parse the http request to extract some basic info (e.g. is it a container?)
 export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<WacLdpTask> {
   debug('LdpParserTask!')
@@ -117,6 +126,7 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     ifNoneMatchList: determineIfNoneMatchList(httpReq),
     asJsonLd: determineAsJsonLd(httpReq),
     ldpTaskType: determineTaskType(httpReq),
+    bearerToken: determineBearerToken(httpReq),
     requestBody: undefined,
     path: new Path(('root' + httpReq.url).split('/'))
   } as WacLdpTask
@@ -134,6 +144,7 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     omitBody: parsedTask.omitBody,
     isContainer: parsedTask.isContainer,
     origin: parsedTask.origin,
+    bearerToken: parsedTask.bearerToken,
     ldpTaskType: parsedTask.ldpTaskType,
     path: parsedTask.path,
     requestBody: parsedTask.requestBody
@@ -155,6 +166,7 @@ export class WacLdpTask {
   ifMatch: string | undefined
   ifNoneMatchStar: boolean
   ifNoneMatchList: Array<string> | undefined
+  bearerToken: string
   ldpTaskType: TaskType
   path: Path
   requestBody: string
