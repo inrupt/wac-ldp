@@ -47,15 +47,15 @@ class ContainerInMem extends NodeInMem implements Container {
     debug('getMembers', this.path, this.tree.kv, listAbsolutePaths, listRelativePaths, memberMap, members)
     return Promise.resolve(members)
   }
-  delete () {
+  delete (): Promise<void> {
     this.getDescendents().map(x => {
       delete this.tree.kv[x]
     })
     return Promise.resolve()
   }
-  exists () {
+  exists (): Promise<boolean> {
     debug('checking exists', this.path.toString(), Object.keys(this.tree.kv))
-    return (!!this.getDescendents().length)
+    return Promise.resolve(!!this.getDescendents().length)
   }
 }
 
@@ -70,13 +70,13 @@ class BlobInMem extends NodeInMem implements Blob {
     debug('this.tree.kv after setData', this.tree.kv, this.path, this.path.toString())
     return Promise.resolve()
   }
-  delete () {
+  delete (): Promise<void> {
     delete this.tree.kv[this.path.toString()]
     return Promise.resolve()
   }
-  exists () {
+  exists (): Promise<boolean> {
     debug('checking exists', this.path.toString(), Object.keys(this.tree.kv))
-    return (!!this.tree.kv.hasOwnProperty(this.path.toString()))
+    return Promise.resolve((!!this.tree.kv.hasOwnProperty(this.path.toString())))
   }
 }
 
