@@ -13,6 +13,7 @@ export enum ResultType {
   OkayWithBody,
   OkayWithoutBody,
   Created,
+  MethodNotAllowed,
   InternalServerError
 }
 
@@ -62,6 +63,9 @@ const responses = {
     responseStatus: 204,
     responseBody: 'No Content'
   },
+  [ResultType.MethodNotAllowed]: {
+    responseStatus: 405,
+    responseBody: 'Method not allowed'},
   [ResultType.InternalServerError]: {
     responseStatus: 500,
     responseBody: 'Internal server error'
@@ -69,7 +73,7 @@ const responses = {
 }
 
 export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.ServerResponse) {
-  debug('sendHttpResponse!')
+  debug('sendHttpResponse!', task)
 
   debug(task.resultType, responses)
   const responseStatus = responses[task.resultType].responseStatus

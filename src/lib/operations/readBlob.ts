@@ -24,14 +24,15 @@ async function fromStream (stream: ReadableStream): Promise<any> {
   return obj
 }
 
-async function executeTask (task: WacLdpTask, resource: Blob): Promise<WacLdpResponse> {
+async function executeTask (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> {
   let result = {
   } as any
-  if (!resource.exists()) {
+  const exists = await blob.exists()
+  if (!exists) {
     result.resultType = ResultType.NotFound
     return result
   }
-  result.resourceData = await fromStream(await resource.getData())
+  result.resourceData = await fromStream(await blob.getData())
   debug('result.resourceData set to ', result.resourceData)
   if (task.omitBody) {
     result.resultType = ResultType.OkayWithoutBody
@@ -44,8 +45,8 @@ async function executeTask (task: WacLdpTask, resource: Blob): Promise<WacLdpRes
 }
 
 export async function readBlob (task: WacLdpTask, storage: BlobTree): Promise<WacLdpResponse> {
-  debug('operation readBlob!')
-  const resource = storage.getBlob(task.path)
-  const result = await this.executeTask(task, resource)
+  debug('operation readBlob!', task)
+  const blob = storage.getBlob(task.path)
+  const result = await executeTask(task, blob)
   return result
 }

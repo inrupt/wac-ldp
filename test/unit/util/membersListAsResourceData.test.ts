@@ -3,8 +3,6 @@ import { fromStream, toStream, ResourceData, makeResourceData } from '../../../s
 import { membersListAsResourceData } from '../../../src/lib/util/membersListAsResourceData'
 import { Member } from '../../../src/lib/storage/Container'
 
-// async function membersListAsResourceData (containerUrl, fileNames, asJsonLd): Promise<ResourceData> 
-
 const membersList: Array<Member> = [
   { name: '1', isContainer: false },
   { name: '2', isContainer: true }

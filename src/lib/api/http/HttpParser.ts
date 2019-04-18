@@ -98,15 +98,14 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
   const parsedTask = {
-    mayIncreaseDiskUsage: this.determineMayIncreaseDiskUsage(httpReq),
-    omitBody: this.determineOmitBody(httpReq),
+    omitBody: determineOmitBody(httpReq),
     isContainer: (httpReq.url.substr(-1) === '/'), // FIXME: code duplication, see determineLdpParserResultName above
-    origin: this.determineOrigin(httpReq),
-    contentType: this.determineContentType(httpReq),
-    ifMatch: this.determineIfMatch(httpReq),
-    ifNoneMatch: this.determineIfNoneMatch(httpReq),
-    asJsonLd: this.determineAsJsonLd(httpReq),
-    ldpTaskType: this.determineTaskType(httpReq),
+    origin: determineOrigin(httpReq),
+    contentType: determineContentType(httpReq),
+    ifMatch: determineIfMatch(httpReq),
+    ifNoneMatch: determineIfNoneMatch(httpReq),
+    asJsonLd: determineAsJsonLd(httpReq),
+    ldpTaskType: determineTaskType(httpReq),
     requestBody: undefined,
     path: new Path(('root' + httpReq.url).split('/'))
   } as WacLdpTask

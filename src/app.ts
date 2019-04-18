@@ -16,10 +16,12 @@ import { writeBlob } from './lib/operations/writeBlob'
 import { updateBlob } from './lib/operations/updateBlob'
 import { deleteBlob } from './lib/operations/deleteBlob'
 
+import { unknownOperation } from './lib/operations/unknownOperation'
+
 import { sendHttpResponse, WacLdpResponse } from './lib/api/http/HttpResponder'
 
 export function makeHandler (storage: BlobTree) {
-  const processors = {
+  const operations = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
     [TaskType.containerRead]: readContainer,
@@ -29,7 +31,8 @@ export function makeHandler (storage: BlobTree) {
     [TaskType.blobRead]: readBlob,
     [TaskType.blobWrite]: writeBlob,
     [TaskType.blobUpdate]: updateBlob,
-    [TaskType.blobDelete]: deleteBlob
+    [TaskType.blobDelete]: deleteBlob,
+    [TaskType.unknown]: unknownOperation
   }
 
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
@@ -42,14 +45,26 @@ export function makeHandler (storage: BlobTree) {
       switch (ldpTask.ldpTaskType) {
         case TaskType.containerRead: return
       }
-      const requestProcessor = processors[ldpTask.ldpTaskType]
-      const response: WacLdpResponse = await requestProcessor.apply(null, [ldpTask, storage])
+      debug('operation', {
+        [TaskType.containerRead]: 'readContainer',
+        [TaskType.containerMemberAdd]: 'addContainerMember',
+        [TaskType.containerDelete]: 'deleteContainer',
+        [TaskType.globRead]: 'readGlob',
+        [TaskType.blobRead]: 'readBlob',
+        [TaskType.blobWrite]: 'writeBlob',
+        [TaskType.blobUpdate]: 'updateBlob',
+        [TaskType.blobDelete]: 'deleteBlob',
+        [TaskType.unknown]: 'unknown'
+      }[ldpTask.ldpTaskType])
+      const requestProcessor = operations[ldpTask.ldpTaskType]
+      response = await requestProcessor.apply(null, [ldpTask, storage])
       debug('executed', response)
     } catch (error) {
       debug('errored', error)
       response = error as WacLdpResponse
     }
     try {
+      debug('response is', response)
       return sendHttpResponse(response, httpRes)
     } catch (error) {
       debug('errored while responding', error)

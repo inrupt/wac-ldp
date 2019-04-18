@@ -20,6 +20,10 @@ lib-cov
 # Coverage directory used by tools like istanbul
 coverage
 
+# Output from https://github.com/w3c/ldp-testsuite
+report
+test-output
+
 # nyc test coverage
 .nyc_output
 
