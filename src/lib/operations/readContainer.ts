@@ -2,13 +2,12 @@ import Debug from 'debug'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { membersListAsResourceData } from '../util/membersListAsResourceData'
-import { BlobTree } from '../storage/BlobTree'
+import { Container } from '../storage/Container'
 
 const debug = Debug('readContainer')
 
-export async function readContainer (task: WacLdpTask, storage: BlobTree): Promise<WacLdpResponse> {
+export async function readContainer (task: WacLdpTask, container: Container): Promise<WacLdpResponse> {
   debug('operation readContainer!')
-  const container = storage.getContainer(task.path)
   debug(container)
   const membersList = await container.getMembers()
   debug(membersList)

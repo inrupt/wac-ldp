@@ -10,6 +10,7 @@ export enum TaskType {
   containerMemberAdd,
   containerDelete,
   globRead,
+  blobCreate,
   blobRead,
   blobWrite,
   blobUpdate,
@@ -75,7 +76,15 @@ function determineIfMatch (httpReq: http.IncomingMessage): string | undefined {
   }
 }
 
-function determineIfNoneMatch (httpReq: http.IncomingMessage): Array<string> | undefined {
+function determineIfNoneMatchStar (httpReq: http.IncomingMessage): boolean {
+  try {
+    return httpReq.headers['if-none-match'] === '*'
+  } catch (error) {
+    return false
+  }
+}
+
+function determineIfNoneMatchList (httpReq: http.IncomingMessage): Array<string> | undefined {
   try {
     return httpReq.headers['if-none-match'].split(',').map(x => x.split('"')[1])
   } catch (error) {
@@ -105,7 +114,8 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     origin: determineOrigin(httpReq),
     contentType: determineContentType(httpReq),
     ifMatch: determineIfMatch(httpReq),
-    ifNoneMatch: determineIfNoneMatch(httpReq),
+    ifNoneMatchStar: determineIfNoneMatchStar(httpReq),
+    ifNoneMatchList: determineIfNoneMatchList(httpReq),
     asJsonLd: determineAsJsonLd(httpReq),
     ldpTaskType: determineTaskType(httpReq),
     requestBody: undefined,
@@ -144,7 +154,8 @@ export class WacLdpTask {
   origin: string | undefined
   contentType: string | undefined
   ifMatch: string | undefined
-  ifNoneMatch: Array<string> | undefined
+  ifNoneMatchStar: boolean
+  ifNoneMatchList: Array<string> | undefined
   ldpTaskType: TaskType
   path: Path
   requestBody: string

@@ -1,12 +1,14 @@
 import * as http from 'http'
+import uuid from 'uuid/v4'
 import Debug from 'debug'
 const debug = Debug('app')
 
 import { BlobTree } from './lib/storage/BlobTree'
+import { Node } from './lib/storage/Node'
+
 import { parseHttpRequest, WacLdpTask, TaskType } from './lib/api/http/HttpParser'
 
 import { readContainer } from './lib/operations/readContainer'
-import { addContainerMember } from './lib/operations/addContainerMember'
 import { deleteContainer } from './lib/operations/deleteContainer'
 
 import { readGlob } from './lib/operations/readGlob'
@@ -18,7 +20,8 @@ import { deleteBlob } from './lib/operations/deleteBlob'
 
 import { unknownOperation } from './lib/operations/unknownOperation'
 
-import { sendHttpResponse, WacLdpResponse } from './lib/api/http/HttpResponder'
+import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from './lib/api/http/HttpResponder'
+import { getBlobAndCheckETag } from './lib/operations/getBlobAndCheckETag'
 
 export function makeHandler (storage: BlobTree) {
   const operations = {
@@ -26,7 +29,6 @@ export function makeHandler (storage: BlobTree) {
     // output type: LdpResponse
     [TaskType.containerRead]: readContainer,
     [TaskType.containerDelete]: deleteContainer,
-    [TaskType.containerMemberAdd]: addContainerMember,
     [TaskType.globRead]: readGlob,
     [TaskType.blobRead]: readBlob,
     [TaskType.blobWrite]: writeBlob,
@@ -41,20 +43,40 @@ export function makeHandler (storage: BlobTree) {
     let response: WacLdpResponse
     try {
       const ldpTask: WacLdpTask = await parseHttpRequest(httpReq)
+      let node: Node
+      // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
+      if (ldpTask.ldpTaskType === TaskType.containerMemberAdd) {
+        debug('converting', ldpTask)
+        ldpTask.path = ldpTask.path.toChild(uuid())
+        ldpTask.ldpTaskType = TaskType.blobWrite
+        ldpTask.isContainer = false
+        debug('converted', ldpTask)
+      }
+      if (ldpTask.isContainer) {
+        node = storage.getContainer(ldpTask.path)
+      } else {
+        debug('not a container, getting blob and checking etag')
+        node = await getBlobAndCheckETag(ldpTask, storage)
+      }
+
       debug('parsed', ldpTask)
       debug('operation', {
+        // acting on a container node:
         [TaskType.containerRead]: 'readContainer',
-        [TaskType.containerMemberAdd]: 'addContainerMember',
+        // [TaskType.containerMemberAdd]: 'addContainerMember', // will have been changed to blobWrite above
         [TaskType.containerDelete]: 'deleteContainer',
-        [TaskType.globRead]: 'readGlob',
+        [TaskType.globRead]: 'readGlob', // get the container, check the etag, list the members, filter rdf sources, merge them, respond
+
+        // acting on a blob node:
         [TaskType.blobRead]: 'readBlob',
         [TaskType.blobWrite]: 'writeBlob',
         [TaskType.blobUpdate]: 'updateBlob',
         [TaskType.blobDelete]: 'deleteBlob',
-        [TaskType.unknown]: 'unknown'
+
+        [TaskType.unknown]: 'unknown' // server error response
       }[ldpTask.ldpTaskType])
       const requestProcessor = operations[ldpTask.ldpTaskType]
-      response = await requestProcessor.apply(null, [ldpTask, storage])
+      response = await requestProcessor.apply(null, [ldpTask, node])
       debug('executed', response)
     } catch (error) {
       debug('errored', error)
