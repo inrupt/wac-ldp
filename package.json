@@ -31,7 +31,8 @@
     "lint": "tslint -t stylish --project \"tsconfig.json\"",
     "test": "npm run lint && npm run jest",
     "docs": "typedoc --out docs --mode modules src",
-    "coveralls": "jest --coverage && cat ./tests/coverage/lcov.info | coveralls"
+    "coverage": "jest --coverage",
+    "coveralls": "npm run coverage && cat ./coverage/lcov.info | coveralls"
   },
   "repository": {
     "type": "git",

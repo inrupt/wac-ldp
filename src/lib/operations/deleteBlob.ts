@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { BlobTree } from '../storage/BlobTree'
-import { fromStream } from '../../ResourceData'
+import { fromStream } from '../util/ResourceDataUtils'
 
 const debug = Debug('deleteBlob')
 

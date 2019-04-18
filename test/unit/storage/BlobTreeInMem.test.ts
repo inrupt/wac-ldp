@@ -1,8 +1,8 @@
-import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
-import { BlobTree, Path } from '../../src/lib/storage/BlobTree'
-import { Blob } from '../../src/lib/storage/Blob'
-import { Container } from '../../src/lib/storage/Container'
-import { fromStream, toStream } from '../../src/ResourceData'
+import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
+import { BlobTree, Path } from '../../../src/lib/storage/BlobTree'
+import { Blob } from '../../../src/lib/storage/Blob'
+import { Container } from '../../../src/lib/storage/Container'
+import { fromStream, toStream } from '../../../src/lib/util/ResourceDataUtils'
 
 let storage: BlobTree
 

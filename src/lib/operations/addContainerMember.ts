@@ -3,7 +3,7 @@ import uuid from 'uuid/v4'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { BlobTree } from '../storage/BlobTree'
-import { makeResourceData, toStream } from '../../ResourceData'
+import { makeResourceData, toStream } from '../util/ResourceDataUtils'
 
 const debug = Debug('addContainerMember')
 

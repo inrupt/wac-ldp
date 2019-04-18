@@ -1,6 +1,6 @@
 import * as Stream from 'stream'
 import Debug from 'debug'
-import { makeResourceData, ResourceData } from '../../ResourceData'
+import { makeResourceData, ResourceData } from './ResourceDataUtils'
 import Formats from 'rdf-formats-common'
 import rdf from 'rdf-ext'
 

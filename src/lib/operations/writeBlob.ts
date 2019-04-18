@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { BlobTree } from '../storage/BlobTree'
-import { makeResourceData, fromStream, toStream } from '../../ResourceData'
+import { makeResourceData, fromStream, toStream } from '../util/ResourceDataUtils'
 
 const debug = Debug('writeBlob')
 export async function writeBlob (task: WacLdpTask, storage: BlobTree) {

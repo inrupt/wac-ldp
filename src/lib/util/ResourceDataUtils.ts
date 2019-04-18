@@ -1,5 +1,5 @@
 import convert from 'buffer-to-stream'
-import { calculateETag } from './lib/util/calculateETag'
+import { calculateETag } from './calculateETag'
 
 export interface ResourceData {
   body: string

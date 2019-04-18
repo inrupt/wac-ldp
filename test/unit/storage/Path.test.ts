@@ -1,4 +1,4 @@
-import { Path } from '../../src/lib/storage/BlobTree'
+import { Path } from '../../../src/lib/storage/BlobTree'
 
 describe('Path', () => {
   it('removes trailing slashes', function () {

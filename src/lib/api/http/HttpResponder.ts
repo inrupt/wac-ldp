@@ -1,6 +1,6 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { ResourceData } from '../../../ResourceData'
+import { ResourceData } from '../../util/ResourceDataUtils'
 const debug = Debug('HttpResponder')
 
 export enum ResultType {
