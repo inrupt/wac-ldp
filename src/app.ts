@@ -42,9 +42,6 @@ export function makeHandler (storage: BlobTree) {
     try {
       const ldpTask: WacLdpTask = await parseHttpRequest(httpReq)
       debug('parsed', ldpTask)
-      switch (ldpTask.ldpTaskType) {
-        case TaskType.containerRead: return
-      }
       debug('operation', {
         [TaskType.containerRead]: 'readContainer',
         [TaskType.containerMemberAdd]: 'addContainerMember',

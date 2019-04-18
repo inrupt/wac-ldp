@@ -50,7 +50,9 @@ function determineTaskType (httpReq: http.IncomingMessage): TaskType {
       DELETE: TaskType.blobDelete
     }
   }
-  return methodMap[lastUrlChar][httpReq.method] || TaskType.unknown
+  debug('determining task type', lastUrlChar, httpReq.method, methodMap[lastUrlChar][httpReq.method])
+  const taskType = methodMap[lastUrlChar][httpReq.method]
+  return (taskType === undefined ? TaskType.unknown : taskType)
 }
 
 function determineOrigin (httpReq: http.IncomingMessage): string | undefined {
