@@ -5,7 +5,7 @@ import Debug from 'debug'
 
 const debug = Debug('fetch-mock')
 
-const WEB_FIXTURES = '../test/fixtures/web'
+const WEB_FIXTURES = './test/fixtures/web'
 
 export interface Response extends Response {}
 
@@ -14,7 +14,7 @@ export default function fetch (urlStr: string) {
   const response = fs
   return new Promise((resolve, reject) => {
     debug('reading web fixture', url)
-    fs.readFile(`${WEB_FIXTURES}/${url.hostname}/${url.port}/${url.pathname}`, (err, data) => {
+    fs.readFile(`${WEB_FIXTURES}/${url.hostname}/${url.port}${url.pathname}`, (err, data) => {
       if (err) {
         debug('error reading web fixture', url)
         reject(err)

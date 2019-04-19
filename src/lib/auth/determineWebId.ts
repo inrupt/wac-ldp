@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import Debug from 'debug'
 import fetch, { Response } from 'node-fetch'
+import RSA from 'node-rsa'
 import { URL } from 'url'
 
 const debug = Debug('determineWebId')
@@ -10,15 +11,26 @@ function urlToDomain (urlStr: string): string {
   const url = new URL(urlStr)
   return url.host
 }
-async function getIssuerPubKey (domain: string) {
+async function getIssuerPubKey (domain: string): Promise<any> {
   debug('fetching', `https://${domain}/.well-known/openid-configuration`)
   const openIdConfigResponse: Response = await fetch(`https://${domain}/.well-known/openid-configuration`)
-  debug('fetch result', openIdConfigResponse)
   const openIdConfig = await openIdConfigResponse.json()
+  debug('openIdConfig', openIdConfig)
   debug('fetching', openIdConfig.jwks_uri)
-  const jwks = await fetch(openIdConfig.jwks_uri)
+  const jwksResponse = await fetch(openIdConfig.jwks_uri)
+  const jwks = await jwksResponse.json()
   debug('jwks', jwks)
-  return jwks[0]
+
+  const pubKeyComponents = {
+    e: Buffer.from(jwks.keys[0].e, 'base64'),
+    n: Buffer.from(jwks.keys[0].n, 'base64')
+  }
+  debug('pubKeyComponents', pubKeyComponents)
+  const rsaPubKey: RSA = new RSA()
+  rsaPubKey.importKey(pubKeyComponents, 'components-public')
+  const publicPem: string = rsaPubKey.exportKey('pkcs1-public-pem')
+  debug('publicPem', publicPem)
+  return publicPem
 }
 
 export async function determineWebId (bearerToken: string, audience: string): Promise<string | undefined> {
@@ -36,6 +48,8 @@ export async function determineWebId (bearerToken: string, audience: string): Pr
       return
     }
     try {
+      // todo: convert JWK to X5C
+      debug('verifying bearerToken', issuerPubKey, audience)
       jwt.verify(bearerToken, issuerPubKey, { audience })
     } catch (error) {
       debug('verification failed', error.message)

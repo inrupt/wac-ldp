@@ -16,6 +16,8 @@
     "jws": "^3.2.2",
     "node-fetch": "^2.3.0",
     "node-jose": "^1.1.3",
+    "node-rsa": "^1.0.5",
+    "node-ursa": "0.0.6",
     "rdf-ext": "^1.2.2",
     "rdf-formats-common": "^1.4.0",
     "rdf-parser-n3": "^1.1.1",
