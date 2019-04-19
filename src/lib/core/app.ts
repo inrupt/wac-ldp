@@ -14,7 +14,7 @@ import { determineTask } from './determineTask'
 import { checkAccess } from './checkAccess'
 import { determineOperation } from './determineOperation'
 
-export function makeHandler (storage: BlobTree) {
+export function makeHandler (storage: BlobTree, aud: string) {
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
@@ -22,7 +22,7 @@ export function makeHandler (storage: BlobTree) {
     try {
       const wacLdpTask: WacLdpTask = await determineTask(httpReq)
 
-      await checkAccess(wacLdpTask) // may throw if access is denied
+      await checkAccess(wacLdpTask, aud) // may throw if access is denied
 
       let node: Node
       if (wacLdpTask.isContainer) {

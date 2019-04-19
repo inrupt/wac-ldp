@@ -5,11 +5,12 @@ import { determineWebId } from '../auth/determineWebId'
 import { readAcl, ACL_SUFFIX } from '../auth/readAcl'
 import { Path } from '../storage/BlobTree'
 import Debug from 'debug'
+import { WacLdpTask } from '../api/http/HttpParser'
 const debug = Debug('checkAccess')
 
-export async function checkAccess (ldpTask) {
-  // const webId = await determineWebId(ldpTask.bearerToken)
-  // debug('webId', webId)
+export async function checkAccess (ldpTask: WacLdpTask, aud: string) {
+  const webId = await determineWebId(ldpTask.bearerToken, aud)
+  debug('webId', webId)
 
   // let baseResourcePath: Path
   // let resourceIsAclDocument

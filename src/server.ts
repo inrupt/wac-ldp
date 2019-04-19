@@ -10,10 +10,10 @@ class Server {
   storage: BlobTree
   server: http.Server
   port: number
-  constructor (port: number) {
+  constructor (port: number, aud: string) {
     this.port = port
     this.storage = new BlobTreeInMem() // singleton in-memory storage
-    const handler = makeHandler(this.storage)
+    const handler = makeHandler(this.storage, aud)
     this.server = http.createServer(handler)
   }
   listen () {
@@ -24,5 +24,7 @@ class Server {
 
 // on startup:
 const port = parseInt(process.env.PORT, 10) || 8080
-const server = new Server(port)
+
+const aud = process.env.AUD || 'https://localhost:8443'
+const server = new Server(port, aud)
 server.listen()

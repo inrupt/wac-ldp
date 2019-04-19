@@ -1,4 +1,5 @@
-export function getBearerToken (correct: boolean): { expectedWebId: string, bearerToken: string } {
+export function getBearerToken (correct: boolean): { expectedWebId: string, bearerToken: string, aud: string } {
+  // jwt.sign(payload, secretOrPrivateKey, [options, callback])
   const bearerToken = `eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiI4M2M1M2U1MGIyNDhlNjZkYWVhNTRkYzRkNWYyZWQ0ZiIsImF1ZCI6I\
 mh0dHBzOi8vbG9jYWxob3N0Ojg0NDMiLCJleHAiOjE1NTU2NjkxMTYsImlhdCI6MTU1NTY2NTUxNiwiaWRfdG9rZW4iOiJleUpoYkdjaU9pSlNVekk\
 xTmlJc0ltdHBaQ0k2SWxKb1lWb3phakEyY1dsUkluMC5leUpwYzNNaU9pSm9kSFJ3Y3pvdkwyeHZZMkZzYUc5emREbzRORFF6SWl3aWMzVmlJam9pY\
@@ -23,6 +24,7 @@ y82lU73J91juvjdNLJjBSy0S0QnirfmigTp8I9R3lXLoPzsBmObzYlzD8b81sIwPKi_ofIeM2fgAIWRF
 uo1P8OZPA8tNQrv4wDd0kVR50nvg`
   return {
     expectedWebId: 'https://localhost:8443/profile/card#me',
-    bearerToken: (correct ? bearerToken : bearerToken.substring(0, 100))
+    bearerToken: (correct ? bearerToken : bearerToken.substring(0, 100)),
+    aud: 'https://localhost:8443'
   }
 }
