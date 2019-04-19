@@ -32,7 +32,7 @@ export function makeHandler (storage: BlobTree, aud: string) {
         node = await getBlobAndCheckETag(wacLdpTask, storage)
       }
 
-      const operation = determineOperation(wacLdpTask.ldpTaskType)
+      const operation = determineOperation(wacLdpTask.wacLdpTaskType)
       response = await operation.apply(null, [wacLdpTask, node])
       debug('executed', response)
     } catch (error) {

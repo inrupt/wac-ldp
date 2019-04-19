@@ -6,10 +6,10 @@ const debug = Debug('determineTask')
 export async function determineTask (httpReq) {
   const wacLdpTask: WacLdpTask = await parseHttpRequest(httpReq)
   // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
-  if (wacLdpTask.ldpTaskType === TaskType.containerMemberAdd) {
+  if (wacLdpTask.wacLdpTaskType === TaskType.containerMemberAdd) {
     debug('converting', wacLdpTask)
     wacLdpTask.path = wacLdpTask.path.toChild(uuid())
-    wacLdpTask.ldpTaskType = TaskType.blobWrite
+    wacLdpTask.wacLdpTaskType = TaskType.blobWrite
     wacLdpTask.isContainer = false
     debug('converted', wacLdpTask)
   }
