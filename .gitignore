@@ -8,9 +8,6 @@ yarn-error.log*
 # TypeScript build result
 dist
 
-# VSCode
-.vscode
-
 # Runtime data
 pids
 *.pid
@@ -22,6 +19,10 @@ lib-cov
 
 # Coverage directory used by tools like istanbul
 coverage
+
+# Output from https://github.com/w3c/ldp-testsuite
+report
+test-output
 
 # nyc test coverage
 .nyc_output
@@ -65,3 +66,7 @@ typings/
 
 # next.js build output
 .next
+
+# IDEs
+.idea
+.vscode

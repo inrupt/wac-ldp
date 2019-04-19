@@ -13,7 +13,7 @@ class NodeInMem {
   constructor (path: Path, tree: BlobTreeInMem) {
     this.path = path
     this.tree = tree
-    debug('constructed node', path, tree)
+    debug('constructed node', path, Object.keys(tree.kv))
   }
 }
 
@@ -44,7 +44,7 @@ class ContainerInMem extends NodeInMem implements Container {
         isContainer: memberMap[name]
       } as Member
     })
-    debug('getMembers', this.path, this.tree.kv, listAbsolutePaths, listRelativePaths, memberMap, members)
+    debug('getMembers', this.path, Object.keys(this.tree.kv), listAbsolutePaths, listRelativePaths, memberMap, members)
     return Promise.resolve(members)
   }
   delete (): Promise<void> {
@@ -67,7 +67,7 @@ class BlobInMem extends NodeInMem implements Blob {
   setData (data: ReadableStream) {
     debug('setData', this.path)
     this.tree.kv[this.path.toString()] = data
-    debug('this.tree.kv after setData', this.tree.kv, this.path, this.path.toString())
+    debug('Object.keys(this.tree.kv) after setData', Object.keys(this.tree.kv), this.path, this.path.toString())
     return Promise.resolve()
   }
   delete (): Promise<void> {
@@ -96,6 +96,6 @@ export class BlobTreeInMem {
   }
   on (eventName: string, eventHandler: (event: any) => void) {
     // TODO: implement
-    debug('adding event handler', eventName, eventHandler)
+    // debug('adding event handler', eventName, eventHandler)
   }
 }

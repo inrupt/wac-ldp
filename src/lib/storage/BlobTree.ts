@@ -12,6 +12,10 @@ import { Blob } from './Blob'
 // A Path always starts with 'root', and ends with the Node's own name; for instance: ['root', 'foo', 'bar']
 // Sibling Nodes are not allowed to have the same name.
 
+function copyStringArray (arr: Array<string>): Array<string> {
+  return JSON.parse(JSON.stringify(arr))
+}
+
 export class Path {
   segments: Array<string>
   constructor (segments: Array<string>) {
@@ -30,6 +34,19 @@ export class Path {
   }
   toContainerPathPrefix (): string {
     return this.toString() + '/'
+  }
+  toChild (segment: string) {
+    const childSegments = copyStringArray(this.segments)
+    childSegments.push(segment)
+    return new Path(childSegments)
+  }
+  toParent () {
+    if (this.segments.length <= 1) {
+      throw new Error('root has no parent!')
+    }
+    const parentSegments = copyStringArray(this.segments)
+    parentSegments.pop()
+    return new Path(parentSegments)
   }
 }
 

@@ -1,14 +1,12 @@
 import Debug from 'debug'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
-import { BlobTree } from '../storage/BlobTree'
+import { Container } from '../storage/Container'
 
 const debug = Debug('deleteContainer')
 
-export async function deleteContainer (task: WacLdpTask, storage: BlobTree) {
+export async function deleteContainer (task: WacLdpTask, container: Container) {
   debug('operation deleteContainer!')
-  const container = storage.getBlob(task.path)
-  // TODO: check task.ifMatch
   await container.delete()
   return {
     resultType: ResultType.OkayWithoutBody

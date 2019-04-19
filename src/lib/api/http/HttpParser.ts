@@ -50,7 +50,9 @@ function determineTaskType (httpReq: http.IncomingMessage): TaskType {
       DELETE: TaskType.blobDelete
     }
   }
-  return methodMap[lastUrlChar][httpReq.method] || TaskType.unknown
+  debug('determining task type', lastUrlChar, httpReq.method, methodMap[lastUrlChar][httpReq.method])
+  const taskType = methodMap[lastUrlChar][httpReq.method]
+  return (taskType === undefined ? TaskType.unknown : taskType)
 }
 
 function determineOrigin (httpReq: http.IncomingMessage): string | undefined {
@@ -73,7 +75,15 @@ function determineIfMatch (httpReq: http.IncomingMessage): string | undefined {
   }
 }
 
-function determineIfNoneMatch (httpReq: http.IncomingMessage): Array<string> | undefined {
+function determineIfNoneMatchStar (httpReq: http.IncomingMessage): boolean {
+  try {
+    return httpReq.headers['if-none-match'] === '*'
+  } catch (error) {
+    return false
+  }
+}
+
+function determineIfNoneMatchList (httpReq: http.IncomingMessage): Array<string> | undefined {
   try {
     return httpReq.headers['if-none-match'].split(',').map(x => x.split('"')[1])
   } catch (error) {
@@ -98,15 +108,15 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
   const parsedTask = {
-    mayIncreaseDiskUsage: this.determineMayIncreaseDiskUsage(httpReq),
-    omitBody: this.determineOmitBody(httpReq),
+    omitBody: determineOmitBody(httpReq),
     isContainer: (httpReq.url.substr(-1) === '/'), // FIXME: code duplication, see determineLdpParserResultName above
-    origin: this.determineOrigin(httpReq),
-    contentType: this.determineContentType(httpReq),
-    ifMatch: this.determineIfMatch(httpReq),
-    ifNoneMatch: this.determineIfNoneMatch(httpReq),
-    asJsonLd: this.determineAsJsonLd(httpReq),
-    ldpTaskType: this.determineTaskType(httpReq),
+    origin: determineOrigin(httpReq),
+    contentType: determineContentType(httpReq),
+    ifMatch: determineIfMatch(httpReq),
+    ifNoneMatchStar: determineIfNoneMatchStar(httpReq),
+    ifNoneMatchList: determineIfNoneMatchList(httpReq),
+    asJsonLd: determineAsJsonLd(httpReq),
+    ldpTaskType: determineTaskType(httpReq),
     requestBody: undefined,
     path: new Path(('root' + httpReq.url).split('/'))
   } as WacLdpTask
@@ -143,7 +153,8 @@ export class WacLdpTask {
   origin: string | undefined
   contentType: string | undefined
   ifMatch: string | undefined
-  ifNoneMatch: Array<string> | undefined
+  ifNoneMatchStar: boolean
+  ifNoneMatchList: Array<string> | undefined
   ldpTaskType: TaskType
   path: Path
   requestBody: string

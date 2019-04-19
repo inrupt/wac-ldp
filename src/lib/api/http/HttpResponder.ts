@@ -1,6 +1,6 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { ResourceData } from '../../../ResourceData'
+import { ResourceData } from '../../util/ResourceDataUtils'
 const debug = Debug('HttpResponder')
 
 export enum ResultType {
@@ -13,6 +13,7 @@ export enum ResultType {
   OkayWithBody,
   OkayWithoutBody,
   Created,
+  MethodNotAllowed,
   InternalServerError
 }
 
@@ -62,6 +63,9 @@ const responses = {
     responseStatus: 204,
     responseBody: 'No Content'
   },
+  [ResultType.MethodNotAllowed]: {
+    responseStatus: 405,
+    responseBody: 'Method not allowed'},
   [ResultType.InternalServerError]: {
     responseStatus: 500,
     responseBody: 'Internal server error'
@@ -69,9 +73,9 @@ const responses = {
 }
 
 export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.ServerResponse) {
-  debug('sendHttpResponse!')
+  debug('sendHttpResponse!', task)
 
-  debug(task.resultType, responses)
+  debug(responses[task.resultType])
   const responseStatus = responses[task.resultType].responseStatus
   const responseBody = responses[task.resultType].responseBody || (task.resourceData ? task.resourceData.body : '')
 
