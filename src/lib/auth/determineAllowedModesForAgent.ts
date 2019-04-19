@@ -1,5 +1,3 @@
-import jose from 'node-jose'
-import jws from 'jws'
 import jwt from 'jsonwebtoken'
 import Debug from 'debug'
 import { WacLdpTask } from '../api/http/HttpParser'
