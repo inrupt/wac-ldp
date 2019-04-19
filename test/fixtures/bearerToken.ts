@@ -25,6 +25,6 @@ uo1P8OZPA8tNQrv4wDd0kVR50nvg`
   return {
     expectedWebId: 'https://localhost:8443/profile/card#me',
     bearerToken: (correct ? bearerToken : bearerToken.substring(0, 100)),
-    aud: 'https://localhost:8443'
+    aud: '83c53e50b248e66daea54dc4d5f2ed4f' // FIXME: should be 'https://localhost:8443', right?
   }
 }
