@@ -6,7 +6,7 @@ A central component for Solid servers, handles Web Access Control and Linked Dat
 
 ## Code Structure
 
-![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/56473714-52836100-646f-11e9-917c-bc6317ad2306.png)
+![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/56473918-6e3c3680-6472-11e9-980d-2ed6c1c762dc.png)
 
 
 ### Entry point
