@@ -6,6 +6,8 @@ A central component for Solid servers, handles Web Access Control and Linked Dat
 
 ## Code Structure
 
+![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/56473675-b8231d80-646e-11e9-978e-e952bcd09e69.png)
+
 ### Entry point
 The entry point is src/server.ts, which instantiates a http server, a BlobTree storage, and the core app.
 
