@@ -107,7 +107,4 @@ export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.Serv
   debug('responding', { responseStatus, responseHeaders, responseBody })
   httpRes.writeHead(responseStatus, responseHeaders)
   httpRes.end(responseBody)
-  httpRes.on('end', () => {
-    debug('request completed')
-  })
 }
