@@ -36,16 +36,18 @@ export const ACL_SUFFIX = '.acl'
 
 async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree): Promise<ResourceData> {
   let currentGuessPath = resourcePath
+  let currentIsContainer = resourceIsContainer
   let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
   let currentGuessBlob = storage.getBlob(aclDocPath)
   debug('aclDocPath', aclDocPath.toString())
   while (!currentGuessBlob.exists()) {
     currentGuessPath = currentGuessPath.toParent()
+    currentIsContainer = true
     if (!currentGuessPath) {
       // root ACL, nobody has access:
       return makeResourceData('text/turtle', '')
     }
-    aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+    aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
     currentGuessBlob = storage.getBlob(aclDocPath)
   }
   const stream = await currentGuessBlob.getData()
