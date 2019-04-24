@@ -22,7 +22,7 @@ export function makeHandler (storage: BlobTree, aud: string) {
     try {
       const wacLdpTask: WacLdpTask = await determineTask(httpReq)
 
-      await checkAccess(wacLdpTask, aud) // may throw if access is denied
+      await checkAccess(wacLdpTask, aud, storage) // may throw if access is denied
 
       let node: Node
       if (wacLdpTask.isContainer) {
