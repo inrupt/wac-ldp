@@ -19,8 +19,6 @@ export async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpRes
   debug('result.resourceData set to ', result.resourceData)
   if (task.omitBody) {
     result.resultType = ResultType.OkayWithoutBody
-  } else if (task.ifNoneMatchList && task.ifNoneMatchList.indexOf(result.resourceData.etag) !== -1) {
-    result.resultType = ResultType.NotModified
   } else {
     result.resultType = ResultType.OkayWithBody
   }

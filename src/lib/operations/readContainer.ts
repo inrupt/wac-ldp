@@ -16,9 +16,6 @@ export async function readContainer (task: WacLdpTask, container: Container): Pr
   return {
     resultType: (task.omitBody ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
     resourceData,
-    createdLocation: undefined,
-    isContainer: task.isContainer,
-    lock: container,
-    httpRes: undefined
+    isContainer: true
   } as WacLdpResponse
 }
