@@ -38,7 +38,7 @@ const quadsExpected = {
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <https://michielbdejong.inrupt.net/profile/card#me> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <mailto:michiel@unhosted.org> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#accessTo> </> .',
-    '<#owner> <http://www.w3.org/ns/auth/acl#defaultForNew> </> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#default> </> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Read> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Write> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Control> .'
@@ -48,7 +48,7 @@ const quadsExpected = {
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <https://michielbdejong.inrupt.net/profile/card#me> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <mailto:michiel@unhosted.org> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#accessTo> </> .',
-    '<#owner> <http://www.w3.org/ns/auth/acl#defaultForNew> </> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#default> </> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Read> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Write> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Control> .'
@@ -58,7 +58,7 @@ const quadsExpected = {
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <https://michielbdejong.inrupt.net/profile/card#me> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <mailto:michiel@unhosted.org> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#accessTo> </> .',
-    '<#owner> <http://www.w3.org/ns/auth/acl#defaultForNew> </> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#default> </> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Read> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Write> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Control> .'
@@ -68,7 +68,7 @@ const quadsExpected = {
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <https://michielbdejong.inrupt.net/profile/card#me> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <mailto:michiel@unhosted.org> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#accessTo> </> .',
-    '<#owner> <http://www.w3.org/ns/auth/acl#defaultForNew> </> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#default> </> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Read> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Write> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Control> .'
