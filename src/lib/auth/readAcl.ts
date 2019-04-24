@@ -38,7 +38,7 @@ async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, sto
   let currentGuessPath = resourcePath
   let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
   let currentGuessBlob = storage.getBlob(aclDocPath)
-  debug('blob', currentGuessBlob)
+  debug('aclDocPath', aclDocPath.toString())
   while (!currentGuessBlob.exists()) {
     currentGuessPath = currentGuessPath.toParent()
     if (!currentGuessPath) {
@@ -49,7 +49,7 @@ async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, sto
     currentGuessBlob = storage.getBlob(aclDocPath)
   }
   const stream = await currentGuessBlob.getData()
-  debug('stream', stream)
+  debug('stream', typeof stream)
   return fromStream(stream) as Promise<ResourceData>
 }
 
