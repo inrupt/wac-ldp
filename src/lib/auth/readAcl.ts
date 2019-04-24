@@ -1,10 +1,11 @@
 import Debug from 'debug'
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
+import convert from 'buffer-to-stream'
 
 import { Path, BlobTree } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, makeResourceData, fromStream, toStream } from '../util/ResourceDataUtils'
+import { ResourceData, makeResourceData, fromStream } from '../util/ResourceDataUtils'
 
 const debug = Debug('readAcl')
 
@@ -33,7 +34,8 @@ export async function readAcl (resourcePath: Path, storage: BlobTree) {
     factory: rdf
   })
   debug('got ACL ResourceData', aclResourceData)
-  let quadStream = parser.import(toStream(aclResourceData.body))
+  const bodyStream = convert(Buffer.from(aclResourceData.body))
+  let quadStream = parser.import(bodyStream)
   const dataset = await rdf.dataset().import(quadStream)
   return dataset
 }

@@ -26,6 +26,19 @@ const path = new Path(['root', 'foo', 'bar'])
 
 test('reads an ACL doc', async () => {
   const dataset = await readAcl(path, storage as unknown as BlobTree)
-  expect(dataset).toEqual({})
+  const quads = []
+  dataset.forEach((quad) => {
+    quads.push(quad.toString())
+  })
+  expect(quads).toEqual([
+    '<#owner> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/auth/acl#Authorization> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#agent> <https://michielbdejong.inrupt.net/profile/card#me> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#agent> <mailto:michiel@unhosted.org> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#accessTo> </> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#defaultForNew> </> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Read> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Write> .',
+    '<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Control> .'
+  ])
 
 })
