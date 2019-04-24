@@ -21,6 +21,40 @@ test('delete blob', async () => {
   })
 })
 
+test.skip('write blob', async () => {
+  const node = {
+    setData: jest.fn(() => {
+      //
+    }),
+    exists: () => true
+  }
+  const operation = determineOperation(TaskType.blobWrite)
+  const result: WacLdpResponse = await operation({}, node)
+  expect(node.setData.mock.calls).toEqual([
+    []
+  ])
+  expect(result).toEqual({
+    resultType: ResultType.OkayWithoutBody
+  })
+})
+
+test.skip('update blob', async () => {
+  const node = {
+    setData: jest.fn(() => {
+      //
+    }),
+    exists: () => true
+  }
+  const operation = determineOperation(TaskType.blobUpdate)
+  const result: WacLdpResponse = await operation({}, node)
+  expect(node.setData.mock.calls).toEqual([
+    []
+  ])
+  expect(result).toEqual({
+    resultType: ResultType.OkayWithoutBody
+  })
+})
+
 test('delete container', async () => {
   const node = {
     delete: jest.fn(() => {
