@@ -1,5 +1,5 @@
 import * as fs from 'fs'
-import { readAcl } from '../../../src/lib/auth/readAcl'
+import { readAcl, ACL_SUFFIX } from '../../../src/lib/auth/readAcl'
 import { Path, BlobTree } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
 
@@ -22,14 +22,17 @@ const storage = {
   })
 }
 
-const path = new Path(['root', 'foo', 'bar'])
 
 test('reads an ACL doc', async () => {
-  const dataset = await readAcl(path, storage as unknown as BlobTree)
+  const path = new Path(['root', 'foo', 'bar'])
+  const dataset = await readAcl(path, true, storage as unknown as BlobTree)
   const quads = []
   dataset.forEach((quad) => {
     quads.push(quad.toString())
   })
+  expect(storage.getBlob.mock.calls).toEqual([
+    [ path.toChild(ACL_SUFFIX) ]
+  ])
   expect(quads).toEqual([
     '<#owner> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/auth/acl#Authorization> .',
     '<#owner> <http://www.w3.org/ns/auth/acl#agent> <https://michielbdejong.inrupt.net/profile/card#me> .',

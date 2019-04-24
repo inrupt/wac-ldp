@@ -1,3 +1,26 @@
+//  cases:
+// * request path foo/bar/
+// * resource path foo/bar/
+//   * acl path foo/bar/.acl
+//   * acl path foo/.acl (filter on acl:default)
+// * request path foo/bar/baz
+// * resource path foo/bar/baz
+//   * acl path foo/bar/baz.acl
+//   * acl path foo/bar/.acl (filter on acl:default)
+// * request path foo/bar/.acl
+// * resource path foo/bar/
+//   * acl path foo/bar/.acl (look for acl:Control)
+//   * acl path foo/.acl (filter on acl:default, look for acl:Control)
+// * request path foo/bar/baz.acl
+// * resource path foo/bar/baz
+//   * acl path foo/bar/baz.acl (look for acl:Control)
+//   * acl path foo/bar/.acl (filter on acl:default, look for acl:Control)
+
+// this module should act on the resource path (not the request path) and
+// filter on acl:default and just give the ACL triples that
+// apply for the resource path, so that the acl path becomes irrelevant
+// from there on.
+
 import Debug from 'debug'
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
@@ -11,9 +34,10 @@ const debug = Debug('readAcl')
 
 export const ACL_SUFFIX = '.acl'
 
-async function getAclBlob (resourcePath: Path, storage: BlobTree): Promise<ResourceData> {
+async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree): Promise<ResourceData> {
   let currentGuessPath = resourcePath
-  let currentGuessBlob = storage.getBlob(currentGuessPath.appendSuffix(ACL_SUFFIX))
+  let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+  let currentGuessBlob = storage.getBlob(aclDocPath)
   debug('blob', currentGuessBlob)
   while (!currentGuessBlob.exists()) {
     currentGuessPath = currentGuessPath.toParent()
@@ -21,15 +45,16 @@ async function getAclBlob (resourcePath: Path, storage: BlobTree): Promise<Resou
       // root ACL, nobody has access:
       return makeResourceData('text/turtle', '')
     }
-    let currentGuessBlob = storage.getBlob(currentGuessPath.appendSuffix(ACL_SUFFIX))
+    aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+    currentGuessBlob = storage.getBlob(aclDocPath)
   }
   const stream = await currentGuessBlob.getData()
   debug('stream', stream)
   return fromStream(stream) as Promise<ResourceData>
 }
 
-export async function readAcl (resourcePath: Path, storage: BlobTree) {
-  const aclResourceData = await getAclBlob(resourcePath, storage)
+export async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree) {
+  const aclResourceData = await getAclBlob(resourcePath, resourceIsContainer, storage)
   let parser = new N3Parser({
     factory: rdf
   })
