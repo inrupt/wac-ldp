@@ -22,7 +22,6 @@ const storage = {
   })
 }
 
-
 test('reads an ACL doc', async () => {
   const path = new Path(['root', 'foo', 'bar'])
   const dataset = await readAcl(path, true, storage as unknown as BlobTree)

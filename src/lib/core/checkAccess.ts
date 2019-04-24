@@ -22,7 +22,7 @@ export async function checkAccess (ldpTask: WacLdpTask, aud: string, storage: Bl
     baseResourcePath = ldpTask.path
     resourceIsAclDocument = false
   }
-  const aclGraph = await readAcl(baseResourcePath, storage)
+  const aclGraph = await readAcl(baseResourcePath, ldpTask.isContainer, storage)
   debug('aclGraph', aclGraph)
 
   const allowedModesForAgent = determineAllowedModesForAgent({
