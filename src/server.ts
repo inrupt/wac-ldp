@@ -20,6 +20,10 @@ class Server {
     this.server.listen(this.port)
     debug('listening on port', this.port)
   }
+  close () {
+    this.server.close()
+    debug('closing port', this.port)
+  }
 }
 
 // on startup:
@@ -28,3 +32,9 @@ const port = parseInt(process.env.PORT, 10) || 8080
 const aud = process.env.AUD || 'https://localhost:8443'
 const server = new Server(port, aud)
 server.listen()
+// server.close()
+
+export function closeServer () {
+  debug('closing server')
+  server.close()
+}
