@@ -33,6 +33,23 @@ function determineRequiredAccessModes (wacLdpTaskType: TaskType, resourceIsAclDo
   throw new ErrorResult(ResultType.InternalServerError)
 }
 
+async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, webId: string | undefined, origin: string | undefined): Promise<boolean> {
+  // first check agent:
+  const agents = (allowedAgentsForModes as any)[mode]
+  debug(mode, agents)
+  if ((agents.indexOf(AGENT_CLASS_ANYBODY) === -1) &&
+      (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN) === -1) &&
+      (agents.indexOf(webId) === -1)) {
+    return false
+  }
+  // then check origin:
+  return appIsTrustedForMode({
+    origin,
+    mode: ACL(mode),
+    resourceOwners: allowedAgentsForModes.control
+  } as OriginCheckTask)
+}
+
 export async function checkAccess (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree) {
   const webId = await determineWebId(wacLdpTask.bearerToken, aud)
   debug('webId', webId)
@@ -57,30 +74,13 @@ export async function checkAccess (wacLdpTask: WacLdpTask, aud: string, storage:
   const requiredAccessModes = determineRequiredAccessModes(wacLdpTask.wacLdpTaskType, resourceIsAclDocument)
   let appendOnly = false
 
-  async function modeAllowed (mode: string): Promise<boolean> {
-    // first check agent:
-    const agents = (allowedAgentsForModes as any)[mode]
-    debug(mode, agents)
-    if ((agents.indexOf(AGENT_CLASS_ANYBODY) === -1) &&
-        (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN) === -1) &&
-        (agents.indexOf(webId) === -1)) {
-      return false
-    }
-    // then check origin:
-    return appIsTrustedForMode({
-      origin: wacLdpTask.origin,
-      mode: ACL(mode),
-      resourceOwners: allowedAgentsForModes.control
-    } as OriginCheckTask)
-  }
-
   // throw if agent or origin does not have access
   requiredAccessModes.map((mode: string) => {
-    if (modeAllowed(mode)) {
+    if (modeAllowed(mode, allowedAgentsForModes, webId, wacLdpTask.origin)) {
       return
     }
     // SPECIAL CASE: append-only
-    if (mode === 'write' && modeAllowed('append')) {
+    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, webId, wacLdpTask.origin)) {
       appendOnly = true
       return
     }
