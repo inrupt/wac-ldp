@@ -3,6 +3,7 @@ import { Node } from './Node'
 import { Container, Member } from './Container'
 import { Blob } from './Blob'
 import { BlobTree, Path } from './BlobTree'
+import { bufferToStream, streamToBuffer } from '../util/ResourceDataUtils'
 
 const debug = Debug('AtomicTreeInMem')
 
@@ -62,11 +63,15 @@ class ContainerInMem extends NodeInMem implements Container {
 class BlobInMem extends NodeInMem implements Blob {
   getData () {
     debug('reading resource', this.path, this.tree.kv)
-    return Promise.resolve(this.tree.kv[this.path.toString()])
+    if (typeof this.tree.kv[this.path.toString()] === 'undefined') {
+      return Promise.resolve()
+    }
+    const buffer: Buffer = this.tree.kv[this.path.toString()]
+    return Promise.resolve(bufferToStream(buffer))
   }
-  setData (data: ReadableStream) {
+  async setData (data: ReadableStream) {
     debug('setData', this.path)
-    this.tree.kv[this.path.toString()] = data
+    this.tree.kv[this.path.toString()] = await streamToBuffer(data)
     debug('Object.keys(this.tree.kv) after setData', Object.keys(this.tree.kv), this.path, this.path.toString())
     return Promise.resolve()
   }
@@ -81,8 +86,7 @@ class BlobInMem extends NodeInMem implements Blob {
 }
 
 export class BlobTreeInMem {
-  kv: any
-
+  kv: { [pathStr: string]: Buffer }
   constructor () {
     this.kv = {}
     debug('constructed in-mem store', this.kv)

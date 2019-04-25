@@ -43,8 +43,11 @@ export class Path {
     childSegments.push(segment)
     return new Path(childSegments)
   }
+  isRoot () {
+    return (this.segments.length <= 1)
+  }
   toParent () {
-    if (this.segments.length <= 1) {
+    if (this.isRoot()) {
       throw new Error('root has no parent!')
     }
     const parentSegments = copyStringArray(this.segments)

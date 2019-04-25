@@ -38,31 +38,37 @@ describe('Path', () => {
     expect(shouldThrow).toThrow()
   })
   it('can do .toChild', function () {
-    const p = new Path(['root', 'a' ])
+    const p = new Path(['root', 'a'])
     expect(p.toChild('b').toString()).toEqual('root/a/b')
   })
   it('can do .toParent', function () {
-    const p = new Path(['root', 'a' ])
+    const p = new Path(['root', 'a'])
     expect(p.toParent().toString()).toEqual('root')
   })
   it('does not allow root.toParent', function () {
-    const p = new Path([ 'root' ])
+    const p = new Path(['root'])
     expect(p.toParent.bind(p)).toThrow('root has no parent!')
   })
 
   it('can do .hasSuffix', function () {
-    const p = new Path(['root', 'ablast' ])
+    const p = new Path(['root', 'ablast'])
     expect(p.hasSuffix('bla')).toEqual(false)
     expect(p.hasSuffix('blast')).toEqual(true)
   })
   it('can do .appendSuffix', function () {
-    const p = new Path(['root', 'foo' ])
+    const p = new Path(['root', 'foo'])
     expect(p.appendSuffix('bar').toString()).toEqual('root/foobar')
   })
   it('can do .removeSuffix', function () {
-    const p = new Path(['root', 'foo' ])
+    const p = new Path(['root', 'foo'])
     expect(p.removeSuffix('oo').toString()).toEqual('root/f')
     expect(() => p.removeSuffix('afoo')).toThrow('no suffix match (last segment name shorter than suffix)')
     expect(() => p.removeSuffix('bar')).toThrow('no suffix match')
+  })
+  it('can do .isRoot', function () {
+    const root = new Path(['root'])
+    const nonRoot = new Path(['root', 'foo'])
+    expect(root.isRoot()).toEqual(true)
+    expect(nonRoot.isRoot()).toEqual(false)
   })
 })

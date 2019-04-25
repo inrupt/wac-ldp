@@ -28,7 +28,7 @@ import convert from 'buffer-to-stream'
 
 import { Path, BlobTree } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, makeResourceData, fromStream } from '../util/ResourceDataUtils'
+import { ResourceData, makeResourceData, streamToObject } from '../util/ResourceDataUtils'
 
 const debug = Debug('readAcl')
 
@@ -39,20 +39,25 @@ async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, sto
   let currentIsContainer = resourceIsContainer
   let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
   let currentGuessBlob = storage.getBlob(aclDocPath)
-  debug('aclDocPath', aclDocPath.toString())
-  while (!currentGuessBlob.exists()) {
-    currentGuessPath = currentGuessPath.toParent()
-    currentIsContainer = true
-    if (!currentGuessPath) {
+  let currentGuessBlobExists = await currentGuessBlob.exists()
+  debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
+  while (!currentGuessBlobExists) {
+    if (currentGuessPath.isRoot()) {
       // root ACL, nobody has access:
       return makeResourceData('text/turtle', '')
     }
+    currentGuessPath = currentGuessPath.toParent()
+    currentIsContainer = true
     aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
     currentGuessBlob = storage.getBlob(aclDocPath)
+    currentGuessBlobExists = await currentGuessBlob.exists()
+    debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
   }
   const stream = await currentGuessBlob.getData()
   debug('stream', typeof stream)
-  return fromStream(stream) as Promise<ResourceData>
+  if (stream) {
+    return streamToObject(stream) as Promise<ResourceData>
+  }
 }
 
 export async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree) {
