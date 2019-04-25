@@ -1,19 +1,20 @@
 import { determineOperation } from '../../../src/lib/core/determineOperation'
-import { TaskType } from '../../../src/lib/api/http/HttpParser'
+import { TaskType, WacLdpTask } from '../../../src/lib/api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../../../src/lib/api/http/HttpResponder'
 import { toChunkStream } from '../helpers/toChunkStream'
 import { makeResourceData } from '../../../src/lib/util/ResourceDataUtils'
+import { Container } from '../../../src/lib/storage/Container'
 
 test('delete blob', async () => {
-  const node = {
+  const node: Blob = {
     delete: jest.fn(() => {
       //
     }),
     exists: () => true
-  }
+  } as unknown as Blob
   const operation = determineOperation(TaskType.blobDelete)
-  const result: WacLdpResponse = await operation({}, node)
-  expect(node.delete.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({} as WacLdpTask, node)
+  expect((node as any).delete.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({
@@ -22,15 +23,15 @@ test('delete blob', async () => {
 })
 
 test.skip('write blob', async () => {
-  const node = {
+  const node: Blob = {
     setData: jest.fn(() => {
       //
     }),
     exists: () => true
-  }
+  } as unknown as Blob
   const operation = determineOperation(TaskType.blobWrite)
-  const result: WacLdpResponse = await operation({}, node)
-  expect(node.setData.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({} as WacLdpTask, node)
+  expect((node as any).setData.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({
@@ -39,15 +40,15 @@ test.skip('write blob', async () => {
 })
 
 test.skip('update blob', async () => {
-  const node = {
+  const node: Blob = {
     setData: jest.fn(() => {
       //
     }),
     exists: () => true
-  }
+  } as unknown as Blob
   const operation = determineOperation(TaskType.blobUpdate)
-  const result: WacLdpResponse = await operation({}, node)
-  expect(node.setData.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({} as WacLdpTask, node)
+  expect((node as any).setData.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({
@@ -56,15 +57,15 @@ test.skip('update blob', async () => {
 })
 
 test('delete container', async () => {
-  const node = {
+  const node: Container = {
     delete: jest.fn(() => {
       //
     }),
     exists: () => true
-  }
+  } as unknown as Container
   const operation = determineOperation(TaskType.containerDelete)
-  const result: WacLdpResponse = await operation({}, node)
-  expect(node.delete.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({} as WacLdpTask, node)
+  expect((node as any).delete.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({
@@ -73,15 +74,15 @@ test('delete container', async () => {
 })
 
 test('read blob (omit body)', async () => {
-  const node = {
+  const node: Blob = {
     getData: jest.fn(() => {
       return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
     }),
     exists: () => true
-  }
+  } as unknown as Blob
   const operation = determineOperation(TaskType.blobRead)
-  const result: WacLdpResponse = await operation({ omitBody: true }, node)
-  expect(node.getData.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({ omitBody: true } as WacLdpTask, node)
+  expect((node as any).getData.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({
@@ -95,15 +96,15 @@ test('read blob (omit body)', async () => {
 })
 
 test('read blob (with body)', async () => {
-  const node = {
+  const node: Blob = {
     getData: jest.fn(() => {
       return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
     }),
     exists: () => true
-  }
+  } as unknown as Blob
   const operation = determineOperation(TaskType.blobRead)
-  const result: WacLdpResponse = await operation({ omitBody: false }, node)
-  expect(node.getData.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({ omitBody: false } as WacLdpTask, node)
+  expect((node as any).getData.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({
@@ -117,15 +118,15 @@ test('read blob (with body)', async () => {
 })
 
 test('read container (omit body)', async () => {
-  const node = {
+  const node: Container = {
     getMembers: jest.fn(() => {
       return []
     }),
     exists: () => true
-  }
+  } as unknown as Container
   const operation = determineOperation(TaskType.containerRead)
-  const result: WacLdpResponse = await operation({ omitBody: true }, node)
-  expect(node.getMembers.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({ path: '/foo', omitBody: true } as unknown as WacLdpTask, node)
+  expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({
@@ -140,15 +141,15 @@ test('read container (omit body)', async () => {
 })
 
 test('read container (with body)', async () => {
-  const node = {
+  const node: Container = {
     getMembers: jest.fn(() => {
       return []
     }),
     exists: () => true
-  }
+  }as unknown as Container
   const operation = determineOperation(TaskType.containerRead)
-  const result: WacLdpResponse = await operation({ omitBody: false }, node)
-  expect(node.getMembers.mock.calls).toEqual([
+  const result: WacLdpResponse = await operation({ path: '/foo', omitBody: false } as unknown as WacLdpTask, node)
+  expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
   expect(result).toEqual({

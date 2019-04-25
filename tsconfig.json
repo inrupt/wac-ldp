@@ -9,6 +9,7 @@
     "removeComments": true,
     "preserveConstEnums": true,
     "sourceMap": true,
+    "strict": true,
     "outDir": "dist",
     "declaration": true,
     "esModuleInterop": true

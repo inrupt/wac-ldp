@@ -24,16 +24,17 @@ export class ErrorResult extends Error {
     this.resultType = resultType
   }
 }
-export class WacLdpResponse {
+export interface WacLdpResponse {
   resultType: ResultType
   resourceData: ResourceData | undefined
   createdLocation: string | undefined
   isContainer: boolean
 }
 
-const responses = {
+const responses: { [resultType in keyof typeof ResultType]: { responseStatus: number, responseBody: string | undefined } } = {
   [ResultType.OkayWithBody]: {
-    responseStatus: 200
+    responseStatus: 200,
+    responseBody: undefined
   },
   [ResultType.CouldNotParse]: {
     responseStatus: 405,
@@ -70,7 +71,7 @@ const responses = {
     responseStatus: 500,
     responseBody: 'Internal server error'
   }
-}
+} as unknown as { [resultType in keyof typeof ResultType]: { responseStatus: number, responseBody: string | undefined } }
 
 export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!', task)

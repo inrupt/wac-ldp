@@ -30,7 +30,7 @@ class ContainerInMem extends NodeInMem implements Container {
     const listAbsolutePaths = this.getDescendents()
     const prefixLength = this.path.toString().length + 1
     const listRelativePaths = listAbsolutePaths.map(x => x.substring(prefixLength))
-    const memberMap = {}
+    const memberMap: { [memberName: string]: boolean } = {}
     listRelativePaths.map(x => {
       const parts = x.split('/')
       if (parts.length === 1) { // member blob
@@ -61,13 +61,13 @@ class ContainerInMem extends NodeInMem implements Container {
 }
 
 class BlobInMem extends NodeInMem implements Blob {
-  getData () {
+  getData (): Promise<ReadableStream | undefined> {
     debug('reading resource', this.path, this.tree.kv)
-    if (typeof this.tree.kv[this.path.toString()] === 'undefined') {
-      return Promise.resolve()
+    const buffer: Buffer | undefined = this.tree.kv[this.path.toString()]
+    if (buffer) {
+      return Promise.resolve(bufferToStream(buffer))
     }
-    const buffer: Buffer = this.tree.kv[this.path.toString()]
-    return Promise.resolve(bufferToStream(buffer))
+    return Promise.resolve(undefined)
   }
   async setData (data: ReadableStream) {
     debug('setData', this.path)
@@ -86,7 +86,7 @@ class BlobInMem extends NodeInMem implements Blob {
 }
 
 export class BlobTreeInMem {
-  kv: { [pathStr: string]: Buffer }
+  kv: { [pathStr: string]: Buffer | undefined }
   constructor () {
     this.kv = {}
     debug('constructed in-mem store', this.kv)

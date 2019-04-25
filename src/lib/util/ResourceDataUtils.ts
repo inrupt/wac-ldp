@@ -26,9 +26,9 @@ export function objectToStream (obj: any): any {
 }
 
 export async function streamToBuffer (stream: any): Promise<Buffer> {
-  const bufs = []
+  const bufs: Array<Buffer> = []
   return new Promise(resolve => {
-    stream.on('data', function (d) {
+    stream.on('data', function (d: Buffer) {
       bufs.push(d)
     })
     stream.on('end', function () {

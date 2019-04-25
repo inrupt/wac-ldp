@@ -58,6 +58,7 @@ async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, sto
   if (stream) {
     return streamToObject(stream) as Promise<ResourceData>
   }
+  return makeResourceData('text/turtle', '')
 }
 
 export async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree) {

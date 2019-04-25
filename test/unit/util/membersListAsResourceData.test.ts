@@ -1,5 +1,5 @@
 
-import { fromStream, toStream, ResourceData, makeResourceData } from '../../../src/lib/util/ResourceDataUtils'
+import { ResourceData, makeResourceData } from '../../../src/lib/util/ResourceDataUtils'
 import { membersListAsResourceData } from '../../../src/lib/util/membersListAsResourceData'
 import { Member } from '../../../src/lib/storage/Container'
 

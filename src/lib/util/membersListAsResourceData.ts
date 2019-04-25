@@ -25,7 +25,7 @@ function toFormat (containerUrl: string, membersList: Array<Member>, contentType
   const output = serializerJsonLd.import(input)
   return new Promise(resolve => {
     let str = ''
-    output.on('data', chunk => {
+    output.on('data', (chunk: Buffer) => {
       debug('chunk', chunk)
       str += chunk.toString()
     })
@@ -35,7 +35,7 @@ function toFormat (containerUrl: string, membersList: Array<Member>, contentType
   })
 }
 
-export async function membersListAsResourceData (containerUrl, membersList, asJsonLd): Promise<ResourceData> {
+export async function membersListAsResourceData (containerUrl: string, membersList: Array<Member>, asJsonLd: boolean): Promise<ResourceData> {
   debug('membersListAsResourceData', containerUrl, membersList, asJsonLd)
   const contentType = (asJsonLd ? 'application/ld+json' : 'text/turtle')
   return makeResourceData(contentType, await toFormat(containerUrl, membersList, contentType))

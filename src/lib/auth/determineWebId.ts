@@ -6,7 +6,7 @@ import { URL } from 'url'
 
 const debug = Debug('determineWebId')
 
-const jwksCache = {}
+const jwksCache: { [domain: string]: { keys: Array<any> } | undefined } = {}
 
 function urlToDomain (urlStr: string): string {
   debug('constructing URL', urlStr)
@@ -26,15 +26,15 @@ async function fetchIssuerJWKS (domain: string): Promise<any> {
   return jwks
 }
 
-async function getIssuerJWKS (domain: string): Promise<{ keys: Array<any> }> {
+async function getIssuerJWKS (domain: string): Promise<{ keys: Array<any> } | undefined> {
   if (!jwksCache[domain]) {
-    jwksCache[domain] = fetchIssuerJWKS(domain)
+    jwksCache[domain] = await fetchIssuerJWKS(domain)
   }
   return jwksCache[domain]
 }
 
 async function getIssuerPubKey (domain: string, kid: string): Promise<string | undefined> {
-  const jwks: { keys: Array<any> } = await getIssuerJWKS(domain)
+  const jwks: { keys: Array<any> } | undefined = await getIssuerJWKS(domain)
   if (jwks === undefined || !Array.isArray(jwks.keys)) {
     debug('could not fetch jwks', domain)
     return

@@ -4,7 +4,7 @@ import { Blob } from '../../../src/lib/storage/Blob'
 import { Container } from '../../../src/lib/storage/Container'
 import { streamToBuffer, bufferToStream } from '../../../src/lib/util/ResourceDataUtils'
 
-let storage: BlobTree
+let storage: BlobTree // | undefined
 
 describe('BlobTreeInMem', () => {
   beforeEach(function () {
@@ -12,7 +12,7 @@ describe('BlobTreeInMem', () => {
     storage = new BlobTreeInMem()
   })
   afterEach(function () {
-    storage = undefined
+    // storage = undefined
   })
   it('adds a blob', async function () {
     // non-existing blob

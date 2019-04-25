@@ -3,7 +3,7 @@ import Debug from 'debug'
 const debug = Debug('app')
 
 import { BlobTree, Path } from '../storage/BlobTree'
-import { Node } from '../storage/Node'
+import { Container } from '../storage/Container'
 
 import { parseHttpRequest, WacLdpTask, TaskType } from '../api/http/HttpParser'
 
@@ -24,7 +24,7 @@ export function makeHandler (storage: BlobTree, aud: string) {
 
       await checkAccess(wacLdpTask, aud, storage) // may throw if access is denied
 
-      let node: Node
+      let node: any
       if (wacLdpTask.isContainer) {
         node = storage.getContainer(wacLdpTask.path)
       } else {

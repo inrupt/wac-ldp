@@ -17,7 +17,10 @@ export enum TaskType {
   unknown
 }
 
-function determineTaskType (method: string, url: string): TaskType {
+function determineTaskType (method: string | undefined, url: string | undefined): TaskType {
+  if (!method || !url) {
+    return TaskType.unknown
+  }
   // if the URL end with a / then the path indicates a container
   // if the URL end with /* then the path indicates a glob
   // in all other cases, the path indicates a blob
@@ -27,7 +30,7 @@ function determineTaskType (method: string, url: string): TaskType {
     lastUrlChar = '(other)'
   }
 
-  const methodMap = {
+  const methodMap: { [lastUrlChar: string]: { [method: string]: TaskType | undefined }} = {
     '/': {
       OPTIONS: TaskType.containerRead,
       HEAD: TaskType.containerRead,
@@ -70,7 +73,7 @@ function determineContentType (headers: http.IncomingHttpHeaders): string | unde
 function determineIfMatch (headers: http.IncomingHttpHeaders): string | undefined {
   try {
     debug(headers)
-    return headers['if-match'].split('"')[1]
+    return headers['if-match'] && headers['if-match'].split('"')[1]
   } catch (error) {
     // return undefined
   }
@@ -94,13 +97,16 @@ function determineIfNoneMatchList (headers: http.IncomingHttpHeaders): Array<str
   }
 }
 
-function determineOmitBody (method: string): boolean {
+function determineOmitBody (method: string | undefined): boolean {
+  if (!method) {
+    return true
+  }
   return (['OPTIONS', 'HEAD'].indexOf(method) !== -1)
 }
 
 function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
   try {
-    return (headers['content-type'].split(';')[0] === 'application/json+ld')
+    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/json+ld')
   } catch (e) {
     return false
   }
@@ -109,7 +115,7 @@ function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
 function determineBearerToken (headers: http.IncomingHttpHeaders): string | undefined {
   try {
     debug(headers, 'authorization')
-    return headers['authorization'].substring('Bearer '.length)
+    return headers['authorization'] && headers['authorization'].substring('Bearer '.length)
   } catch (error) {
     debug('no bearer token found') // TODO: allow other ways of providing a PoP token
   }
@@ -120,7 +126,7 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
 export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<WacLdpTask> {
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
-  const isContainer = (httpReq.url.substr(-1) === '/')
+  const isContainer = (httpReq.url && httpReq.url.substr(-1) === '/')
   const parsedTask = {
     isContainer,
     omitBody: determineOmitBody(httpReq.method),
@@ -145,7 +151,6 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
   debug('parsed http request', {
     method: httpReq.method,
     headers: httpReq.headers,
-    mayIncreaseDiskUsage: parsedTask.mayIncreaseDiskUsage,
     omitBody: parsedTask.omitBody,
     isContainer: parsedTask.isContainer,
     origin: parsedTask.origin,
@@ -154,15 +159,14 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     path: parsedTask.path,
     requestBody: parsedTask.requestBody
   })
-  if (errorCode === null) {
-    return parsedTask
-  } else {
-    throw new ErrorResult(ResultType.CouldNotParse)
-  }
+  // if (errorCode === null) {
+  return parsedTask
+  // } else {
+  //   throw new ErrorResult(ResultType.CouldNotParse)
+  // }
 }
 
-export class WacLdpTask {
-  mayIncreaseDiskUsage: boolean
+export interface WacLdpTask {
   isContainer: boolean
   omitBody: boolean
   asJsonLd: boolean
@@ -174,5 +178,5 @@ export class WacLdpTask {
   bearerToken: string
   wacLdpTaskType: TaskType
   path: Path
-  requestBody: string
+  requestBody: string | undefined
 }

@@ -1,11 +1,12 @@
 
 import { OriginCheckTask, determineAllowedModesForOrigin } from '../auth/determineAllowedModesForOrigin'
-import { ModesCheckTask, determineAllowedAgentsForModes, ACL } from '../auth/determineAllowedAgentsForModes'
+import { ModesCheckTask, determineAllowedAgentsForModes, ACL, AccessModes } from '../auth/determineAllowedAgentsForModes'
 import { determineWebId } from '../auth/determineWebId'
 import { readAcl, ACL_SUFFIX } from '../auth/readAcl'
 import { Path, BlobTree } from '../storage/BlobTree'
 import Debug from 'debug'
 import { WacLdpTask } from '../api/http/HttpParser'
+
 const debug = Debug('checkAccess')
 
 export async function checkAccess (ldpTask: WacLdpTask, aud: string, storage: BlobTree) {
@@ -25,18 +26,20 @@ export async function checkAccess (ldpTask: WacLdpTask, aud: string, storage: Bl
   const aclGraph = await readAcl(baseResourcePath, ldpTask.isContainer, storage)
   debug('aclGraph', aclGraph)
 
-  const allowedAgentsForModes = determineAllowedAgentsForModes({
+  const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
     aclGraph
   } as ModesCheckTask)
   debug('allowedModesForAgent', allowedAgentsForModes)
 
-  const allowedModesForOrigin = {}
-  ;['Read', 'Write', 'Append', 'Control'].map(mode => {
-    allowedModesForOrigin[ACL(mode)] = determineAllowedModesForOrigin({
+  const allowedModesForOrigin: {[mode: string]: boolean} = {}
+  const ret = Promise.all(['Read', 'Write', 'Append', 'Control'].map(async (mode: string): Promise<void> => {
+    allowedModesForOrigin[ACL(mode)] = await determineAllowedModesForOrigin({
       origin: ldpTask.origin,
       mode: ACL(mode),
-      resourceOwners: allowedAgentsForModes[ACL('Control')]
+      resourceOwners: allowedAgentsForModes.control
     } as OriginCheckTask)
-  })
+    return
+  }))
   debug('allowedModesForOrigin', allowedModesForOrigin)
+  return ret
 }

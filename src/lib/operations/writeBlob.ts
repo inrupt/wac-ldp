@@ -8,7 +8,8 @@ const debug = Debug('writeBlob')
 export async function writeBlob (task: WacLdpTask, blob: Blob) {
   debug('operation writeBlob!')
   const resultType = (blob.exists() ? ResultType.OkayWithoutBody : ResultType.Created)
-  await blob.setData(objectToStream(makeResourceData(task.contentType, task.requestBody)))
+  const resourceData = makeResourceData(task.contentType ? task.contentType : '', task.requestBody ? task.requestBody : '')
+  await blob.setData(objectToStream(resourceData))
   return {
     resultType
   } as WacLdpResponse
