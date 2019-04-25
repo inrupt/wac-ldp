@@ -14,6 +14,7 @@ export enum TaskType {
   blobWrite,
   blobUpdate,
   blobDelete,
+  getOptions,
   unknown
 }
 
@@ -32,7 +33,7 @@ function determineTaskType (method: string | undefined, url: string | undefined)
 
   const methodMap: { [lastUrlChar: string]: { [method: string]: TaskType | undefined }} = {
     '/': {
-      OPTIONS: TaskType.containerRead,
+      OPTIONS: TaskType.getOptions,
       HEAD: TaskType.containerRead,
       GET: TaskType.containerRead,
       POST: TaskType.containerMemberAdd,
@@ -40,12 +41,12 @@ function determineTaskType (method: string | undefined, url: string | undefined)
       DELETE: TaskType.containerDelete
     },
     '*': {
-      OPTIONS: TaskType.globRead,
+      OPTIONS: TaskType.getOptions,
       HEAD: TaskType.globRead,
       GET: TaskType.globRead
     },
     '(other)': {
-      OPTIONS: TaskType.blobRead,
+      OPTIONS: TaskType.getOptions,
       HEAD: TaskType.blobRead,
       GET: TaskType.blobRead,
       PUT: TaskType.blobWrite,

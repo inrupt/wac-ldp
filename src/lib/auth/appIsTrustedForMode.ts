@@ -13,6 +13,6 @@ export interface OriginCheckTask {
   resourceOwners: Array<string>
 }
 
-export async function determineAllowedModesForOrigin (task: OriginCheckTask): Promise<boolean> {
+export async function appIsTrustedForMode (task: OriginCheckTask): Promise<boolean> {
   return false
 }
