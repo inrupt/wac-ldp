@@ -1,7 +1,7 @@
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
-import { determineAllowedModesForAgent, AgentCheckTask } from '../../../src/lib/auth/determineAllowedModesForAgent'
+import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/auth/determineAllowedAgentsForModes'
 
 test('finds acl:accessTo modes', async () => {
   const bodyStream = fs.createReadStream('test/fixtures/aclDoc1.ttl')
@@ -10,18 +10,17 @@ test('finds acl:accessTo modes', async () => {
   })
   let quadStream = parser.import(bodyStream)
   const dataset = await rdf.dataset().import(quadStream)
-  const task: AgentCheckTask = {
-    agent: 'https://michielbdejong.inrupt.net/profile/card#me',
+  const task: ModesCheckTask = {
     aclGraph: dataset,
     isAdjacent: true,
     resourcePath: '/'
   }
-  const result = await determineAllowedModesForAgent(task)
+  const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
-    read: true,
-    write: true,
-    append: false,
-    control: true
+    read: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    write: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    append: [],
+    control: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org']
   })
 })
 
@@ -32,18 +31,17 @@ test('finds acl:default modes', async () => {
   })
   let quadStream = parser.import(bodyStream)
   const dataset = await rdf.dataset().import(quadStream)
-  const task: AgentCheckTask = {
-    agent: 'https://michielbdejong.inrupt.net/profile/card#me',
+  const task: ModesCheckTask = {
     aclGraph: dataset,
     isAdjacent: false,
     resourcePath: '/'
   }
-  const result = await determineAllowedModesForAgent(task)
+  const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
-    read: true,
-    write: true,
-    append: false,
-    control: true
+    read: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    write: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    append: [],
+    control: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org']
   })
 })
 // tests to add:

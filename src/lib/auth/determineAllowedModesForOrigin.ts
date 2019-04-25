@@ -1,29 +1,18 @@
 import Debug from 'debug'
 
-import { AccessModes } from './determineAllowedModesForAgent'
+import { ACL, RDF_TYPE } from './determineAllowedAgentsForModes'
+
+const debug = Debug('DetermineAllowedModeForOrigin')
+
+// Given an ACL graph, find out who controls the resource.
+// Then for each of those, fetch the profile doc and look for acl:trustedApps.
 
 export interface OriginCheckTask {
   origin: string,
-  aclGraph: any
-}
-//
-function filterModes (dataset: any): Array<string> {
-  const modes: Array<string> = []
-  dataset.filter((quad: any): boolean => {
-    if (quad.predicate.value === ACL('mode')) {
-      modes.push(quad.object.value)
-    }
-    return false
-  })
-  debug('got modes!', modes)
-  return modes
+  mode: string,
+  resourceOwners: Array<string>
 }
 
-export async function determineAllowedModesForOrigin (task: OriginCheckTask): Promise<AccessModes> {
-  return {
-    read: false,
-    write: false,
-    append: false,
-    control: false
-  }
+export async function determineAllowedModesForOrigin (task: OriginCheckTask): Promise<boolean> {
+  return false
 }
