@@ -11,7 +11,7 @@ import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../ap
 import { getBlobAndCheckETag } from './getBlobAndCheckETag'
 
 import { determineTask } from './determineTask'
-import { checkAccess } from './checkAccess'
+import { checkAccess, AccessCheckTask } from './checkAccess'
 import { determineOperation } from './determineOperation'
 
 export function makeHandler (storage: BlobTree, aud: string) {
@@ -22,7 +22,15 @@ export function makeHandler (storage: BlobTree, aud: string) {
     try {
       const wacLdpTask: WacLdpTask = await determineTask(httpReq)
 
-      await checkAccess(wacLdpTask, aud, storage) // may throw if access is denied
+      await checkAccess({
+        path: wacLdpTask.path,
+        isContainer: wacLdpTask.isContainer,
+        bearerToken: wacLdpTask.bearerToken,
+        aud,
+        origin: wacLdpTask.origin,
+        wacLdpTaskType: wacLdpTask.wacLdpTaskType,
+        storage
+      } as AccessCheckTask) // may throw if access is denied
 
       let node: any
       if (wacLdpTask.isContainer) {
@@ -48,3 +56,6 @@ export function makeHandler (storage: BlobTree, aud: string) {
   }
   return handle
 }
+
+export * from './checkAccess' // checkAccess, AccessCheckTask
+export * from '../storage/BlobTree' // Path and BlobTree

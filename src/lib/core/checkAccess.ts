@@ -50,37 +50,47 @@ async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, we
   } as OriginCheckTask)
 }
 
-export async function checkAccess (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree) {
-  const webId = await determineWebId(wacLdpTask.bearerToken, aud)
+export interface AccessCheckTask {
+  path: Path,
+  isContainer: boolean,
+  bearerToken: string,
+  aud: string,
+  origin: string,
+  wacLdpTaskType: TaskType
+  storage: BlobTree
+}
+
+export async function checkAccess (task: AccessCheckTask) {
+  const webId = await determineWebId(task.bearerToken, task.aud)
   debug('webId', webId)
 
   let baseResourcePath: Path
   let resourceIsAclDocument
-  if (wacLdpTask.path.hasSuffix(ACL_SUFFIX)) {
+  if (task.path.hasSuffix(ACL_SUFFIX)) {
     // editing an ACL file requires acl:Control on the base resource
-    baseResourcePath = wacLdpTask.path.removeSuffix(ACL_SUFFIX)
+    baseResourcePath = task.path.removeSuffix(ACL_SUFFIX)
     resourceIsAclDocument = true
   } else {
-    baseResourcePath = wacLdpTask.path
+    baseResourcePath = task.path
     resourceIsAclDocument = false
   }
-  const aclGraph = await readAcl(baseResourcePath, wacLdpTask.isContainer, storage)
+  const aclGraph = await readAcl(baseResourcePath, task.isContainer, task.storage)
   debug('aclGraph', aclGraph)
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
     aclGraph
   } as ModesCheckTask)
   debug('allowedAgentsModes', allowedAgentsForModes)
-  const requiredAccessModes = determineRequiredAccessModes(wacLdpTask.wacLdpTaskType, resourceIsAclDocument)
+  const requiredAccessModes = determineRequiredAccessModes(task.wacLdpTaskType, resourceIsAclDocument)
   let appendOnly = false
 
   // throw if agent or origin does not have access
   requiredAccessModes.map((mode: string) => {
-    if (modeAllowed(mode, allowedAgentsForModes, webId, wacLdpTask.origin)) {
+    if (modeAllowed(mode, allowedAgentsForModes, webId, origin)) {
       return
     }
     // SPECIAL CASE: append-only
-    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, webId, wacLdpTask.origin)) {
+    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, webId, origin)) {
       appendOnly = true
       return
     }
