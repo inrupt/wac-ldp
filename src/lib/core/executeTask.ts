@@ -11,14 +11,6 @@ import Debug from 'debug'
 const debug = Debug('executeTask')
 
 export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree): Promise<WacLdpResponse> {
-  // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
-  if (wacLdpTask.wacLdpTaskType === TaskType.containerMemberAdd) {
-    debug('converting', wacLdpTask)
-    wacLdpTask.path = wacLdpTask.path.toChild(uuid())
-    wacLdpTask.wacLdpTaskType = TaskType.blobWrite
-    wacLdpTask.isContainer = false
-    debug('converted', wacLdpTask)
-  }
   await checkAccess({
     path: wacLdpTask.path,
     isContainer: wacLdpTask.isContainer,
@@ -28,6 +20,18 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
     wacLdpTaskType: wacLdpTask.wacLdpTaskType,
     storage
   } as AccessCheckTask) // may throw if access is denied
+
+  // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
+  // but notice that access check for this is append on the container,
+  // write access on the Blob is not required!
+  // See https://github.com/solid/web-access-control-spec#aclappend
+  if (wacLdpTask.wacLdpTaskType === TaskType.containerMemberAdd) {
+    debug('converting', wacLdpTask)
+    wacLdpTask.path = wacLdpTask.path.toChild(uuid())
+    wacLdpTask.wacLdpTaskType = TaskType.blobWrite
+    wacLdpTask.isContainer = false
+    debug('converted', wacLdpTask)
+  }
 
   let node: any
   if (wacLdpTask.isContainer) {
