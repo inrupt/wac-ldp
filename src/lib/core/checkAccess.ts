@@ -86,11 +86,11 @@ export async function checkAccess (task: AccessCheckTask) {
 
   // throw if agent or origin does not have access
   requiredAccessModes.map((mode: string) => {
-    if (modeAllowed(mode, allowedAgentsForModes, webId, origin)) {
+    if (modeAllowed(mode, allowedAgentsForModes, webId, task.origin)) {
       return
     }
     // SPECIAL CASE: append-only
-    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, webId, origin)) {
+    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, webId, task.origin)) {
       appendOnly = true
       return
     }
