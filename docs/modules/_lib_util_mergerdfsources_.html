@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>OriginCheckTask | wac-ldp-kit</title>
+	<title>&quot;lib/util/mergeRdfSources&quot; | wac-ldp-kit</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,62 +56,90 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="../modules/_lib_auth_determineallowedmodesfororigin_.html">&quot;lib/auth/determineAllowedModesForOrigin&quot;</a>
-				</li>
-				<li>
-					<a href="_lib_auth_determineallowedmodesfororigin_.originchecktask.html">OriginCheckTask</a>
+					<a href="_lib_util_mergerdfsources_.html">&quot;lib/util/mergeRdfSources&quot;</a>
 				</li>
 			</ul>
-			<h1>Interface OriginCheckTask</h1>
+			<h1>External module &quot;lib/util/mergeRdfSources&quot;</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
-			<section class="tsd-panel tsd-hierarchy">
-				<h3>Hierarchy</h3>
-				<ul class="tsd-hierarchy">
-					<li>
-						<span class="target">OriginCheckTask</span>
-					</li>
-				</ul>
-			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section ">
-							<h3>Properties</h3>
+							<h3>Functions</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_determineallowedmodesfororigin_.originchecktask.html#aclgraph" class="tsd-kind-icon">acl<wbr>Graph</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_determineallowedmodesfororigin_.originchecktask.html#origin" class="tsd-kind-icon">origin</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_util_mergerdfsources_.html#mergerdfsources" class="tsd-kind-icon">merge<wbr>Rdf<wbr>Sources</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_util_mergerdfsources_.html#readandmerge" class="tsd-kind-icon">read<wbr>And<wbr>Merge</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Properties</h2>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="aclgraph" class="tsd-anchor"></a>
-					<h3>acl<wbr>Graph</h3>
-					<div class="tsd-signature tsd-kind-icon">acl<wbr>Graph<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/auth/determineAllowedModesForOrigin.ts#L7">lib/auth/determineAllowedModesForOrigin.ts:7</a></li>
-						</ul>
-					</aside>
+				<h2>Functions</h2>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="mergerdfsources" class="tsd-anchor"></a>
+					<h3>merge<wbr>Rdf<wbr>Sources</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">merge<wbr>Rdf<wbr>Sources<span class="tsd-signature-symbol">(</span>rdfSources<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span>, asJsonLd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/util/mergeRdfSources.ts#L11">lib/util/mergeRdfSources.ts:11</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>rdfSources: <span class="tsd-signature-type">object</span></h5>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-index-signature">
+											<h5><span class="tsd-signature-symbol">[</span>indexer: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a></h5>
+										</li>
+									</ul>
+								</li>
+								<li>
+									<h5>asJsonLd: <span class="tsd-signature-type">boolean</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
 				</section>
-				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="origin" class="tsd-anchor"></a>
-					<h3>origin</h3>
-					<div class="tsd-signature tsd-kind-icon">origin<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/auth/determineAllowedModesForOrigin.ts#L6">lib/auth/determineAllowedModesForOrigin.ts:6</a></li>
-						</ul>
-					</aside>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="readandmerge" class="tsd-anchor"></a>
+					<h3>read<wbr>And<wbr>Merge</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+						<li class="tsd-signature tsd-kind-icon">read<wbr>And<wbr>Merge<span class="tsd-signature-symbol">(</span>rdfSources<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">object</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ReadableStream</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/util/mergeRdfSources.ts#L5">lib/util/mergeRdfSources.ts:5</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>rdfSources: <span class="tsd-signature-type">object</span></h5>
+									<ul class="tsd-parameters">
+										<li class="tsd-parameter-index-signature">
+											<h5><span class="tsd-signature-symbol">[</span>indexer: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">]: </span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a></h5>
+										</li>
+									</ul>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">ReadableStream</span></h4>
+						</li>
+					</ul>
 				</section>
 			</section>
 		</div>
@@ -122,29 +150,17 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="../modules/_lib_auth_determineallowedmodesfororigin_.html">"lib/auth/determine<wbr>Allowed<wbr>Modes<wbr>For<wbr>Origin"</a>
+						<a href="_lib_util_mergerdfsources_.html">"lib/util/merge<wbr>Rdf<wbr>Sources"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
-				</ul>
-				<ul class="current">
-					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
-						<a href="_lib_auth_determineallowedmodesfororigin_.originchecktask.html" class="tsd-kind-icon">Origin<wbr>Check<wbr>Task</a>
-						<ul>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_lib_auth_determineallowedmodesfororigin_.originchecktask.html#aclgraph" class="tsd-kind-icon">acl<wbr>Graph</a>
-							</li>
-							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_lib_auth_determineallowedmodesfororigin_.originchecktask.html#origin" class="tsd-kind-icon">origin</a>
-							</li>
-						</ul>
-					</li>
-				</ul>
-				<ul class="after-current">
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="../modules/_lib_auth_determineallowedmodesfororigin_.html#determineallowedmodesfororigin" class="tsd-kind-icon">determine<wbr>Allowed<wbr>Modes<wbr>For<wbr>Origin</a>
+						<a href="_lib_util_mergerdfsources_.html#mergerdfsources" class="tsd-kind-icon">merge<wbr>Rdf<wbr>Sources</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_lib_util_mergerdfsources_.html#readandmerge" class="tsd-kind-icon">read<wbr>And<wbr>Merge</a>
 					</li>
 				</ul>
 			</nav>

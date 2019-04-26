@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;lib/core/determineTask&quot; | wac-ldp-kit</title>
+	<title>ModesCheckTask | wac-ldp-kit</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,72 +56,73 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_lib_core_determinetask_.html">&quot;lib/core/determineTask&quot;</a>
+					<a href="../modules/_lib_auth_determineallowedagentsformodes_.html">&quot;lib/auth/determineAllowedAgentsForModes&quot;</a>
+				</li>
+				<li>
+					<a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html">ModesCheckTask</a>
 				</li>
 			</ul>
-			<h1>External module &quot;lib/core/determineTask&quot;</h1>
+			<h1>Interface ModesCheckTask</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">ModesCheckTask</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Variables</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_core_determinetask_.html#debug" class="tsd-kind-icon">debug</a></li>
-							</ul>
-						</section>
 						<section class="tsd-index-section ">
-							<h3>Functions</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_core_determinetask_.html#determinetask" class="tsd-kind-icon">determine<wbr>Task</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html#aclgraph" class="tsd-kind-icon">acl<wbr>Graph</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html#isadjacent" class="tsd-kind-icon">is<wbr>Adjacent</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html#resourcepath" class="tsd-kind-icon">resource<wbr>Path</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
-				<h2>Variables</h2>
-				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="debug" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagConst">Const</span> debug</h3>
-					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Debugger</span><span class="tsd-signature-symbol"> =&nbsp;Debug(&#x27;determineTask&#x27;)</span></div>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="aclgraph" class="tsd-anchor"></a>
+					<h3>acl<wbr>Graph</h3>
+					<div class="tsd-signature tsd-kind-icon">acl<wbr>Graph<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/core/determineTask.ts#L4">lib/core/determineTask.ts:4</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/auth/determineAllowedAgentsForModes.ts#L31">lib/auth/determineAllowedAgentsForModes.ts:31</a></li>
 						</ul>
 					</aside>
 				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="determinetask" class="tsd-anchor"></a>
-					<h3>determine<wbr>Task</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>Task<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/core/determineTask.ts#L6">lib/core/determineTask.ts:6</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>httpReq: <span class="tsd-signature-type">any</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="isadjacent" class="tsd-anchor"></a>
+					<h3>is<wbr>Adjacent</h3>
+					<div class="tsd-signature tsd-kind-icon">is<wbr>Adjacent<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/auth/determineAllowedAgentsForModes.ts#L32">lib/auth/determineAllowedAgentsForModes.ts:32</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="resourcepath" class="tsd-anchor"></a>
+					<h3>resource<wbr>Path</h3>
+					<div class="tsd-signature tsd-kind-icon">resource<wbr>Path<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/auth/determineAllowedAgentsForModes.ts#L33">lib/auth/determineAllowedAgentsForModes.ts:33</a></li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 		</div>
@@ -132,17 +133,53 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_lib_core_determinetask_.html">"lib/core/determine<wbr>Task"</a>
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html">"lib/auth/determine<wbr>Allowed<wbr>Agents<wbr>For<wbr>Modes"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_lib_auth_determineallowedagentsformodes_.accessmodes.html" class="tsd-kind-icon">Access<wbr>Modes</a>
+					</li>
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html" class="tsd-kind-icon">Modes<wbr>Check<wbr>Task</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html#aclgraph" class="tsd-kind-icon">acl<wbr>Graph</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html#isadjacent" class="tsd-kind-icon">is<wbr>Adjacent</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_auth_determineallowedagentsformodes_.modeschecktask.html#resourcepath" class="tsd-kind-icon">resource<wbr>Path</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html#agent_class_anybody" class="tsd-kind-icon">AGENT_<wbr>CLASS_<wbr>ANYBODY</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html#agent_class_anybody_logged_in" class="tsd-kind-icon">AGENT_<wbr>CLASS_<wbr>ANYBODY_<wbr>LOGGED_<wbr>IN</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module">
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html#rdf_type" class="tsd-kind-icon">RDF_<wbr>TYPE</a>
+					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_lib_core_determinetask_.html#debug" class="tsd-kind-icon">debug</a>
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html#debug" class="tsd-kind-icon">debug</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_lib_core_determinetask_.html#determinetask" class="tsd-kind-icon">determine<wbr>Task</a>
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html#acl" class="tsd-kind-icon">ACL</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html#determineallowedagentsformodes" class="tsd-kind-icon">determine<wbr>Allowed<wbr>Agents<wbr>For<wbr>Modes</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_lib_auth_determineallowedagentsformodes_.html#fetchgroupmembers" class="tsd-kind-icon">fetch<wbr>Group<wbr>Members</a>
 					</li>
 				</ul>
 			</nav>

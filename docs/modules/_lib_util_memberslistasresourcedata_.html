@@ -74,14 +74,12 @@
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_util_memberslistasresourcedata_.html#debug" class="tsd-kind-icon">debug</a></li>
-								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_util_memberslistasresourcedata_.html#formats" class="tsd-kind-icon">formats</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_util_memberslistasresourcedata_.html#memberslistasresourcedata" class="tsd-kind-icon">members<wbr>List<wbr>AsResource<wbr>Data</a></li>
-								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_util_memberslistasresourcedata_.html#toformat" class="tsd-kind-icon">to<wbr>Format</a></li>
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_util_memberslistasresourcedata_.html#tordf" class="tsd-kind-icon">to<wbr>Rdf</a></li>
 							</ul>
 						</section>
@@ -96,17 +94,7 @@
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Debugger</span><span class="tsd-signature-symbol"> =&nbsp;Debug(&#x27;membersListAsResourceData&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/util/membersListAsResourceData.ts#L9">lib/util/membersListAsResourceData.ts:9</a></li>
-						</ul>
-					</aside>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="formats" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagConst">Const</span> formats</h3>
-					<div class="tsd-signature tsd-kind-icon">formats<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> =&nbsp;Formats()</span></div>
-					<aside class="tsd-sources">
-						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/util/membersListAsResourceData.ts#L8">lib/util/membersListAsResourceData.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/util/membersListAsResourceData.ts#L7">lib/util/membersListAsResourceData.ts:7</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -117,42 +105,13 @@
 					<a name="memberslistasresourcedata" class="tsd-anchor"></a>
 					<h3>members<wbr>List<wbr>AsResource<wbr>Data</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">members<wbr>List<wbr>AsResource<wbr>Data<span class="tsd-signature-symbol">(</span>containerUrl<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, membersList<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, asJsonLd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">members<wbr>List<wbr>AsResource<wbr>Data<span class="tsd-signature-symbol">(</span>containerUrl<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, membersList<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_storage_container_.member.html" class="tsd-signature-type">Member</a><span class="tsd-signature-symbol">&gt;</span>, asJsonLd<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/util/membersListAsResourceData.ts#L38">lib/util/membersListAsResourceData.ts:38</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>containerUrl: <span class="tsd-signature-type">any</span></h5>
-								</li>
-								<li>
-									<h5>membersList: <span class="tsd-signature-type">any</span></h5>
-								</li>
-								<li>
-									<h5>asJsonLd: <span class="tsd-signature-type">any</span></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
-				</section>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="toformat" class="tsd-anchor"></a>
-					<h3>to<wbr>Format</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">to<wbr>Format<span class="tsd-signature-symbol">(</span>containerUrl<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, membersList<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_storage_container_.member.html" class="tsd-signature-type">Member</a><span class="tsd-signature-symbol">&gt;</span>, contentType<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/util/membersListAsResourceData.ts#L22">lib/util/membersListAsResourceData.ts:22</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/util/membersListAsResourceData.ts#L20">lib/util/membersListAsResourceData.ts:20</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -164,10 +123,10 @@
 									<h5>membersList: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_storage_container_.member.html" class="tsd-signature-type">Member</a><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 								<li>
-									<h5>contentType: <span class="tsd-signature-type">string</span></h5>
+									<h5>asJsonLd: <span class="tsd-signature-type">boolean</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -181,7 +140,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/util/membersListAsResourceData.ts#L11">lib/util/membersListAsResourceData.ts:11</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/util/membersListAsResourceData.ts#L9">lib/util/membersListAsResourceData.ts:9</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -215,14 +174,8 @@
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_lib_util_memberslistasresourcedata_.html#debug" class="tsd-kind-icon">debug</a>
 					</li>
-					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_lib_util_memberslistasresourcedata_.html#formats" class="tsd-kind-icon">formats</a>
-					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_lib_util_memberslistasresourcedata_.html#memberslistasresourcedata" class="tsd-kind-icon">members<wbr>List<wbr>AsResource<wbr>Data</a>
-					</li>
-					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_lib_util_memberslistasresourcedata_.html#toformat" class="tsd-kind-icon">to<wbr>Format</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_lib_util_memberslistasresourcedata_.html#tordf" class="tsd-kind-icon">to<wbr>Rdf</a>

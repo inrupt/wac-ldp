@@ -77,9 +77,9 @@
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
-							<h3>Classes</h3>
+							<h3>Interfaces</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-class tsd-parent-kind-external-module"><a href="../classes/_lib_api_http_httpparser_.wacldptask.html" class="tsd-kind-icon">Wac<wbr>Ldp<wbr>Task</a></li>
+								<li class="tsd-kind-interface tsd-parent-kind-external-module"><a href="../interfaces/_lib_api_http_httpparser_.wacldptask.html" class="tsd-kind-icon">Wac<wbr>Ldp<wbr>Task</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section tsd-is-not-exported">
@@ -114,7 +114,7 @@
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Debugger</span><span class="tsd-signature-symbol"> =&nbsp;Debug(&#x27;HttpParser&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L6">lib/api/http/HttpParser.ts:6</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L6">lib/api/http/HttpParser.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -125,19 +125,19 @@
 					<a name="determineasjsonld" class="tsd-anchor"></a>
 					<h3>determine<wbr>AsJson<wbr>Ld</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>AsJson<wbr>Ld<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>AsJson<wbr>Ld<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingHttpHeaders</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L98">lib/api/http/HttpParser.ts:98</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L108">lib/api/http/HttpParser.ts:108</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>headers: <span class="tsd-signature-type">IncomingHttpHeaders</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -148,19 +148,19 @@
 					<a name="determinebearertoken" class="tsd-anchor"></a>
 					<h3>determine<wbr>Bearer<wbr>Token</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>Bearer<wbr>Token<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>Bearer<wbr>Token<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingHttpHeaders</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L106">lib/api/http/HttpParser.ts:106</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L116">lib/api/http/HttpParser.ts:116</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>headers: <span class="tsd-signature-type">IncomingHttpHeaders</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span>
@@ -174,19 +174,19 @@
 					<a name="determinecontenttype" class="tsd-anchor"></a>
 					<h3>determine<wbr>Content<wbr>Type</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>Content<wbr>Type<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>Content<wbr>Type<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingHttpHeaders</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L66">lib/api/http/HttpParser.ts:66</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L70">lib/api/http/HttpParser.ts:70</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>headers: <span class="tsd-signature-type">IncomingHttpHeaders</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span>
@@ -200,19 +200,19 @@
 					<a name="determineifmatch" class="tsd-anchor"></a>
 					<h3>determine<wbr>IfMatch</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>IfMatch<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>IfMatch<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingHttpHeaders</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L70">lib/api/http/HttpParser.ts:70</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L74">lib/api/http/HttpParser.ts:74</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>headers: <span class="tsd-signature-type">IncomingHttpHeaders</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span>
@@ -226,19 +226,19 @@
 					<a name="determineifnonematchlist" class="tsd-anchor"></a>
 					<h3>determine<wbr>IfNone<wbr>Match<wbr>List</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>IfNone<wbr>Match<wbr>List<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>IfNone<wbr>Match<wbr>List<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingHttpHeaders</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L86">lib/api/http/HttpParser.ts:86</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L91">lib/api/http/HttpParser.ts:91</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>headers: <span class="tsd-signature-type">IncomingHttpHeaders</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span>
@@ -252,19 +252,19 @@
 					<a name="determineifnonematchstar" class="tsd-anchor"></a>
 					<h3>determine<wbr>IfNone<wbr>Match<wbr>Star</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>IfNone<wbr>Match<wbr>Star<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>IfNone<wbr>Match<wbr>Star<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingHttpHeaders</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L78">lib/api/http/HttpParser.ts:78</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L83">lib/api/http/HttpParser.ts:83</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>headers: <span class="tsd-signature-type">IncomingHttpHeaders</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -275,19 +275,19 @@
 					<a name="determineomitbody" class="tsd-anchor"></a>
 					<h3>determine<wbr>Omit<wbr>Body</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>Omit<wbr>Body<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>Omit<wbr>Body<span class="tsd-signature-symbol">(</span>method<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">boolean</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L94">lib/api/http/HttpParser.ts:94</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L101">lib/api/http/HttpParser.ts:101</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>method: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">boolean</span></h4>
@@ -298,19 +298,19 @@
 					<a name="determineorigin" class="tsd-anchor"></a>
 					<h3>determine<wbr>Origin</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>Origin<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>Origin<span class="tsd-signature-symbol">(</span>headers<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingHttpHeaders</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L58">lib/api/http/HttpParser.ts:58</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L62">lib/api/http/HttpParser.ts:62</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>headers: <span class="tsd-signature-type">IncomingHttpHeaders</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">string</span>
@@ -324,19 +324,22 @@
 					<a name="determinetasktype" class="tsd-anchor"></a>
 					<h3>determine<wbr>Task<wbr>Type</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
-						<li class="tsd-signature tsd-kind-icon">determine<wbr>Task<wbr>Type<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../enums/_lib_api_http_httpparser_.tasktype.html" class="tsd-signature-type">TaskType</a></li>
+						<li class="tsd-signature tsd-kind-icon">determine<wbr>Task<wbr>Type<span class="tsd-signature-symbol">(</span>method<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span>, url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../enums/_lib_api_http_httpparser_.tasktype.html" class="tsd-signature-type">TaskType</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L20">lib/api/http/HttpParser.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L21">lib/api/http/HttpParser.ts:21</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
+									<h5>method: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h5>
+								</li>
+								<li>
+									<h5>url: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <a href="../enums/_lib_api_http_httpparser_.tasktype.html" class="tsd-signature-type">TaskType</a></h4>
@@ -347,13 +350,13 @@
 					<a name="parsehttprequest" class="tsd-anchor"></a>
 					<h3>parse<wbr>Http<wbr>Request</h3>
 					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">parse<wbr>Http<wbr>Request<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">parse<wbr>Http<wbr>Request<span class="tsd-signature-symbol">(</span>httpReq<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">IncomingMessage</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/43848cf/src/lib/api/http/HttpParser.ts#L116">lib/api/http/HttpParser.ts:116</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpParser.ts#L127">lib/api/http/HttpParser.ts:127</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -362,7 +365,7 @@
 									<h5>httpReq: <span class="tsd-signature-type">IncomingMessage</span></h5>
 								</li>
 							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../classes/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -384,8 +387,8 @@
 					<li class=" tsd-kind-enum tsd-parent-kind-external-module">
 						<a href="../enums/_lib_api_http_httpparser_.tasktype.html" class="tsd-kind-icon">Task<wbr>Type</a>
 					</li>
-					<li class=" tsd-kind-class tsd-parent-kind-external-module">
-						<a href="../classes/_lib_api_http_httpparser_.wacldptask.html" class="tsd-kind-icon">Wac<wbr>Ldp<wbr>Task</a>
+					<li class=" tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="../interfaces/_lib_api_http_httpparser_.wacldptask.html" class="tsd-kind-icon">Wac<wbr>Ldp<wbr>Task</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_lib_api_http_httpparser_.html#debug" class="tsd-kind-icon">debug</a>
