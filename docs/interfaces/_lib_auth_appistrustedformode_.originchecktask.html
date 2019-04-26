@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;lib/operations/readBlob&quot; | wac-ldp-kit</title>
+	<title>OriginCheckTask | wac-ldp-kit</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -56,75 +56,73 @@
 					<a href="../globals.html">Globals</a>
 				</li>
 				<li>
-					<a href="_lib_operations_readblob_.html">&quot;lib/operations/readBlob&quot;</a>
+					<a href="../modules/_lib_auth_appistrustedformode_.html">&quot;lib/auth/appIsTrustedForMode&quot;</a>
+				</li>
+				<li>
+					<a href="_lib_auth_appistrustedformode_.originchecktask.html">OriginCheckTask</a>
 				</li>
 			</ul>
-			<h1>External module &quot;lib/operations/readBlob&quot;</h1>
+			<h1>Interface OriginCheckTask</h1>
 		</div>
 	</div>
 </header>
 <div class="container container-main">
 	<div class="row">
 		<div class="col-8 col-content">
+			<section class="tsd-panel tsd-hierarchy">
+				<h3>Hierarchy</h3>
+				<ul class="tsd-hierarchy">
+					<li>
+						<span class="target">OriginCheckTask</span>
+					</li>
+				</ul>
+			</section>
 			<section class="tsd-panel-group tsd-index-group">
 				<h2>Index</h2>
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
-						<section class="tsd-index-section tsd-is-not-exported">
-							<h3>Variables</h3>
-							<ul class="tsd-index-list">
-								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_operations_readblob_.html#debug" class="tsd-kind-icon">debug</a></li>
-							</ul>
-						</section>
 						<section class="tsd-index-section ">
-							<h3>Functions</h3>
+							<h3>Properties</h3>
 							<ul class="tsd-index-list">
-								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_operations_readblob_.html#readblob" class="tsd-kind-icon">read<wbr>Blob</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_appistrustedformode_.originchecktask.html#mode" class="tsd-kind-icon">mode</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_appistrustedformode_.originchecktask.html#origin" class="tsd-kind-icon">origin</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_auth_appistrustedformode_.originchecktask.html#resourceowners" class="tsd-kind-icon">resource<wbr>Owners</a></li>
 							</ul>
 						</section>
 					</div>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
-				<h2>Variables</h2>
-				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-					<a name="debug" class="tsd-anchor"></a>
-					<h3><span class="tsd-flag ts-flagConst">Const</span> debug</h3>
-					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Debugger</span><span class="tsd-signature-symbol"> =&nbsp;Debug(&#x27;readBlob&#x27;)</span></div>
+			<section class="tsd-panel-group tsd-member-group ">
+				<h2>Properties</h2>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="mode" class="tsd-anchor"></a>
+					<h3>mode</h3>
+					<div class="tsd-signature tsd-kind-icon">mode<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/operations/readBlob.ts#L8">lib/operations/readBlob.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/auth/appIsTrustedForMode.ts#L12">lib/auth/appIsTrustedForMode.ts:12</a></li>
 						</ul>
 					</aside>
 				</section>
-			</section>
-			<section class="tsd-panel-group tsd-member-group ">
-				<h2>Functions</h2>
-				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
-					<a name="readblob" class="tsd-anchor"></a>
-					<h3>read<wbr>Blob</h3>
-					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
-						<li class="tsd-signature tsd-kind-icon">read<wbr>Blob<span class="tsd-signature-symbol">(</span>task<span class="tsd-signature-symbol">: </span><a href="../interfaces/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a>, blob<span class="tsd-signature-symbol">: </span><a href="../interfaces/_lib_storage_blob_.blob.html" class="tsd-signature-type">Blob</a><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_api_http_httpresponder_.wacldpresponse.html" class="tsd-signature-type">WacLdpResponse</a><span class="tsd-signature-symbol">&gt;</span></li>
-					</ul>
-					<ul class="tsd-descriptions">
-						<li class="tsd-description">
-							<aside class="tsd-sources">
-								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/operations/readBlob.ts#L10">lib/operations/readBlob.ts:10</a></li>
-								</ul>
-							</aside>
-							<h4 class="tsd-parameters-title">Parameters</h4>
-							<ul class="tsd-parameters">
-								<li>
-									<h5>task: <a href="../interfaces/_lib_api_http_httpparser_.wacldptask.html" class="tsd-signature-type">WacLdpTask</a></h5>
-								</li>
-								<li>
-									<h5>blob: <a href="../interfaces/_lib_storage_blob_.blob.html" class="tsd-signature-type">Blob</a></h5>
-								</li>
-							</ul>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><a href="../interfaces/_lib_api_http_httpresponder_.wacldpresponse.html" class="tsd-signature-type">WacLdpResponse</a><span class="tsd-signature-symbol">&gt;</span></h4>
-						</li>
-					</ul>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="origin" class="tsd-anchor"></a>
+					<h3>origin</h3>
+					<div class="tsd-signature tsd-kind-icon">origin<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/auth/appIsTrustedForMode.ts#L11">lib/auth/appIsTrustedForMode.ts:11</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="resourceowners" class="tsd-anchor"></a>
+					<h3>resource<wbr>Owners</h3>
+					<div class="tsd-signature tsd-kind-icon">resource<wbr>Owners<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/auth/appIsTrustedForMode.ts#L13">lib/auth/appIsTrustedForMode.ts:13</a></li>
+						</ul>
+					</aside>
 				</section>
 			</section>
 		</div>
@@ -135,17 +133,35 @@
 						<a href="../globals.html"><em>Globals</em></a>
 					</li>
 					<li class="current tsd-kind-external-module">
-						<a href="_lib_operations_readblob_.html">"lib/operations/read<wbr>Blob"</a>
+						<a href="../modules/_lib_auth_appistrustedformode_.html">"lib/auth/app<wbr>IsTrusted<wbr>For<wbr>Mode"</a>
 					</li>
 				</ul>
 			</nav>
 			<nav class="tsd-navigation secondary menu-sticky">
 				<ul class="before-current">
+				</ul>
+				<ul class="current">
+					<li class="current tsd-kind-interface tsd-parent-kind-external-module">
+						<a href="_lib_auth_appistrustedformode_.originchecktask.html" class="tsd-kind-icon">Origin<wbr>Check<wbr>Task</a>
+						<ul>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_auth_appistrustedformode_.originchecktask.html#mode" class="tsd-kind-icon">mode</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_auth_appistrustedformode_.originchecktask.html#origin" class="tsd-kind-icon">origin</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_auth_appistrustedformode_.originchecktask.html#resourceowners" class="tsd-kind-icon">resource<wbr>Owners</a>
+							</li>
+						</ul>
+					</li>
+				</ul>
+				<ul class="after-current">
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="_lib_operations_readblob_.html#debug" class="tsd-kind-icon">debug</a>
+						<a href="../modules/_lib_auth_appistrustedformode_.html#debug" class="tsd-kind-icon">debug</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
-						<a href="_lib_operations_readblob_.html#readblob" class="tsd-kind-icon">read<wbr>Blob</a>
+						<a href="../modules/_lib_auth_appistrustedformode_.html#appistrustedformode" class="tsd-kind-icon">app<wbr>IsTrusted<wbr>For<wbr>Mode</a>
 					</li>
 				</ul>
 			</nav>
