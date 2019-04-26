@@ -53,17 +53,13 @@ async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, we
 export interface AccessCheckTask {
   path: Path,
   isContainer: boolean,
-  bearerToken: string,
-  aud: string,
+  webId: string,
   origin: string,
   wacLdpTaskType: TaskType
   storage: BlobTree
 }
 
 export async function checkAccess (task: AccessCheckTask) {
-  const webId = await determineWebId(task.bearerToken, task.aud)
-  debug('webId', webId)
-
   let baseResourcePath: Path
   let resourceIsAclDocument
   if (task.path.hasSuffix(ACL_SUFFIX)) {
@@ -86,18 +82,18 @@ export async function checkAccess (task: AccessCheckTask) {
 
   // throw if agent or origin does not have access
   requiredAccessModes.map((mode: string) => {
-    if (modeAllowed(mode, allowedAgentsForModes, webId, task.origin)) {
+    if (modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin)) {
       return
     }
     // SPECIAL CASE: append-only
-    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, webId, task.origin)) {
+    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, task.webId, task.origin)) {
       appendOnly = true
       return
     }
-    debug(`Access denied! ${mode} access is required for this task, webid is "${webId}"`)
+    debug(`Access denied! ${mode} access is required for this task, webid is "${task.webId}"`)
     throw new ErrorResult(ResultType.AccessDenied)
   })
   // webId may be reused to check individual ACLs on individual member resources for Glob
   // appendOnly may be used to restrict PATCH operations
-  return { webId, appendOnly }
+  return appendOnly
 }

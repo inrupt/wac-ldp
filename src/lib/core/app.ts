@@ -30,4 +30,5 @@ export function makeHandler (storage: BlobTree, aud: string) {
 }
 
 export * from './checkAccess' // checkAccess, AccessCheckTask
+export * from '../auth/determineWebId' // determineWebId
 export * from '../storage/BlobTree' // Path and BlobTree
