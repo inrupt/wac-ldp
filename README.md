@@ -4,6 +4,19 @@
 
 A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.
 
+## Context
+
+This module implements the 'Auth' and 'LDP' parts of the server architecture described by the following diagram:
+
+![server architecture](https://user-images.githubusercontent.com/408412/56799596-8c5eb980-6819-11e9-89f1-785c7cdc0e34.png)
+
+It also includes an in-memory implementation of the 'BlobTree' persistence layer abstraction.
+It exports the following things:
+* `makeHandler (storage: BlobTree, aud: string): (req: http.IncomingMessage, res: http.ServerResponse) => void`, a function that creates a [request listener](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener) for use in a http server.
+* `BlobTree`, an abstract interface describing the interface that `makeHandler` expects in its first argument.
+* `Path`, a class that `checkAccess` expects in its first argument. `BlobTree` will emit `'change'` events that refer to `Path`s, so typically, a notifications server would want to emit notifications about changes only to clients that have access to the resource that changed.
+* `checkAccess(path: Path, bearerToken: string, origin: string): { read: boolean, write: boolean, append: boolean, control: boolean }` - a function for querying whether a given combination of bearer token and origin should get access to information about a given `Path`.
+
 ## Code Structure
 
 ![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/56473918-6e3c3680-6472-11e9-980d-2ed6c1c762dc.png)
