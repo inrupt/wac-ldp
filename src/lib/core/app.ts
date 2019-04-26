@@ -1,15 +1,11 @@
 import * as http from 'http'
 import Debug from 'debug'
-const debug = Debug('app')
-
-import { BlobTree, Path } from '../storage/BlobTree'
-import { Container } from '../storage/Container'
-
-import { parseHttpRequest, WacLdpTask, TaskType } from '../api/http/HttpParser'
-
-import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-
+import { BlobTree } from '../storage/BlobTree'
+import { parseHttpRequest, WacLdpTask } from '../api/http/HttpParser'
+import { sendHttpResponse, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
 import { executeTask } from './executeTask'
+
+const debug = Debug('app')
 
 export function makeHandler (storage: BlobTree, aud: string) {
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
