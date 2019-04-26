@@ -11,7 +11,7 @@ import Debug from 'debug'
 const debug = Debug('executeTask')
 
 export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree): Promise<WacLdpResponse> {
-  await checkAccess({
+  const { webId, appendOnly } = await checkAccess({
     path: wacLdpTask.path,
     isContainer: wacLdpTask.isContainer,
     bearerToken: wacLdpTask.bearerToken,
@@ -42,7 +42,7 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
   }
 
   const operation = determineOperation(wacLdpTask.wacLdpTaskType)
-  const response = await operation.apply(null, [wacLdpTask, node])
+  const response = await operation.apply(null, [wacLdpTask, node, appendOnly])
   debug('executed', response)
   return response
 }
