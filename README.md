@@ -14,8 +14,8 @@ It also includes an in-memory implementation of the 'BlobTree' persistence layer
 It exports the following things:
 * `makeHandler (storage: BlobTree, aud: string): (req: http.IncomingMessage, res: http.ServerResponse) => void`, a function that creates a [request listener](https://nodejs.org/api/http.html#http_http_createserver_options_requestlistener) for use in a http server.
 * `BlobTree`, an abstract interface describing the interface that `makeHandler` expects in its first argument.
-* `Path`, a class that `checkAccess` expects in its first argument. `BlobTree` will emit `'change'` events that refer to `Path`s, so typically, a notifications server would want to emit notifications about changes only to clients that have access to the resource that changed.
-* `checkAccess(path: Path, bearerToken: string, origin: string): { read: boolean, write: boolean, append: boolean, control: boolean }` - a function for querying whether a given combination of bearer token and origin should get access to information about a given `Path`.
+* `AccessCheckTask`, a class that `checkAccess` expects in its argument. `BlobTree` will emit `'change'` events that refer to `Path`s, so typically, a notifications server would want to emit notifications about changes only to clients that have access to the resource that changed. 
+* `checkAccess(accessCheckTask): Promise<{ webId: string, appendOnly: boolean }>, throws ErrorResult` - a function for querying whether a given combination of bearer token and origin should get access to information about a given `Path`. It will reject with `ResultType.AccessDenied` errors where applicable, except for `TaskType.updateBlob` tasks where write access is denied, but append access is allowed; in that special case it will resolve with `appendOnly` set to true, instead of rejecting.
 
 ## Code Structure
 
