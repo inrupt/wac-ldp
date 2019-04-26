@@ -162,3 +162,7 @@ test('read container (with body)', async () => {
     }
   })
 })
+
+test('read glob (with body)', async () => {
+  // ...
+})

@@ -8,11 +8,8 @@ import { Container } from '../storage/Container'
 import { parseHttpRequest, WacLdpTask, TaskType } from '../api/http/HttpParser'
 
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { getBlobAndCheckETag } from './getBlobAndCheckETag'
 
-import { determineTask } from './determineTask'
-import { checkAccess, AccessCheckTask } from './checkAccess'
-import { determineOperation } from './determineOperation'
+import { executeTask } from './executeTask'
 
 export function makeHandler (storage: BlobTree, aud: string) {
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
@@ -20,29 +17,8 @@ export function makeHandler (storage: BlobTree, aud: string) {
 
     let response: WacLdpResponse
     try {
-      const wacLdpTask: WacLdpTask = await determineTask(httpReq)
-
-      await checkAccess({
-        path: wacLdpTask.path,
-        isContainer: wacLdpTask.isContainer,
-        bearerToken: wacLdpTask.bearerToken,
-        aud,
-        origin: wacLdpTask.origin,
-        wacLdpTaskType: wacLdpTask.wacLdpTaskType,
-        storage
-      } as AccessCheckTask) // may throw if access is denied
-
-      let node: any
-      if (wacLdpTask.isContainer) {
-        node = storage.getContainer(wacLdpTask.path)
-      } else {
-        debug('not a container, getting blob and checking etag')
-        node = await getBlobAndCheckETag(wacLdpTask, storage)
-      }
-
-      const operation = determineOperation(wacLdpTask.wacLdpTaskType)
-      response = await operation.apply(null, [wacLdpTask, node])
-      debug('executed', response)
+      const wacLdpTask: WacLdpTask = await parseHttpRequest(httpReq)
+      response = await executeTask(wacLdpTask, aud, storage)
     } catch (error) {
       debug('errored', error)
       response = error as WacLdpResponse
