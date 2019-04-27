@@ -1,5 +1,5 @@
 {
-  "name": "wac-ldp-kit",
+  "name": "wac-ldp",
   "version": "0.1.0",
   "description": "A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.",
   "main": "dist/app.js",
