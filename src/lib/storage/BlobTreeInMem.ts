@@ -1,3 +1,4 @@
+import * as events from 'events'
 import Debug from 'debug'
 import { Node } from './Node'
 import { Container, Member } from './Container'
@@ -50,6 +51,7 @@ class ContainerInMem extends NodeInMem implements Container {
   }
   delete (): Promise<void> {
     this.getDescendents().map(x => {
+      this.tree.emit('delete', { path: x })
       delete this.tree.kv[x]
     })
     return Promise.resolve()
@@ -73,10 +75,12 @@ class BlobInMem extends NodeInMem implements Blob {
     debug('setData', this.path)
     this.tree.kv[this.path.toString()] = await streamToBuffer(data)
     debug('Object.keys(this.tree.kv) after setData', Object.keys(this.tree.kv), this.path, this.path.toString())
+    this.tree.emit('change', { path: this.path })
     return Promise.resolve()
   }
   delete (): Promise<void> {
     delete this.tree.kv[this.path.toString()]
+    this.tree.emit('delete', { path: this.path })
     return Promise.resolve()
   }
   exists (): Promise<boolean> {
@@ -85,9 +89,10 @@ class BlobInMem extends NodeInMem implements Blob {
   }
 }
 
-export class BlobTreeInMem {
+export class BlobTreeInMem extends events.EventEmitter {
   kv: { [pathStr: string]: Buffer | undefined }
   constructor () {
+    super()
     this.kv = {}
     debug('constructed in-mem store', this.kv)
   }
@@ -97,9 +102,5 @@ export class BlobTreeInMem {
   }
   getBlob (path: Path) {
     return new BlobInMem(path, this)
-  }
-  on (eventName: string, eventHandler: (event: any) => void) {
-    // TODO: implement
-    // debug('adding event handler', eventName, eventHandler)
   }
 }

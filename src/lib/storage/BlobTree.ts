@@ -1,3 +1,4 @@
+import * as events from 'events'
 import Debug from 'debug'
 import { Container } from './Container'
 import { Blob } from './Blob'
@@ -84,8 +85,7 @@ export class Path {
 // getData/setData when doesn't exist
 // containers always exist, unless there is a blob at their filename
 // creating a path ignores the trailing slash
-export interface BlobTree {
+export interface BlobTree extends events.EventEmitter {
   getContainer (path: Path): Container
   getBlob (path: Path): Blob
-  on (eventName: string, eventHandler: (event: any) => void): void
 }
