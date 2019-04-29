@@ -51,7 +51,7 @@ class ContainerInMem extends NodeInMem implements Container {
   }
   delete (): Promise<void> {
     this.getDescendents().map(x => {
-      this.tree.emit('delete', { path: x })
+      this.tree.emit('change', { path: x })
       delete this.tree.kv[x]
     })
     return Promise.resolve()
@@ -80,7 +80,7 @@ class BlobInMem extends NodeInMem implements Blob {
   }
   delete (): Promise<void> {
     delete this.tree.kv[this.path.toString()]
-    this.tree.emit('delete', { path: this.path })
+    this.tree.emit('change', { path: this.path })
     return Promise.resolve()
   }
   exists (): Promise<boolean> {
