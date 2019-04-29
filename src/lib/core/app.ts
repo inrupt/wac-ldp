@@ -29,7 +29,8 @@ export function makeHandler (storage: BlobTree, aud: string) {
   return handle
 }
 
-export * from './checkAccess' // checkAccess, AccessCheckTask
-export * from '../auth/determineWebId' // determineWebId
-export * from '../storage/BlobTree' // Path and BlobTree
-export * from '../storage/BlobTreeInMem' // BlobTreeInMem
+export { checkAccess, AccessCheckTask } from './checkAccess'
+export { determineWebId } from '../auth/determineWebId'
+export { BlobTree, Path } from '../storage/BlobTree'
+export { BlobTreeInMem } from '../storage/BlobTreeInMem'
+export { TaskType } from '../api/http/HttpParser'
