@@ -1,8 +1,8 @@
 {
   "name": "wac-ldp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.",
-  "main": "dist/app.js",
+  "main": "dist/lib/core/app.js",
   "dependencies": {
     "@types/debug": "^4.1.4",
     "@types/jsonwebtoken": "^8.3.2",

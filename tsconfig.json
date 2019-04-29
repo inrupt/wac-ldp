@@ -14,7 +14,7 @@
     "declaration": true,
     "esModuleInterop": true
   },
-  "typeRoots": ["./src/types"],
+  "typeRoots": ["./types"],
   "exclude": [
     "test",
     "node_modules",
