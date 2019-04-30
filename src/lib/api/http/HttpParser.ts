@@ -123,11 +123,21 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
   return undefined
 }
 
+function determinePath (urlPath: string | undefined) {
+  let pathToUse = (urlPath ? 'root' + urlPath : 'root/')
+  if (pathToUse.substr(-2) === '/*') {
+    pathToUse = pathToUse.substring(0, pathToUse.length - 2)
+  } else if (pathToUse.substr(-1) === '/') {
+    pathToUse = pathToUse.substring(0, pathToUse.length - 1)
+  }
+  return new Path((pathToUse).split('/'))
+}
+
 // parse the http request to extract some basic info (e.g. is it a container?)
 export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<WacLdpTask> {
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
-  const isContainer = (httpReq.url && httpReq.url.substr(-1) === '/')
+  const isContainer = (httpReq.url && (httpReq.url.substr(-1) === '/' || httpReq.url.substr(-2) === '/*'))
   const parsedTask = {
     isContainer,
     omitBody: determineOmitBody(httpReq.method),
@@ -140,7 +150,7 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     wacLdpTaskType: determineTaskType(httpReq.method, httpReq.url),
     bearerToken: determineBearerToken(httpReq.headers),
     requestBody: undefined,
-    path: new Path(('root' + httpReq.url).split('/'))
+    path: determinePath(httpReq.url)
   } as WacLdpTask
   await new Promise(resolve => {
     parsedTask.requestBody = ''

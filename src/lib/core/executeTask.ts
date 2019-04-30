@@ -17,7 +17,12 @@ const debug = Debug('executeTask')
 export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree): Promise<WacLdpResponse> {
   const webId = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
   debug('webId', webId)
-
+  debug({
+    path: wacLdpTask.path,
+    isContainer: wacLdpTask.isContainer,
+    webId,
+    origin: wacLdpTask.origin,
+    wacLdpTaskType: wacLdpTask.wacLdpTaskType })
   const appendOnly = await checkAccess({
     path: wacLdpTask.path,
     isContainer: wacLdpTask.isContainer,
@@ -46,6 +51,7 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
     const containerMembers = await storage.getContainer(wacLdpTask.path).getMembers()
     const rdfSources: { [indexer: string]: ResourceData } = {}
     await Promise.all(containerMembers.map(async (member) => {
+      debug('glob, considering member', member)
       if (member.isContainer) {// not an RDF source
         return
       }
@@ -65,6 +71,7 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
           storage
         } as AccessCheckTask) // may throw if access is denied
         rdfSources[member.name] = resourceData
+        debug('Found RDF source', member.name)
       } catch (error) {
         if (error instanceof ErrorResult && error.resultType === ResultType.AccessDenied) {
           debug('access denied to blob in glob, skipping', blobPath.toString())

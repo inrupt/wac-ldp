@@ -7,7 +7,7 @@ import { objectToStream, ResourceData, makeResourceData } from '../../src/lib/ut
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
-  const aclDoc = fs.readFileSync('test/fixtures/aclDoc2.ttl')
+  const aclDoc = fs.readFileSync('test/fixtures/aclDoc3.ttl')
   const publicContainerAclDocData = await objectToStream(makeResourceData('text/turtle', aclDoc.toString()))
   await storage.getBlob(new Path(['root', 'public', '.acl'])).setData(publicContainerAclDocData)
 
@@ -44,7 +44,7 @@ test.only('handles a GET /* request (glob read)', async () => {
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/turtle',
-        'ETag': '"1B2M2Y8AsgTpgAmY7PhCfg=="',
+        'ETag': '"v/I8yBrDQliUoJxmAw54pw=="',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"'
       }
     ]
