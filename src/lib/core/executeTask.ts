@@ -15,7 +15,7 @@ import { mergeRdfSources } from '../util/mergeRdfSources'
 const debug = Debug('executeTask')
 
 export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree): Promise<WacLdpResponse> {
-  const webId = await determineWebId(wacLdpTask.bearerToken, aud)
+  const webId = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
   debug('webId', webId)
 
   const appendOnly = await checkAccess({

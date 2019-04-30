@@ -34,19 +34,21 @@ const debug = Debug('readAcl')
 
 export const ACL_SUFFIX = '.acl'
 
-async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree): Promise<ResourceData> {
+async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree): Promise<{ aclResourceData: ResourceData, topicPath: Path, isAdjacent: boolean }> {
   let currentGuessPath = resourcePath
   let currentIsContainer = resourceIsContainer
   let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+  let isAdjacent = true
   let currentGuessBlob = storage.getBlob(aclDocPath)
   let currentGuessBlobExists = await currentGuessBlob.exists()
   debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
   while (!currentGuessBlobExists) {
     if (currentGuessPath.isRoot()) {
       // root ACL, nobody has access:
-      return makeResourceData('text/turtle', '')
+      return { aclResourceData: makeResourceData('text/turtle', ''), topicPath: currentGuessPath, isAdjacent }
     }
     currentGuessPath = currentGuessPath.toParent()
+    isAdjacent = false
     currentIsContainer = true
     aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
     currentGuessBlob = storage.getBlob(aclDocPath)
@@ -56,13 +58,13 @@ async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, sto
   const stream = await currentGuessBlob.getData()
   debug('stream', typeof stream)
   if (stream) {
-    return streamToObject(stream) as Promise<ResourceData>
+    return { aclResourceData: await streamToObject(stream) as ResourceData, topicPath: currentGuessPath, isAdjacent }
   }
-  return makeResourceData('text/turtle', '')
+  return { aclResourceData: makeResourceData('text/turtle', ''), topicPath: currentGuessPath, isAdjacent }
 }
 
 export async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree) {
-  const aclResourceData = await getAclBlob(resourcePath, resourceIsContainer, storage)
+  const { aclResourceData, topicPath, isAdjacent } = await getAclBlob(resourcePath, resourceIsContainer, storage)
   let parser = new N3Parser({
     factory: rdf
   })
@@ -70,7 +72,11 @@ export async function readAcl (resourcePath: Path, resourceIsContainer: boolean,
   const bodyStream = convert(Buffer.from(aclResourceData.body))
   let quadStream = parser.import(bodyStream)
   const dataset = await rdf.dataset().import(quadStream)
-  return dataset
+  return {
+    aclGraph: dataset,
+    topicPath,
+    isAdjacent
+  }
 }
 
 // Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:

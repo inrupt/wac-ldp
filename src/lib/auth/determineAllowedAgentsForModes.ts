@@ -83,29 +83,43 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
     } else if (quad.predicate.value === accessPredicate && quad.object.value === task.resourcePath) {
       aboutThisResource[quad.subject.value] = true
     }
+    debug('aboutThisResource - ', task, quad.predicate.value, accessPredicate, quad.object.value, task.resourcePath)
     return false
   })
   debug(isAuthorization, aboutAgents, aboutThisResource, aboutMode)
   // pass 2, find the subjects for which all boxes are checked, and add up modes from them
   function determineModeAgents (mode: string): Array<string> {
+    let anybody = false
     let anybodyLoggedIn = false
     const agentsMap: { [agent: string]: boolean } = {}
     for (const subject in aboutMode[mode]) {
       if ((isAuthorization[subject]) && (aboutThisResource[subject])) {
         Object.keys(aboutAgents[subject] as any).map(agentId => {
+          if (anybody) {
+            return
+          }
           if (agentId === AGENT_CLASS_ANYBODY) {
-            return [AGENT_CLASS_ANYBODY]
+            debug(mode, 'considering agentId', agentId, 'case 1')
+            anybody = true
           } else if (agentId === AGENT_CLASS_ANYBODY_LOGGED_IN) {
+            debug(mode, 'considering agentId', agentId, 'case 2')
             anybodyLoggedIn = true
           } else {
+            debug(mode, 'considering agentId', agentId, 'case 3')
             agentsMap[agentId] = true
           }
         })
       }
     }
+    if (anybody) {
+      debug(mode, 'anybody')
+      return [AGENT_CLASS_ANYBODY]
+    }
     if (anybodyLoggedIn) {
+      debug(mode, 'anybody logged in')
       return [AGENT_CLASS_ANYBODY_LOGGED_IN]
     }
+    debug(mode, 'specific webIds', Object.keys(agentsMap))
     return Object.keys(agentsMap)
   }
   return {

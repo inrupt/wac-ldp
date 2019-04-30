@@ -73,20 +73,23 @@ export async function checkAccess (task: AccessCheckTask) {
     baseResourcePath = task.path
     resourceIsAclDocument = false
   }
-  const aclGraph = await readAcl(baseResourcePath, task.isContainer, task.storage)
+  const { aclGraph, topicPath, isAdjacent } = await readAcl(baseResourcePath, task.isContainer, task.storage)
   debug('aclGraph', aclGraph)
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
-    aclGraph
+    aclGraph,
+    isAdjacent,
+    resourcePath: topicPath.toString()
   } as ModesCheckTask)
-  debug('allowedAgentsModes', allowedAgentsForModes)
+  debug('allowedAgentsForModes', allowedAgentsForModes)
   const requiredAccessModes = determineRequiredAccessModes(task.wacLdpTaskType, resourceIsAclDocument)
   let appendOnly = false
 
   // throw if agent or origin does not have access
   await Promise.all(requiredAccessModes.map(async (mode: string) => {
+    debug('required mode', mode)
     if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin)) {
-      debug('mode is allowed!')
+      debug(mode, 'is allowed!')
       return
     }
     debug(`mode ${mode} is not allowed, but checking for appendOnly now`)

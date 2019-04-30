@@ -14,5 +14,6 @@ export interface OriginCheckTask {
 }
 
 export async function appIsTrustedForMode (task: OriginCheckTask): Promise<boolean> {
-  return false
+  // FIXME: implement
+  return true
 }

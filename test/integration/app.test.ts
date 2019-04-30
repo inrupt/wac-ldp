@@ -1,13 +1,29 @@
 import * as http from 'http'
-import { makeHandler } from '../../src/lib/core/app'
+import { makeHandler, Path } from '../../src/lib/core/app'
 import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
+import { objectToStream, ResourceData, makeResourceData } from '../../src/lib/util/ResourceDataUtils'
 
 const storage = new BlobTreeInMem()
+beforeEach(async () => {
+  const publicContainerAclDocData = await objectToStream(makeResourceData('text/turtle', `
+  # ACL resource for the public folder
+  @prefix acl: <http://www.w3.org/ns/auth/acl#>.
+  @prefix foaf: <http://xmlns.com/foaf/0.1/>.
+
+  # The public has read permissions
+  <#public>
+      a acl:Authorization;
+      acl:agentClass foaf:Agent;
+      acl:default <root/public>;
+      acl:mode acl:Read.
+`))
+  await storage.getBlob(new Path(['root', 'public', '.acl'])).setData(publicContainerAclDocData)
+})
 
 const handler = makeHandler(storage, 'audience')
 
-test('handles a GET request for a public resource', async () => {
+test.only('handles a GET request for a public resource', async () => {
   let streamed = false
   let endCallback: () => void
   let httpReq: any = toChunkStream('')

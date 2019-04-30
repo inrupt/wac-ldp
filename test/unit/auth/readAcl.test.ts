@@ -81,9 +81,9 @@ afterEach(() => {
 
 test('reads an adjacent ACL doc for a container', async () => {
   const path = new Path(['root', 'foo', 'bar'])
-  const dataset = await readAcl(path, true, storage as unknown as BlobTree)
+  let { aclGraph, topicPath, isAdjacent } = await readAcl(path, true, storage as unknown as BlobTree)
   const quads: Array<string> = []
-  dataset.forEach((quad: string) => {
+  aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
   expect(storage.getBlob.mock.calls).toEqual([
@@ -95,9 +95,9 @@ test('reads an adjacent ACL doc for a container', async () => {
 
 test('reads an adjacent ACL doc for a non-container', async () => {
   const path = new Path(['root', 'foo', 'moo'])
-  const dataset = await readAcl(path, false, storage as unknown as BlobTree)
+  const { aclGraph, topicPath, isAdjacent } = await readAcl(path, false, storage as unknown as BlobTree)
   const quads: Array<string> = []
-  dataset.forEach((quad: string) => {
+  aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
   expect(storage.getBlob.mock.calls).toEqual([
@@ -108,9 +108,9 @@ test('reads an adjacent ACL doc for a non-container', async () => {
 
 test('falls back to parent ACL doc for a container', async () => {
   const path = new Path(['root', 'foo', 'yes'])
-  const dataset = await readAcl(path, true, storage as unknown as BlobTree)
+  const { aclGraph, topicPath, isAdjacent } = await readAcl(path, true, storage as unknown as BlobTree)
   const quads: Array<string> = []
-  dataset.forEach((quad: string) => {
+  aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
   expect(storage.getBlob.mock.calls).toEqual([
@@ -122,9 +122,9 @@ test('falls back to parent ACL doc for a container', async () => {
 
 test('falls back to container ACL doc for a non-container', async () => {
   const path = new Path(['root', 'foo', 'no'])
-  const dataset = await readAcl(path, false, storage as unknown as BlobTree)
+  const { aclGraph, topicPath, isAdjacent } = await readAcl(path, false, storage as unknown as BlobTree)
   const quads: Array<string> = []
-  dataset.forEach((quad: string) => {
+  aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
   expect(storage.getBlob.mock.calls).toEqual([
@@ -136,9 +136,9 @@ test('falls back to container ACL doc for a non-container', async () => {
 
 test('falls back to ancestor ACL doc for a container', async () => {
   const path = new Path(['root', 'foo', 'moo', 'yes'])
-  const dataset = await readAcl(path, true, storage as unknown as BlobTree)
+  const { aclGraph, topicPath, isAdjacent } = await readAcl(path, true, storage as unknown as BlobTree)
   const quads: Array<string> = []
-  dataset.forEach((quad: string) => {
+  aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
   expect(storage.getBlob.mock.calls).toEqual([
@@ -151,9 +151,9 @@ test('falls back to ancestor ACL doc for a container', async () => {
 
 test('falls back to ancestor ACL doc for a non-container', async () => {
   const path = new Path(['root', 'foo', 'moo', 'no'])
-  const dataset = await readAcl(path, false, storage as unknown as BlobTree)
+  const { aclGraph, topicPath, isAdjacent } = await readAcl(path, false, storage as unknown as BlobTree)
   const quads: Array<string> = []
-  dataset.forEach((quad: string) => {
+  aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
   expect(storage.getBlob.mock.calls).toEqual([
