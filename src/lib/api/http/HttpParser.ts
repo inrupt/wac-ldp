@@ -176,7 +176,7 @@ export interface WacLdpTask {
   ifMatch: string | undefined
   ifNoneMatchStar: boolean
   ifNoneMatchList: Array<string> | undefined
-  bearerToken: string
+  bearerToken: string | undefined
   wacLdpTaskType: TaskType
   path: Path
   requestBody: string | undefined

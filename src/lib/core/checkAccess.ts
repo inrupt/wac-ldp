@@ -40,8 +40,11 @@ async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, we
   if ((agents.indexOf(AGENT_CLASS_ANYBODY) === -1) &&
       (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN) === -1) &&
       (agents.indexOf(webId) === -1)) {
+    debug('agent check returning false')
     return false
   }
+  debug('agent check passed!')
+
   // then check origin:
   return appIsTrustedForMode({
     origin,
@@ -81,18 +84,21 @@ export async function checkAccess (task: AccessCheckTask) {
   let appendOnly = false
 
   // throw if agent or origin does not have access
-  requiredAccessModes.map((mode: string) => {
-    if (modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin)) {
+  await Promise.all(requiredAccessModes.map(async (mode: string) => {
+    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin)) {
+      debug('mode is allowed!')
       return
     }
+    debug(`mode ${mode} is not allowed, but checking for appendOnly now`)
     // SPECIAL CASE: append-only
-    if (mode === 'write' && modeAllowed('append', allowedAgentsForModes, task.webId, task.origin)) {
+    if (mode === 'write' && await modeAllowed('append', allowedAgentsForModes, task.webId, task.origin)) {
       appendOnly = true
+      debug('write was requested and is not allowed but append is; setting appendOnly to true')
       return
     }
     debug(`Access denied! ${mode} access is required for this task, webid is "${task.webId}"`)
     throw new ErrorResult(ResultType.AccessDenied)
-  })
+  }))
   // webId may be reused to check individual ACLs on individual member resources for Glob
   // appendOnly may be used to restrict PATCH operations
   return appendOnly

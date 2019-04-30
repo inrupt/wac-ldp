@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import Debug from 'debug'
 import { WacLdpTask } from '../api/http/HttpParser'
 
-const debug = Debug('DetermineAllowedAgentsModes')
+const debug = Debug('DetermineAllowedAgentsForModes')
 
 // Given an ACL graph, find out which agents should get read, write, append, and/or control.
 // If the ACL graph came from an adjacent ACL doc (so /foo.acl for /foo or /bar/.acl for /bar/),

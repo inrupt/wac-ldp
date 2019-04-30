@@ -4,14 +4,12 @@ import { Path } from '../../../../src/lib/storage/BlobTree'
 import { bufferToStream } from '../../../../src/lib/util/ResourceDataUtils'
 import { toChunkStream } from '../../helpers/toChunkStream'
 
-test('should parse a http request', async () => {
+test('should parse a http request with Bearer token', async () => {
   let streamed = false
   let endCallback: () => void
-  let request: any = toChunkStream('the-body')
+  let request: any = toChunkStream('')
   request.headers = {
-    'authorization': 'Bearer the-bearer-token',
-    'if-match': '"if-match-etag"',
-    'if-none-match': '*'
+    'authorization': 'Bearer the-bearer-token'
   } as http.IncomingHttpHeaders
   request.url = '/foo/bar' as string
   request.method = 'DELETE'
@@ -22,14 +20,98 @@ test('should parse a http request', async () => {
     asJsonLd: false,
     bearerToken: 'the-bearer-token',
     contentType: undefined,
-    ifMatch: 'if-match-etag',
+    ifMatch: undefined,
+    ifNoneMatchList: undefined,
+    ifNoneMatchStar: false,
+    isContainer: false,
+    omitBody: false,
+    origin: undefined,
+    path: new Path(['root', 'foo', 'bar']),
+    requestBody: '',
+    wacLdpTaskType: TaskType.blobDelete
+  } as WacLdpTask)
+})
+
+test('should parse a http request with If-None-Match: * header', async () => {
+  let streamed = false
+  let endCallback: () => void
+  let request: any = toChunkStream('')
+  request.headers = {
+    'if-none-match': '*'
+  } as http.IncomingHttpHeaders
+  request.url = '/foo/bar' as string
+  request.method = 'DELETE'
+  request = request as http.IncomingMessage
+
+  const parsed = await parseHttpRequest(request)
+  expect(parsed).toEqual({
+    asJsonLd: false,
+    bearerToken: undefined,
+    contentType: undefined,
+    ifMatch: undefined,
     ifNoneMatchList: undefined,
     ifNoneMatchStar: true,
     isContainer: false,
     omitBody: false,
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
-    requestBody: 'the-body',
+    requestBody: '',
+    wacLdpTaskType: TaskType.blobDelete
+  } as WacLdpTask)
+})
+
+test('should parse a http request with If-None-Match: [list] header', async () => {
+  let streamed = false
+  let endCallback: () => void
+  let request: any = toChunkStream('')
+  request.headers = {
+    'if-none-match': '"etag-1", "etag-2"'
+  } as http.IncomingHttpHeaders
+  request.url = '/foo/bar' as string
+  request.method = 'DELETE'
+  request = request as http.IncomingMessage
+
+  const parsed = await parseHttpRequest(request)
+  expect(parsed).toEqual({
+    asJsonLd: false,
+    bearerToken: undefined,
+    contentType: undefined,
+    ifMatch: undefined,
+    ifNoneMatchList: ['etag-1', 'etag-2'],
+    ifNoneMatchStar: false,
+    isContainer: false,
+    omitBody: false,
+    origin: undefined,
+    path: new Path(['root', 'foo', 'bar']),
+    requestBody: '',
+    wacLdpTaskType: TaskType.blobDelete
+  } as WacLdpTask)
+})
+
+test('should parse a http request with If-Match header', async () => {
+  let streamed = false
+  let endCallback: () => void
+  let request: any = toChunkStream('')
+  request.headers = {
+    'if-match': '"if-match-etag"'
+  } as http.IncomingHttpHeaders
+  request.url = '/foo/bar' as string
+  request.method = 'DELETE'
+  request = request as http.IncomingMessage
+
+  const parsed = await parseHttpRequest(request)
+  expect(parsed).toEqual({
+    asJsonLd: false,
+    bearerToken: undefined,
+    contentType: undefined,
+    ifMatch: 'if-match-etag',
+    ifNoneMatchList: undefined,
+    ifNoneMatchStar: false,
+    isContainer: false,
+    omitBody: false,
+    origin: undefined,
+    path: new Path(['root', 'foo', 'bar']),
+    requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
 })
