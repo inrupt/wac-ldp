@@ -7,14 +7,14 @@ import { executeTask } from './executeTask'
 
 const debug = Debug('app')
 
-export function makeHandler (storage: BlobTree, aud: string) {
+export function makeHandler (storage: BlobTree, aud: string, skipWac: boolean) {
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
     let response: WacLdpResponse
     try {
       const wacLdpTask: WacLdpTask = await parseHttpRequest(httpReq)
-      response = await executeTask(wacLdpTask, aud, storage)
+      response = await executeTask(wacLdpTask, aud, storage, skipWac)
     } catch (error) {
       debug('errored', error)
       response = error as WacLdpResponse
