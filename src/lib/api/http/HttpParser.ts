@@ -133,8 +133,12 @@ function determinePath (urlPath: string | undefined) {
   return new Path((pathToUse).split('/'))
 }
 
+function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): string {
+  return hostname + httpReq.url
+}
+
 // parse the http request to extract some basic info (e.g. is it a container?)
-export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<WacLdpTask> {
+export async function parseHttpRequest (hostname: string, httpReq: http.IncomingMessage): Promise<WacLdpTask> {
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
   const isContainer = (httpReq.url && (httpReq.url.substr(-1) === '/' || httpReq.url.substr(-2) === '/*'))
@@ -150,7 +154,8 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     wacLdpTaskType: determineTaskType(httpReq.method, httpReq.url),
     bearerToken: determineBearerToken(httpReq.headers),
     requestBody: undefined,
-    path: determinePath(httpReq.url)
+    path: determinePath(httpReq.url),
+    fullUrl: determineFullUrl(hostname, httpReq)
   } as WacLdpTask
   await new Promise(resolve => {
     parsedTask.requestBody = ''
@@ -188,6 +193,7 @@ export interface WacLdpTask {
   ifNoneMatchList: Array<string> | undefined
   bearerToken: string | undefined
   wacLdpTaskType: TaskType
-  path: Path
+  path: Path,
+  fullUrl: string,
   requestBody: string | undefined
 }
