@@ -22,7 +22,7 @@ beforeEach(async () => {
 
 const handler = makeHandler(storage, 'audience')
 
-test.only('handles a GET /* request (glob read)', async () => {
+test('handles a GET /* request (glob read)', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge.ttl').toString()
   let streamed = false
   let endCallback: () => void

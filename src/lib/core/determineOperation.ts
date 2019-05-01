@@ -13,22 +13,20 @@ import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse } from '../api/http/HttpResponder'
 import { Container } from '../storage/Container'
 
-// It would be more readable to define a function type 'Operation' as shorthand for
-// (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>
-// but not sure how to do that. Interfaces are only for classes, not for functions.
+type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>
 
-export function determineOperation (taskType: TaskType): (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse> {
-  const operations: { [taskType in keyof typeof TaskType]: (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse> } = {
+export function determineOperation (taskType: TaskType): Operation {
+  const operations: { [taskType in keyof typeof TaskType]: Operation } = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.containerRead]: readContainer as (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>,
-    [TaskType.containerDelete]: deleteContainer as (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>,
-    [TaskType.globRead]: readGlob as (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>,
-    [TaskType.blobRead]: readBlob as unknown as (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>,
-    [TaskType.blobWrite]: writeBlob as unknown as (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>,
-    [TaskType.blobUpdate]: updateBlob as unknown as (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>,
-    [TaskType.blobDelete]: deleteBlob as unknown as (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>,
+    [TaskType.containerRead]: readContainer as Operation,
+    [TaskType.containerDelete]: deleteContainer as Operation,
+    [TaskType.globRead]: readGlob as Operation,
+    [TaskType.blobRead]: readBlob as unknown as Operation,
+    [TaskType.blobWrite]: writeBlob as unknown as Operation,
+    [TaskType.blobUpdate]: updateBlob as unknown as Operation,
+    [TaskType.blobDelete]: deleteBlob as unknown as Operation,
     [TaskType.unknown]: unknownOperation
-  } as unknown as { [taskType in keyof typeof TaskType]: (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse> }
+  } as unknown as { [taskType in keyof typeof TaskType]: Operation }
   return operations[taskType]
 }

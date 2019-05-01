@@ -31,7 +31,10 @@ export interface WacLdpResponse {
   isContainer: boolean
 }
 
-const responses: { [resultType in keyof typeof ResultType]: { responseStatus: number, responseBody: string | undefined } } = {
+type ResponseContent = { responseStatus: number, responseBody: string | undefined }
+type Responses = { [resultType in keyof typeof ResultType]: ResponseContent }
+
+const responses: Responses = {
   [ResultType.OkayWithBody]: {
     responseStatus: 200,
     responseBody: undefined
@@ -71,7 +74,7 @@ const responses: { [resultType in keyof typeof ResultType]: { responseStatus: nu
     responseStatus: 500,
     responseBody: 'Internal server error'
   }
-} as unknown as { [resultType in keyof typeof ResultType]: { responseStatus: number, responseBody: string | undefined } }
+} as unknown as Responses
 
 export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!', task)

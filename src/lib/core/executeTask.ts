@@ -98,6 +98,15 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
   }
 
   const operation = determineOperation(wacLdpTask.wacLdpTaskType)
+
+  // Note that the operation is executed on the `node` that was retrieved earlier,
+  // that means that the storage can tell if the underlying resource changed since
+  // that memento of the node was retrieved, and reject write operations if that's
+  // the case. Also, if there was for instance an ETag check on a read operation,
+  // then the body will be the one from the memento that existed when the resource
+  // reference was first retrieved.
+  // But see also https://github.com/inrupt/wac-ldp/issues/46
+
   const response = await operation.apply(null, [wacLdpTask, node, appendOnly])
   debug('executed', response)
   return response

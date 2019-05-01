@@ -4,15 +4,13 @@ import { Path, BlobTree } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
 
 const aclDoc1Txt = fs.readFileSync('test/fixtures/aclDoc1.ttl')
-const aclDoc2Txt = fs.readFileSync('test/fixtures/aclDoc2.ttl')
-const aclDoc3Txt = fs.readFileSync('test/fixtures/aclDoc3.ttl')
-const aclDoc4Txt = fs.readFileSync('test/fixtures/aclDoc4.ttl')
 
+// FIXME: use different ACL docs and test different situations here:
 const kv: {[pathStr: string]: string} = {
   'root/foo/.acl': aclDoc1Txt.toString(),
-  'root/foo/moo.acl': aclDoc2Txt.toString(),
-  'root/foo/bar/.acl': aclDoc3Txt.toString(),
-  'root/foo/bar/baz.acl': aclDoc4Txt.toString()
+  'root/foo/moo.acl': aclDoc1Txt.toString(),
+  'root/foo/bar/.acl': aclDoc1Txt.toString(),
+  'root/foo/bar/baz.acl': aclDoc1Txt.toString()
 }
 
 const storage = {
