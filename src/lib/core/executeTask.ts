@@ -23,6 +23,17 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
     webId,
     origin: wacLdpTask.origin,
     wacLdpTaskType: wacLdpTask.wacLdpTaskType })
+
+  // handle OPTIONS before checking WAC
+  if (wacLdpTask.wacLdpTaskType === TaskType.getOptions) {
+    return Promise.resolve({
+      resultType: ResultType.OkayWithoutBody,
+      resourceData: undefined,
+      createdLocation: undefined,
+      isContainer: wacLdpTask.isContainer
+    })
+  }
+
   let appendOnly = false
   if (!skipWac) {
     appendOnly = await checkAccess({
