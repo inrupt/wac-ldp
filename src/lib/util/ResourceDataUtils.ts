@@ -15,22 +15,30 @@ export function makeResourceData (contentType: string, body: string): ResourceDa
   }
 }
 
-// Generic stream conversion function, not really related to ResourceData specifically, but included here for convenience
-export function toStream (obj: any): any {
-  const buffer = Buffer.from(JSON.stringify(obj))
+// Generic stream conversion functions, not really related to ResourceData specifically, but included here for convenience
+export function bufferToStream (buffer: Buffer): any {
   return convert(buffer)
 }
 
-// Generic stream conversion function, not really related to ResourceData specifically, but included here for convenience
-export async function fromStream (stream: any): Promise<any> {
-  const bufs = []
+export function objectToStream (obj: any): any {
+  const buffer = Buffer.from(JSON.stringify(obj))
+  return bufferToStream(buffer)
+}
+
+export async function streamToBuffer (stream: any): Promise<Buffer> {
+  const bufs: Array<Buffer> = []
   return new Promise(resolve => {
-    stream.on('data', function (d) {
+    stream.on('data', function (d: Buffer) {
       bufs.push(d)
     })
     stream.on('end', function () {
-      const str = Buffer.concat(bufs).toString()
-      resolve(JSON.parse(str))
+      resolve(Buffer.concat(bufs))
     })
   })
+}
+
+export async function streamToObject (stream: any): Promise<any> {
+  const buffer = await streamToBuffer(stream)
+  const str = buffer.toString()
+  return JSON.parse(str)
 }

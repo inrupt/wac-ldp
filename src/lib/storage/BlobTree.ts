@@ -1,5 +1,9 @@
+import * as events from 'events'
+import Debug from 'debug'
 import { Container } from './Container'
 import { Blob } from './Blob'
+
+const debug = Debug('BlobTree')
 
 // The BlobTree is a tree structure. Its internal Nodes are called Containers. Its leaves are called Blobs.
 // A Blob has methods setData and getData, which take and return a ReadableStream, so that you can store opaque
@@ -40,13 +44,39 @@ export class Path {
     childSegments.push(segment)
     return new Path(childSegments)
   }
+  isRoot () {
+    return (this.segments.length <= 1)
+  }
   toParent () {
-    if (this.segments.length <= 1) {
+    if (this.isRoot()) {
       throw new Error('root has no parent!')
     }
     const parentSegments = copyStringArray(this.segments)
     parentSegments.pop()
     return new Path(parentSegments)
+  }
+  hasSuffix (suffix: string) {
+    const lastSegment = this.segments[this.segments.length - 1]
+    return (lastSegment.substr(-suffix.length) === suffix)
+  }
+  removeSuffix (suffix: string) {
+    const withoutSuffixSegments: Array<string> = copyStringArray(this.segments)
+    const remainingLength: number = withoutSuffixSegments[withoutSuffixSegments.length - 1].length - suffix.length
+    debug(withoutSuffixSegments, remainingLength, suffix)
+    if (remainingLength < 0) {
+      throw new Error('no suffix match (last segment name shorter than suffix)')
+    }
+    if (withoutSuffixSegments[withoutSuffixSegments.length - 1].substring(remainingLength) !== suffix) {
+      throw new Error('no suffix match')
+    }
+    const withoutSuffix: string = withoutSuffixSegments[withoutSuffixSegments.length - 1].substring(0, remainingLength)
+    withoutSuffixSegments[withoutSuffixSegments.length - 1] = withoutSuffix
+    return new Path(withoutSuffixSegments)
+  }
+  appendSuffix (suffix: string) {
+    const withSuffixSegments: Array<string> = copyStringArray(this.segments)
+    withSuffixSegments[withSuffixSegments.length - 1] += suffix
+    return new Path(withSuffixSegments)
   }
 }
 
@@ -55,8 +85,7 @@ export class Path {
 // getData/setData when doesn't exist
 // containers always exist, unless there is a blob at their filename
 // creating a path ignores the trailing slash
-export interface BlobTree {
+export interface BlobTree extends events.EventEmitter {
   getContainer (path: Path): Container
   getBlob (path: Path): Blob
-  on (eventName: string, eventHandler: (event: any) => void): void
 }

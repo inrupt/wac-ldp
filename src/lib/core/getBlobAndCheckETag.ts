@@ -1,6 +1,6 @@
 import { Path, BlobTree } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { fromStream } from '../util/ResourceDataUtils'
+import { streamToObject } from '../util/ResourceDataUtils'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
 import Debug from 'debug'
@@ -14,7 +14,7 @@ export async function getBlobAndCheckETag (ldpTask: WacLdpTask, storage: BlobTre
     if (ldpTask.ifNoneMatchStar) { // If-None-Match: * -> resource should not exist
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
-    const resourceData = await fromStream(data)
+    const resourceData = await streamToObject(data)
     if (ldpTask.ifMatch && resourceData.etag !== ldpTask.ifMatch) { // If-Match -> ETag should match
       throw new ErrorResult(ResultType.PreconditionFailed)
     }

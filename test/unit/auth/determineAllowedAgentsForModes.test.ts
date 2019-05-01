@@ -1,0 +1,50 @@
+import rdf from 'rdf-ext'
+import N3Parser from 'rdf-parser-n3'
+import fs from 'fs'
+import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/auth/determineAllowedAgentsForModes'
+
+test('finds acl:accessTo modes', async () => {
+  const bodyStream = fs.createReadStream('test/fixtures/aclDoc1.ttl')
+  let parser = new N3Parser({
+    factory: rdf
+  })
+  let quadStream = parser.import(bodyStream)
+  const dataset = await rdf.dataset().import(quadStream)
+  const task: ModesCheckTask = {
+    aclGraph: dataset,
+    isAdjacent: true,
+    resourcePath: '/'
+  }
+  const result = await determineAllowedAgentsForModes(task)
+  expect(result).toEqual({
+    read: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    write: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    append: [],
+    control: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org']
+  })
+})
+
+test('finds acl:default modes', async () => {
+  const bodyStream = fs.createReadStream('test/fixtures/aclDoc1.ttl')
+  let parser = new N3Parser({
+    factory: rdf
+  })
+  let quadStream = parser.import(bodyStream)
+  const dataset = await rdf.dataset().import(quadStream)
+  const task: ModesCheckTask = {
+    aclGraph: dataset,
+    isAdjacent: false,
+    resourcePath: '/'
+  }
+  const result = await determineAllowedAgentsForModes(task)
+  expect(result).toEqual({
+    read: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    write: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    append: [],
+    control: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org']
+  })
+})
+// tests to add:
+// * are resource paths always absolute URL on the domain? (e.g. '/public/')
+// * should use a different aclDoc fixture for acl:accessTo and acl:default
+// * agent groups

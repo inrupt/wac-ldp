@@ -5,7 +5,7 @@ import { Blob } from '../storage/Blob'
 
 const debug = Debug('updateBlob')
 
-export async function updateBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> {
+export async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: boolean): Promise<WacLdpResponse> {
   debug('operation updateBlob!')
   // TODO: implement
   return {

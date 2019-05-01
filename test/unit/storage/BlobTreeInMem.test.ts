@@ -2,9 +2,9 @@ import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { BlobTree, Path } from '../../../src/lib/storage/BlobTree'
 import { Blob } from '../../../src/lib/storage/Blob'
 import { Container } from '../../../src/lib/storage/Container'
-import { fromStream, toStream } from '../../../src/lib/util/ResourceDataUtils'
+import { streamToBuffer, bufferToStream } from '../../../src/lib/util/ResourceDataUtils'
 
-let storage: BlobTree
+let storage: BlobTree // | undefined
 
 describe('BlobTreeInMem', () => {
   beforeEach(function () {
@@ -12,7 +12,7 @@ describe('BlobTreeInMem', () => {
     storage = new BlobTreeInMem()
   })
   afterEach(function () {
-    storage = undefined
+    // storage = undefined
   })
   it('adds a blob', async function () {
     // non-existing blob
@@ -20,9 +20,10 @@ describe('BlobTreeInMem', () => {
     expect(await blob.exists()).toEqual(false)
 
     // put data into it
-    await blob.setData(toStream('bar'))
+    await blob.setData(bufferToStream(Buffer.from('bar')))
     expect(await blob.exists()).toEqual(true)
-    const readBack2 = await fromStream(await blob.getData())
+    const stream = await blob.getData()
+    const readBack2 = await streamToBuffer(stream)
     expect(readBack2.toString()).toEqual('bar')
   })
 
@@ -33,7 +34,7 @@ describe('BlobTreeInMem', () => {
 
     // add a member
     const blob = storage.getBlob(new Path(['root', 'foo', 'bar']))
-    await blob.setData(toStream('contents of foo/bar'))
+    await blob.setData(bufferToStream(Buffer.from('contents of foo/bar')))
     expect(await container.exists()).toEqual(true)
 
     const members = await container.getMembers()
@@ -44,9 +45,9 @@ describe('BlobTreeInMem', () => {
 
   describe('after adding some data', () => {
     beforeEach(async () => {
-      await storage.getBlob(new Path(['root', 'foo', 'bar'])).setData(toStream('I am foo/bar'))
-      await storage.getBlob(new Path(['root', 'foo', 'baz', '1'])).setData(toStream('I am foo/baz/1'))
-      await storage.getBlob(new Path(['root', 'foo', 'baz', '2'])).setData(toStream('I am foo/baz/2'))
+      await storage.getBlob(new Path(['root', 'foo', 'bar'])).setData(bufferToStream(Buffer.from('I am foo/bar')))
+      await storage.getBlob(new Path(['root', 'foo', 'baz', '1'])).setData(bufferToStream(Buffer.from('I am foo/baz/1')))
+      await storage.getBlob(new Path(['root', 'foo', 'baz', '2'])).setData(bufferToStream(Buffer.from('I am foo/baz/2')))
     })
 
     it('correctly reports the container member listings', async function () {

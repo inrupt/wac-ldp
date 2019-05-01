@@ -1,8 +1,10 @@
+import * as events from 'events'
 import Debug from 'debug'
 import { Node } from './Node'
 import { Container, Member } from './Container'
 import { Blob } from './Blob'
 import { BlobTree, Path } from './BlobTree'
+import { bufferToStream, streamToBuffer } from '../util/ResourceDataUtils'
 
 const debug = Debug('AtomicTreeInMem')
 
@@ -29,7 +31,7 @@ class ContainerInMem extends NodeInMem implements Container {
     const listAbsolutePaths = this.getDescendents()
     const prefixLength = this.path.toString().length + 1
     const listRelativePaths = listAbsolutePaths.map(x => x.substring(prefixLength))
-    const memberMap = {}
+    const memberMap: { [memberName: string]: boolean } = {}
     listRelativePaths.map(x => {
       const parts = x.split('/')
       if (parts.length === 1) { // member blob
@@ -49,6 +51,7 @@ class ContainerInMem extends NodeInMem implements Container {
   }
   delete (): Promise<void> {
     this.getDescendents().map(x => {
+      this.tree.emit('change', { path: x })
       delete this.tree.kv[x]
     })
     return Promise.resolve()
@@ -60,18 +63,24 @@ class ContainerInMem extends NodeInMem implements Container {
 }
 
 class BlobInMem extends NodeInMem implements Blob {
-  getData () {
+  getData (): Promise<ReadableStream | undefined> {
     debug('reading resource', this.path, this.tree.kv)
-    return Promise.resolve(this.tree.kv[this.path.toString()])
+    const buffer: Buffer | undefined = this.tree.kv[this.path.toString()]
+    if (buffer) {
+      return Promise.resolve(bufferToStream(buffer))
+    }
+    return Promise.resolve(undefined)
   }
-  setData (data: ReadableStream) {
+  async setData (data: ReadableStream) {
     debug('setData', this.path)
-    this.tree.kv[this.path.toString()] = data
+    this.tree.kv[this.path.toString()] = await streamToBuffer(data)
     debug('Object.keys(this.tree.kv) after setData', Object.keys(this.tree.kv), this.path, this.path.toString())
+    this.tree.emit('change', { path: this.path })
     return Promise.resolve()
   }
   delete (): Promise<void> {
     delete this.tree.kv[this.path.toString()]
+    this.tree.emit('change', { path: this.path })
     return Promise.resolve()
   }
   exists (): Promise<boolean> {
@@ -80,10 +89,10 @@ class BlobInMem extends NodeInMem implements Blob {
   }
 }
 
-export class BlobTreeInMem {
-  kv: any
-
+export class BlobTreeInMem extends events.EventEmitter {
+  kv: { [pathStr: string]: Buffer | undefined }
   constructor () {
+    super()
     this.kv = {}
     debug('constructed in-mem store', this.kv)
   }
@@ -93,9 +102,5 @@ export class BlobTreeInMem {
   }
   getBlob (path: Path) {
     return new BlobInMem(path, this)
-  }
-  on (eventName: string, eventHandler: (event: any) => void) {
-    // TODO: implement
-    // debug('adding event handler', eventName, eventHandler)
   }
 }

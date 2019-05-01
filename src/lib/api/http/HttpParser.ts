@@ -14,22 +14,26 @@ export enum TaskType {
   blobWrite,
   blobUpdate,
   blobDelete,
+  getOptions,
   unknown
 }
 
-function determineTaskType (httpReq: http.IncomingMessage): TaskType {
+function determineTaskType (method: string | undefined, url: string | undefined): TaskType {
+  if (!method || !url) {
+    return TaskType.unknown
+  }
   // if the URL end with a / then the path indicates a container
   // if the URL end with /* then the path indicates a glob
   // in all other cases, the path indicates a blob
 
-  let lastUrlChar = httpReq.url.substr(-1)
+  let lastUrlChar = url.substr(-1)
   if (['/', '*'].indexOf(lastUrlChar) === -1) {
     lastUrlChar = '(other)'
   }
 
-  const methodMap = {
+  const methodMap: { [lastUrlChar: string]: { [method: string]: TaskType | undefined }} = {
     '/': {
-      OPTIONS: TaskType.containerRead,
+      OPTIONS: TaskType.getOptions,
       HEAD: TaskType.containerRead,
       GET: TaskType.containerRead,
       POST: TaskType.containerMemberAdd,
@@ -37,12 +41,12 @@ function determineTaskType (httpReq: http.IncomingMessage): TaskType {
       DELETE: TaskType.containerDelete
     },
     '*': {
-      OPTIONS: TaskType.globRead,
+      OPTIONS: TaskType.getOptions,
       HEAD: TaskType.globRead,
       GET: TaskType.globRead
     },
     '(other)': {
-      OPTIONS: TaskType.blobRead,
+      OPTIONS: TaskType.getOptions,
       HEAD: TaskType.blobRead,
       GET: TaskType.blobRead,
       PUT: TaskType.blobWrite,
@@ -50,75 +54,103 @@ function determineTaskType (httpReq: http.IncomingMessage): TaskType {
       DELETE: TaskType.blobDelete
     }
   }
-  debug('determining task type', lastUrlChar, httpReq.method, methodMap[lastUrlChar][httpReq.method])
-  const taskType = methodMap[lastUrlChar][httpReq.method]
+  debug('determining task type', lastUrlChar, method, methodMap[lastUrlChar][method])
+  const taskType = methodMap[lastUrlChar][method]
   return (taskType === undefined ? TaskType.unknown : taskType)
 }
 
-function determineOrigin (httpReq: http.IncomingMessage): string | undefined {
-  if (Array.isArray(httpReq.headers.origin)) {
-    return httpReq.headers.origin[0]
+function determineOrigin (headers: http.IncomingHttpHeaders): string | undefined {
+  if (Array.isArray(headers.origin)) {
+    return headers.origin[0]
   } else {
-    return httpReq.headers.origin
+    return headers.origin
   }
 }
 
-function determineContentType (httpReq: http.IncomingMessage): string | undefined {
-  return httpReq.headers['content-type']
+function determineContentType (headers: http.IncomingHttpHeaders): string | undefined {
+  return headers['content-type']
 }
 
-function determineIfMatch (httpReq: http.IncomingMessage): string | undefined {
+function determineIfMatch (headers: http.IncomingHttpHeaders): string | undefined {
   try {
-    return httpReq.headers['if-match'].split('"')[1]
+    debug(headers)
+    return headers['if-match'] && headers['if-match'].split('"')[1]
   } catch (error) {
     // return undefined
   }
 }
 
-function determineIfNoneMatchStar (httpReq: http.IncomingMessage): boolean {
+function determineIfNoneMatchStar (headers: http.IncomingHttpHeaders): boolean {
   try {
-    return httpReq.headers['if-none-match'] === '*'
+    return headers['if-none-match'] === '*'
   } catch (error) {
     return false
   }
 }
 
-function determineIfNoneMatchList (httpReq: http.IncomingMessage): Array<string> | undefined {
+function determineIfNoneMatchList (headers: http.IncomingHttpHeaders): Array<string> | undefined {
   try {
-    return httpReq.headers['if-none-match'].split(',').map(x => x.split('"')[1])
+    if (headers['if-none-match'] && headers['if-none-match'] !== '*') {
+      return headers['if-none-match'].split(',').map(x => x.split('"')[1])
+    }
   } catch (error) {
     // return undefined
   }
 }
 
-function determineOmitBody (httpReq: http.IncomingMessage): boolean {
-  return (['OPTIONS', 'HEAD'].indexOf(httpReq.method) !== -1)
+function determineOmitBody (method: string | undefined): boolean {
+  if (!method) {
+    return true
+  }
+  return (['OPTIONS', 'HEAD'].indexOf(method) !== -1)
 }
 
-function determineAsJsonLd (httpReq: http.IncomingMessage): boolean {
+function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
   try {
-    return (httpReq.headers['content-type'].split(';')[0] === 'application/json+ld')
+    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/json+ld')
   } catch (e) {
     return false
   }
+}
+
+function determineBearerToken (headers: http.IncomingHttpHeaders): string | undefined {
+  try {
+    debug(headers, 'authorization')
+    return headers['authorization'] && headers['authorization'].substring('Bearer '.length)
+  } catch (error) {
+    debug('no bearer token found') // TODO: allow other ways of providing a PoP token
+  }
+  return undefined
+}
+
+function determinePath (urlPath: string | undefined) {
+  let pathToUse = (urlPath ? 'root' + urlPath : 'root/')
+  if (pathToUse.substr(-2) === '/*') {
+    pathToUse = pathToUse.substring(0, pathToUse.length - 2)
+  } else if (pathToUse.substr(-1) === '/') {
+    pathToUse = pathToUse.substring(0, pathToUse.length - 1)
+  }
+  return new Path((pathToUse).split('/'))
 }
 
 // parse the http request to extract some basic info (e.g. is it a container?)
 export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<WacLdpTask> {
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
+  const isContainer = (httpReq.url && (httpReq.url.substr(-1) === '/' || httpReq.url.substr(-2) === '/*'))
   const parsedTask = {
-    omitBody: determineOmitBody(httpReq),
-    isContainer: (httpReq.url.substr(-1) === '/'), // FIXME: code duplication, see determineLdpParserResultName above
-    origin: determineOrigin(httpReq),
-    contentType: determineContentType(httpReq),
-    ifMatch: determineIfMatch(httpReq),
-    ifNoneMatchStar: determineIfNoneMatchStar(httpReq),
-    ifNoneMatchList: determineIfNoneMatchList(httpReq),
-    asJsonLd: determineAsJsonLd(httpReq),
-    ldpTaskType: determineTaskType(httpReq),
+    isContainer,
+    omitBody: determineOmitBody(httpReq.method),
+    origin: determineOrigin(httpReq.headers),
+    contentType: determineContentType(httpReq.headers),
+    ifMatch: determineIfMatch(httpReq.headers),
+    ifNoneMatchStar: determineIfNoneMatchStar(httpReq.headers),
+    ifNoneMatchList: determineIfNoneMatchList(httpReq.headers),
+    asJsonLd: determineAsJsonLd(httpReq.headers),
+    wacLdpTaskType: determineTaskType(httpReq.method, httpReq.url),
+    bearerToken: determineBearerToken(httpReq.headers),
     requestBody: undefined,
-    path: new Path(('root' + httpReq.url).split('/'))
+    path: determinePath(httpReq.url)
   } as WacLdpTask
   await new Promise(resolve => {
     parsedTask.requestBody = ''
@@ -130,23 +162,22 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
   debug('parsed http request', {
     method: httpReq.method,
     headers: httpReq.headers,
-    mayIncreaseDiskUsage: parsedTask.mayIncreaseDiskUsage,
     omitBody: parsedTask.omitBody,
     isContainer: parsedTask.isContainer,
     origin: parsedTask.origin,
-    ldpTaskType: parsedTask.ldpTaskType,
+    bearerToken: parsedTask.bearerToken,
+    ldpTaskType: parsedTask.wacLdpTaskType,
     path: parsedTask.path,
     requestBody: parsedTask.requestBody
   })
-  if (errorCode === null) {
-    return parsedTask
-  } else {
-    throw new ErrorResult(ResultType.CouldNotParse)
-  }
+  // if (errorCode === null) {
+  return parsedTask
+  // } else {
+  //   throw new ErrorResult(ResultType.CouldNotParse)
+  // }
 }
 
-export class WacLdpTask {
-  mayIncreaseDiskUsage: boolean
+export interface WacLdpTask {
   isContainer: boolean
   omitBody: boolean
   asJsonLd: boolean
@@ -155,7 +186,8 @@ export class WacLdpTask {
   ifMatch: string | undefined
   ifNoneMatchStar: boolean
   ifNoneMatchList: Array<string> | undefined
-  ldpTaskType: TaskType
+  bearerToken: string | undefined
+  wacLdpTaskType: TaskType
   path: Path
-  requestBody: string
+  requestBody: string | undefined
 }
