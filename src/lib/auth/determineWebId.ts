@@ -75,7 +75,6 @@ export async function determineWebId (bearerToken: string, audience: string): Pr
       return
     }
     try {
-      // todo: convert JWK to X5C
       debug('verifying id token', issuerPubKey, audience)
       jwt.verify(payload.id_token, issuerPubKey, { audience })
     } catch (error) {
