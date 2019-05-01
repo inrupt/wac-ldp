@@ -13,7 +13,7 @@ export function makeHandler (storage: BlobTree, aud: string, skipWac: boolean) {
 
     let response: WacLdpResponse
     try {
-      const wacLdpTask: WacLdpTask = await parseHttpRequest(httpReq)
+      const wacLdpTask: WacLdpTask = await parseHttpRequest(aud, httpReq)
       response = await executeTask(wacLdpTask, aud, storage, skipWac)
     } catch (error) {
       debug('errored', error)
