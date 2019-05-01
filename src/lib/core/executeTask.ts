@@ -14,7 +14,7 @@ import { determineWebId } from '../auth/determineWebId'
 import { mergeRdfSources } from '../util/mergeRdfSources'
 const debug = Debug('executeTask')
 
-export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree): Promise<WacLdpResponse> {
+export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree, skipWac: boolean): Promise<WacLdpResponse> {
   const webId = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
   debug('webId', webId)
   debug({
@@ -23,14 +23,17 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
     webId,
     origin: wacLdpTask.origin,
     wacLdpTaskType: wacLdpTask.wacLdpTaskType })
-  const appendOnly = await checkAccess({
-    path: wacLdpTask.path,
-    isContainer: wacLdpTask.isContainer,
-    webId,
-    origin: wacLdpTask.origin,
-    wacLdpTaskType: wacLdpTask.wacLdpTaskType,
-    storage
-  } as AccessCheckTask) // may throw if access is denied
+  let appendOnly = false
+  if (!skipWac) {
+    appendOnly = await checkAccess({
+      path: wacLdpTask.path,
+      isContainer: wacLdpTask.isContainer,
+      webId,
+      origin: wacLdpTask.origin,
+      wacLdpTaskType: wacLdpTask.wacLdpTaskType,
+      storage
+    } as AccessCheckTask) // may throw if access is denied
+  }
 
   // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
   // but notice that access check for this is append on the container,
@@ -62,14 +65,16 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
         return
       }
       try {
-        await checkAccess({
-          path: blobPath,
-          isContainer: false,
-          webId,
-          origin: wacLdpTask.origin,
-          wacLdpTaskType: TaskType.blobRead,
-          storage
-        } as AccessCheckTask) // may throw if access is denied
+        if (!skipWac) {
+          await checkAccess({
+            path: blobPath,
+            isContainer: false,
+            webId,
+            origin: wacLdpTask.origin,
+            wacLdpTaskType: TaskType.blobRead,
+            storage
+          } as AccessCheckTask) // may throw if access is denied
+        }
         rdfSources[member.name] = resourceData
         debug('Found RDF source', member.name)
       } catch (error) {

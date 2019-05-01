@@ -7,6 +7,7 @@ import { readBlob } from '../operations/readBlob'
 import { writeBlob } from '../operations/writeBlob'
 import { updateBlob } from '../operations/updateBlob'
 import { deleteBlob } from '../operations/deleteBlob'
+import { getOptions } from '../operations/getOptions'
 
 import { unknownOperation } from '../operations/unknownOperation'
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
@@ -26,6 +27,7 @@ export function determineOperation (taskType: TaskType): Operation {
     [TaskType.blobWrite]: writeBlob as unknown as Operation,
     [TaskType.blobUpdate]: updateBlob as unknown as Operation,
     [TaskType.blobDelete]: deleteBlob as unknown as Operation,
+    [TaskType.getOptions]: getOptions as unknown as Operation,
     [TaskType.unknown]: unknownOperation
   } as unknown as { [taskType in keyof typeof TaskType]: Operation }
   return operations[taskType]
