@@ -10,6 +10,7 @@
     "@types/node": "^11.12.1",
     "@types/node-fetch": "^2.3.2",
     "@types/node-rsa": "^1.0.0",
+    "@types/rdflib": "^0.17.1",
     "buffer-to-stream": "^1.0.0",
     "debug": "^4.1.1",
     "jsonwebtoken": "^8.5.1",
@@ -21,6 +22,7 @@
     "rdf-formats-common": "^1.4.0",
     "rdf-parser-jsonld": "^1.1.0",
     "rdf-parser-n3": "^1.1.1",
+    "rdflib": "^0.20.1",
     "uuid": "^3.3.2"
   },
   "devDependencies": {
