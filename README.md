@@ -8,7 +8,7 @@ A central component for Solid servers, handles Web Access Control and Linked Dat
 
 This module implements the 'Auth' and 'LDP' parts of the server architecture described by the following diagram:
 
-![server architecture](https://user-images.githubusercontent.com/408412/56799596-8c5eb980-6819-11e9-89f1-785c7cdc0e34.png)
+![server architecture](https://user-images.githubusercontent.com/408412/56815699-4b2ecf80-6842-11e9-8e9c-f65839713166.png)
 
 It also includes an in-memory implementation of the 'BlobTree' persistence layer abstraction.
 It exports the following things:
