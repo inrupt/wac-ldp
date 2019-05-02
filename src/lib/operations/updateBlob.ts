@@ -9,7 +9,7 @@ import { streamToObject, ResourceData, objectToStream, makeResourceData } from '
 const debug = Debug('updateBlob')
 
 export async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: boolean): Promise<WacLdpResponse> {
-  debug('operation updateBlob!')
+  debug('operation updateBlob!', { appendOnly })
   const resourceData = await streamToObject(await blob.getData()) as ResourceData
   const store = rdflib.graph()
   const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
@@ -18,6 +18,11 @@ export async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: bool
 
   const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
   const patchObject = sparqlUpdateParser(task.requestBody || '', rdflib.graph(), task.fullUrl)
+  debug('patchObject', patchObject)
+  if (appendOnly && typeof patchObject.delete !== 'undefined') {
+    debug('appendOnly and patch contains deletes')
+    throw new ErrorResult(ResultType.AccessDenied)
+  }
   await new Promise((resolve, reject) => {
     store.applyPatch(patchObject, store.sym(task.fullUrl), (err: Error) => {
       if (err) {
