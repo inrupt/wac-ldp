@@ -18,11 +18,18 @@ export async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: bool
 
   const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
   const patchObject = sparqlUpdateParser(task.requestBody || '', rdflib.graph(), task.fullUrl)
-  store.applyPatch(patchObject, store.sym(task.fullUrl), (err: Error) => {
-    console.error(err)
+  await new Promise((resolve, reject) => {
+    store.applyPatch(patchObject, store.sym(task.fullUrl), (err: Error) => {
+      if (err) {
+        reject(err)
+      } else {
+        resolve()
+      }
+    })
   })
   debug('after patch', store.toNT())
-  await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, store.toNT())))
+  const turtleDoc = rdflib.serialize(undefined, store, task.fullUrl, 'text/turtle')
+  await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
   return {
     resultType: ResultType.OkayWithoutBody
   } as WacLdpResponse

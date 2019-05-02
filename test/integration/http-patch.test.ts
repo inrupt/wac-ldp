@@ -19,7 +19,7 @@ beforeEach(async () => {
 const handler = makeHandler(storage, 'http://localhost:8080', true)
 
 test('handles a PATCH request', async () => {
-  const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge.ttl').toString()
+  const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge-alt.ttl').toString()
   const patchText = fs.readFileSync('test/fixtures/ldpRs2-as-patch.ttl').toString()
 
   let streamed = false
