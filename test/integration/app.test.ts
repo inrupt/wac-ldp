@@ -12,7 +12,7 @@ beforeEach(async () => {
   await storage.getBlob(new Path(['root', 'public', '.acl'])).setData(publicContainerAclDocData)
 })
 
-const handler = makeHandler(storage, 'audience')
+const handler = makeHandler(storage, 'audience', false)
 
 test('handles a GET request for a public resource', async () => {
   let streamed = false
