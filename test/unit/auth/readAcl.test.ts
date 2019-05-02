@@ -3,7 +3,7 @@ import { readAcl, ACL_SUFFIX } from '../../../src/lib/auth/readAcl'
 import { Path, BlobTree } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
 
-const aclDoc1Txt = fs.readFileSync('test/fixtures/aclDoc1.ttl')
+const aclDoc1Txt = fs.readFileSync('test/fixtures/aclDoc-from-NSS.ttl')
 
 // FIXME: use different ACL docs and test different situations here:
 const kv: {[pathStr: string]: string} = {
