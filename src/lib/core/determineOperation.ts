@@ -1,8 +1,6 @@
 import { readContainer } from '../operations/readContainer'
 import { deleteContainer } from '../operations/deleteContainer'
 
-import { readGlob } from '../operations/readGlob'
-
 import { readBlob } from '../operations/readBlob'
 import { writeBlob } from '../operations/writeBlob'
 import { updateBlob } from '../operations/updateBlob'
@@ -21,7 +19,6 @@ export function determineOperation (taskType: TaskType): Operation {
     // output type: LdpResponse
     [TaskType.containerRead]: readContainer as Operation,
     [TaskType.containerDelete]: deleteContainer as Operation,
-    [TaskType.globRead]: readGlob as Operation,
     [TaskType.blobRead]: readBlob as unknown as Operation,
     [TaskType.blobWrite]: writeBlob as unknown as Operation,
     [TaskType.blobUpdate]: updateBlob as unknown as Operation,

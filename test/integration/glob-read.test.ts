@@ -20,7 +20,7 @@ beforeEach(async () => {
   await storage.getBlob(new Path(['root', 'public', 'ldp-rs2.ttl'])).setData(ldpRs2Data)
 })
 
-const handler = makeHandler(storage, 'audience', true)
+const handler = makeHandler(storage, 'audience', false)
 
 test('handles a GET /* request (glob read)', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge.ttl').toString()
@@ -36,6 +36,9 @@ test('handles a GET /* request (glob read)', async () => {
     end: jest.fn(() => { }) // tslint:disable-line: no-empty
   }
   await handler(httpReq, httpRes as unknown as http.ServerResponse)
+  expect(httpRes.end.mock.calls).toEqual([
+    [ expectedTurtle ]
+  ])
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       200,
@@ -48,8 +51,5 @@ test('handles a GET /* request (glob read)', async () => {
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"'
       }
     ]
-  ])
-  expect(httpRes.end.mock.calls).toEqual([
-    [ expectedTurtle ]
   ])
 })

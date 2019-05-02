@@ -14,7 +14,7 @@ function toFormat (input: ReadableStream, contentType: string): Promise<string> 
   return new Promise(resolve => {
     let str = ''
     output.on('data', (chunk: Buffer) => {
-      debug('chunk', chunk)
+      debug('chunk', chunk.toString())
       str += chunk.toString()
     })
     output.on('end', () => {

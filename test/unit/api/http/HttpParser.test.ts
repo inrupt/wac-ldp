@@ -15,7 +15,7 @@ test('should parse a http request with Bearer token', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest(request)
+  const parsed = await parseHttpRequest('http://localhost:8080', request)
   expect(parsed).toEqual({
     asJsonLd: false,
     bearerToken: 'the-bearer-token',
@@ -27,6 +27,7 @@ test('should parse a http request with Bearer token', async () => {
     omitBody: false,
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
+    fullUrl: 'http://localhost:8080/foo/bar',
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
@@ -43,7 +44,7 @@ test('should parse a http request with If-None-Match: * header', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest(request)
+  const parsed = await parseHttpRequest('http://localhost:8080', request)
   expect(parsed).toEqual({
     asJsonLd: false,
     bearerToken: undefined,
@@ -55,6 +56,7 @@ test('should parse a http request with If-None-Match: * header', async () => {
     omitBody: false,
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
+    fullUrl: 'http://localhost:8080/foo/bar',
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
@@ -71,7 +73,7 @@ test('should parse a http request with If-None-Match: [list] header', async () =
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest(request)
+  const parsed = await parseHttpRequest('http://localhost:8080', request)
   expect(parsed).toEqual({
     asJsonLd: false,
     bearerToken: undefined,
@@ -83,6 +85,7 @@ test('should parse a http request with If-None-Match: [list] header', async () =
     omitBody: false,
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
+    fullUrl: 'http://localhost:8080/foo/bar',
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
@@ -99,7 +102,7 @@ test('should parse a http request with If-Match header', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest(request)
+  const parsed = await parseHttpRequest('http://localhost:8080', request)
   expect(parsed).toEqual({
     asJsonLd: false,
     bearerToken: undefined,
@@ -111,6 +114,7 @@ test('should parse a http request with If-Match header', async () => {
     omitBody: false,
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
+    fullUrl: 'http://localhost:8080/foo/bar',
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)

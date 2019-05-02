@@ -11,6 +11,8 @@ const debug = Debug('mergeRdfSources')
 
 function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): ReadableStream {
   const dataset = rdf.dataset()
+  debug('created dataset')
+  dataset.forEach((quad: any) => { debug(quad.toString()) })
   // TODO: read and merge rdf sources
   for (let i in rdfSources) {
     let parser
@@ -22,6 +24,8 @@ function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): Readabl
     const bodyStream = convert(Buffer.from(rdfSources[i].body))
     const quadStream = parser.import(bodyStream)
     dataset.import(quadStream)
+    debug('after import', rdfSources[i].body)
+    dataset.forEach((quad: any) => { debug(quad.toString()) })
   }
   return dataset.toStream()
 }
