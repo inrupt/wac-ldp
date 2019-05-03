@@ -30,7 +30,7 @@ class Server {
 const port: number = parseInt((process.env.PORT ? process.env.PORT : ''), 10) || 8080
 const skipWac: boolean = !!process.env.SKIP_WAC
 
-const aud = process.env.AUD || 'https://localhost:8443'
+const aud = process.env.AUD || `http://localhost:${port}`
 const server = new Server(port, aud, skipWac)
 server.listen()
 // server.close()

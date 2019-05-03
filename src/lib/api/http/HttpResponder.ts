@@ -97,6 +97,8 @@ export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.Serv
   } as any
   if (task.resourceData) {
     responseHeaders['Content-Type'] = task.resourceData.contentType
+  } else {
+    responseHeaders['Content-Type'] = 'text/plain'
   }
   if (task.createdLocation) {
     responseHeaders['Location'] = task.createdLocation
