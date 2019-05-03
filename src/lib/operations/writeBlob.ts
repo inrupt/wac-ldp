@@ -6,11 +6,13 @@ import { makeResourceData, streamToObject, objectToStream } from '../util/Resour
 
 const debug = Debug('writeBlob')
 export async function writeBlob (task: WacLdpTask, blob: Blob) {
-  debug('operation writeBlob!')
-  const resultType = (blob.exists() ? ResultType.OkayWithoutBody : ResultType.Created)
+  const blobExists: boolean = await blob.exists()
+  debug('operation writeBlob!', blobExists)
+  const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)
   const resourceData = makeResourceData(task.contentType ? task.contentType : '', task.requestBody ? task.requestBody : '')
   await blob.setData(objectToStream(resourceData))
   return {
-    resultType
+    resultType,
+    createdLocation: (blobExists ? undefined : task.fullUrl)
   } as WacLdpResponse
 }
