@@ -34,3 +34,7 @@ export async function mergeRdfSources (rdfSources: { [indexer: string]: Resource
   const dataset = readAndMerge(rdfSources)
   return rdfToResourceData(dataset, asJsonLd)
 }
+
+export function resourceDataToRdf (resourceData: ResourceData) {
+  return readAndMerge({ resourceData })
+}

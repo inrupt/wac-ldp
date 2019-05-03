@@ -107,7 +107,7 @@ function determineOmitBody (method: string | undefined): boolean {
 
 function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
   try {
-    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/json+ld')
+    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/ld+json')
   } catch (e) {
     return false
   }
