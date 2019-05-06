@@ -136,9 +136,14 @@ test('read container (omit body)', async () => {
     resultType: ResultType.OkayWithoutBody,
     isContainer: true,
     resourceData: {
-      body: `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .\n`,
+      body: [
+        `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .`,
+        `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#Container> .`,
+        `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#RDFSource> .`,
+        ''
+      ].join('\n'),
       contentType: 'text/turtle',
-      etag: 'LdNAjpZS8+e5hRW83Mq3Mg==',
+      etag: 'b7tBKbyK9TFeTR66sFzUKw==',
       rdfType: RdfType.Turtle
     }
   })
@@ -160,9 +165,14 @@ test('read container (with body)', async () => {
     resultType: ResultType.OkayWithBody,
     isContainer: true,
     resourceData: {
-      body: `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .\n`,
+      body: [
+        `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .`,
+        `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#Container> .`,
+        `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#RDFSource> .`,
+        ''
+      ].join('\n'),
       contentType: 'text/turtle',
-      etag: 'LdNAjpZS8+e5hRW83Mq3Mg==',
+      etag: 'b7tBKbyK9TFeTR66sFzUKw==',
       rdfType: RdfType.Turtle
     }
   })

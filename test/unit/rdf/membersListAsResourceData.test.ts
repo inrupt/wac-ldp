@@ -15,9 +15,11 @@ test('asTurtle', async () => {
     body: [
       '<> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/1> .',
       '<> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/2> .',
-      '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .'
+      '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .',
+      '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#Container> .',
+      '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#RDFSource> .'
     ].join('\n') + '\n',
-    etag: 'NIS58zYf2nH1tEAffcLmfA==',
+    etag: 'urDZ67shsseSvB1Q9hRytA==',
     rdfType: RdfType.Turtle
   })
 })
@@ -42,9 +44,17 @@ test('asJsonLd', async () => {
       {
         '@id': '',
         '@type': 'http://www.w3.org/ns/ldp#BasicContainer'
+      },
+      {
+        '@id': '',
+        '@type': 'http://www.w3.org/ns/ldp#Container'
+      },
+      {
+        '@id': '',
+        '@type': 'http://www.w3.org/ns/ldp#RDFSource'
       }
     ]),
-    etag: 'F/UZbx2Oyi7ABYk1kZa/ow==',
+    etag: 'jkHpd7hL6F2eZ5O6u0mhdA==',
     rdfType: RdfType.JsonLd
   })
 })
