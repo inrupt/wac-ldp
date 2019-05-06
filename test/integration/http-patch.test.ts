@@ -41,6 +41,7 @@ test('handles an append-only PATCH request with Write permissions', async () => 
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
@@ -79,6 +80,7 @@ test('handles an append-only PATCH request with Append permissions', async () =>
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
@@ -113,6 +115,7 @@ test('handles a destructive PATCH request (allowed)', async () => {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
@@ -151,6 +154,7 @@ test('handles a destructive PATCH request (not allowed but append is allowed)', 
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
@@ -189,6 +193,7 @@ test('handles a destructive PATCH request (not allowed but append is allowed)', 
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
