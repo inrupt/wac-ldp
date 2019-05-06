@@ -3,7 +3,6 @@ import { URL } from 'url'
 import Debug from 'debug'
 import { WacLdpResponse, ResultType, ErrorResult } from './HttpResponder'
 import { Path } from '../../storage/BlobTree'
-import { IncomingHttpHeaders } from 'http2';
 
 const debug = Debug('HttpParser')
 
@@ -146,7 +145,7 @@ function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): str
   return hostname + httpReq.url
 }
 
-function determinePreferMinimalContainer (headers: IncomingHttpHeaders): boolean {
+function determinePreferMinimalContainer (headers: http.IncomingHttpHeaders): boolean {
   // FIXME: this implementation is just a placeholder, should find a proper prefer-header parsing lib for this:
   if (headers['prefer'] && headers['prefer'] === 'return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"') {
     return true
