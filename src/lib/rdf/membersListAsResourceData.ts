@@ -21,6 +21,16 @@ function toRdf (containerUrl: string, membersList: Array<Member>): ReadableStrea
     rdf.namedNode(RDF.type),
     rdf.namedNode(LDP.BasicContainer)
   ))
+  dataset.add(rdf.quad(
+    rdf.namedNode(''),
+    rdf.namedNode(RDF.type),
+    rdf.namedNode(LDP.Container)
+  ))
+  dataset.add(rdf.quad(
+    rdf.namedNode(''),
+    rdf.namedNode(RDF.type),
+    rdf.namedNode(LDP.RDFSource)
+  ))
   debug(dataset)
   return dataset.toStream()
 }

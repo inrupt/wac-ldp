@@ -29,7 +29,9 @@ export const FOAF = {
 
 export const LDP = {
   BasicContainer: PREFIX.LDP + 'BasicContainer',
+  Container: PREFIX.LDP + 'Container',
   Resource: PREFIX.LDP + 'Resource',
+  RDFSource: PREFIX.LDP + 'RDFSource',
   contains: PREFIX.LDP + 'contains'
 }
 export const RDF = {
