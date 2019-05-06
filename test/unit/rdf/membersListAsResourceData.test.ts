@@ -13,10 +13,11 @@ test('asTurtle', async () => {
   expect(resourceData).toEqual({
     contentType: 'text/turtle',
     body: [
-      '<https://example.com/foo/> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/1> .',
-      '<https://example.com/foo/> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/2> .'
+      '<> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/1> .',
+      '<> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/2> .',
+      '<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .'
     ].join('\n') + '\n',
-    etag: 'NfmMi+TUwA4G37x4uBNEpA==',
+    etag: 'NIS58zYf2nH1tEAffcLmfA==',
     rdfType: RdfType.Turtle
   })
 })
@@ -27,19 +28,23 @@ test('asJsonLd', async () => {
     contentType: 'application/ld+json',
     body: JSON.stringify([
       {
-        '@id': 'https://example.com/foo/',
+        '@id': '',
         'http://www.w3.org/ns/ldp#contains': {
           '@id': 'https://example.com/foo/1'
         }
       },
       {
-        '@id': 'https://example.com/foo/',
+        '@id': '',
         'http://www.w3.org/ns/ldp#contains': {
           '@id': 'https://example.com/foo/2'
         }
+      },
+      {
+        '@id': '',
+        '@type': 'http://www.w3.org/ns/ldp#BasicContainer'
       }
     ]),
-    etag: '6fS0Q9y5iobzWMXFWSSYjQ==',
+    etag: 'F/UZbx2Oyi7ABYk1kZa/ow==',
     rdfType: RdfType.JsonLd
   })
 })

@@ -25,5 +25,6 @@ function toFormat (input: ReadableStream, contentType: string): Promise<string> 
 
 export async function rdfToResourceData (dataset: ReadableStream, asJsonLd: boolean): Promise<ResourceData> {
   const contentType = (asJsonLd ? 'application/ld+json' : 'text/turtle')
-  return makeResourceData(contentType, await toFormat(dataset, contentType))
+  const str = await toFormat(dataset, contentType)
+  return makeResourceData(contentType, str)
 }
