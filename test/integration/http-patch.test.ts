@@ -3,7 +3,7 @@ import * as http from 'http'
 import { makeHandler, Path } from '../../src/lib/core/app'
 import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
-import { objectToStream, ResourceData, makeResourceData, streamToObject } from '../../src/lib/util/ResourceDataUtils'
+import { objectToStream, ResourceData, makeResourceData, streamToObject } from '../../src/lib/rdf/ResourceDataUtils'
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {

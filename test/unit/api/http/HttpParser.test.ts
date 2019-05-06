@@ -1,7 +1,7 @@
 import * as http from 'http'
 import { parseHttpRequest, WacLdpTask, TaskType } from '../../../../src/lib/api/http/HttpParser'
 import { Path } from '../../../../src/lib/storage/BlobTree'
-import { bufferToStream } from '../../../../src/lib/util/ResourceDataUtils'
+import { bufferToStream } from '../../../../src/lib/rdf/ResourceDataUtils'
 import { toChunkStream } from '../../helpers/toChunkStream'
 
 test('should parse a http request with Bearer token', async () => {

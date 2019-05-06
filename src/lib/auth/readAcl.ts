@@ -28,7 +28,7 @@ import convert from 'buffer-to-stream'
 
 import { Path, BlobTree } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, makeResourceData, streamToObject } from '../util/ResourceDataUtils'
+import { ResourceData, makeResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 
 const debug = Debug('readAcl')
 

@@ -1,6 +1,6 @@
 
-import { ResourceData, makeResourceData } from '../../../src/lib/util/ResourceDataUtils'
-import { membersListAsResourceData } from '../../../src/lib/util/membersListAsResourceData'
+import { ResourceData, makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
+import { membersListAsResourceData } from '../../../src/lib/rdf/membersListAsResourceData'
 import { Member } from '../../../src/lib/storage/Container'
 
 const membersList: Array<Member> = [
