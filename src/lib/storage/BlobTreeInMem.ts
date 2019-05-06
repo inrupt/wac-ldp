@@ -4,7 +4,7 @@ import { Node } from './Node'
 import { Container, Member } from './Container'
 import { Blob } from './Blob'
 import { BlobTree, Path } from './BlobTree'
-import { bufferToStream, streamToBuffer } from '../util/ResourceDataUtils'
+import { bufferToStream, streamToBuffer } from '../rdf/ResourceDataUtils'
 
 const debug = Debug('AtomicTreeInMem')
 

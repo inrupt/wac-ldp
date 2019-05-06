@@ -9,9 +9,9 @@ import { basicOperations } from './basicOperations'
 
 import Debug from 'debug'
 
-import { ResourceData, streamToObject } from '../util/ResourceDataUtils'
+import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { determineWebId } from '../auth/determineWebId'
-import { mergeRdfSources } from '../util/mergeRdfSources'
+import { mergeRdfSources } from '../rdf/mergeRdfSources'
 const debug = Debug('executeTask')
 
 function handleOptions (wacLdpTask: WacLdpTask) {

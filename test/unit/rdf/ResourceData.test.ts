@@ -1,5 +1,5 @@
 
-import { streamToObject, objectToStream, ResourceData, makeResourceData } from '../../../src/lib/util/ResourceDataUtils'
+import { streamToObject, objectToStream, ResourceData, makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
 
 test('toStream -> fromStream', async () => {
   const obj = { foo: 'bar' }

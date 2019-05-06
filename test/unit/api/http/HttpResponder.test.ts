@@ -1,6 +1,6 @@
 import * as http from 'http'
 import { sendHttpResponse, WacLdpResponse, ResultType } from '../../../../src/lib/api/http/HttpResponder'
-import { makeResourceData } from '../../../../src/lib/util/ResourceDataUtils'
+import { makeResourceData } from '../../../../src/lib/rdf/ResourceDataUtils'
 
 test('should produce a http response', async () => {
   let responseTask: WacLdpResponse = {

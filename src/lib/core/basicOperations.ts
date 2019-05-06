@@ -1,15 +1,15 @@
 import * as rdflib from 'rdflib'
 
 import Debug from 'debug'
-import { membersListAsResourceData } from '../util/membersListAsResourceData'
+import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { Container } from '../storage/Container'
 import { Blob } from '../storage/Blob'
-import { resourceDataToRdf } from '../util/mergeRdfSources'
-import { streamToObject, objectToStream, makeResourceData, ResourceData } from '../util/ResourceDataUtils'
-import { rdfToResourceData } from '../util/rdfToResourceData'
+import { resourceDataToRdf } from '../rdf/mergeRdfSources'
+import { streamToObject, objectToStream, makeResourceData, ResourceData } from '../rdf/ResourceDataUtils'
+import { rdfToResourceData } from '../rdf/rdfToResourceData'
 
 export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>
 

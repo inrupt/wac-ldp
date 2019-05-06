@@ -3,7 +3,7 @@ import { Blob } from '../../../src/lib/storage/Blob'
 import { TaskType, WacLdpTask } from '../../../src/lib/api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../../../src/lib/api/http/HttpResponder'
 import { toChunkStream } from '../helpers/toChunkStream'
-import { makeResourceData } from '../../../src/lib/util/ResourceDataUtils'
+import { makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
 import { Container } from '../../../src/lib/storage/Container'
 
 test('delete blob', async () => {

@@ -2,7 +2,7 @@ import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { BlobTree, Path } from '../../../src/lib/storage/BlobTree'
 import { Blob } from '../../../src/lib/storage/Blob'
 import { Container } from '../../../src/lib/storage/Container'
-import { streamToBuffer, bufferToStream } from '../../../src/lib/util/ResourceDataUtils'
+import { streamToBuffer, bufferToStream } from '../../../src/lib/rdf/ResourceDataUtils'
 
 let storage: BlobTree // | undefined
 
