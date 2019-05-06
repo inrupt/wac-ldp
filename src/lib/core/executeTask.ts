@@ -1,10 +1,10 @@
 import uuid from 'uuid/v4'
 import { BlobTree, Path } from '../storage/BlobTree'
+import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { checkAccess, AccessCheckTask } from './checkAccess'
-import { getBlobAndCheckETag } from './getBlobAndCheckETag'
 import { determineOperation } from './determineOperation'
 
 import Debug from 'debug'
@@ -21,6 +21,29 @@ function handleOptions (wacLdpTask: WacLdpTask) {
     createdLocation: undefined,
     isContainer: wacLdpTask.isContainer
   })
+}
+
+async function getBlobAndCheckETag (ldpTask: WacLdpTask, storage: BlobTree): Promise<Blob> {
+  const blob: Blob = storage.getBlob(ldpTask.path)
+  const data = await blob.getData()
+  debug(data, ldpTask)
+  if (data) { // resource exists
+    if (ldpTask.ifNoneMatchStar) { // If-None-Match: * -> resource should not exist
+      throw new ErrorResult(ResultType.PreconditionFailed)
+    }
+    const resourceData = await streamToObject(data)
+    if (ldpTask.ifMatch && resourceData.etag !== ldpTask.ifMatch) { // If-Match -> ETag should match
+      throw new ErrorResult(ResultType.PreconditionFailed)
+    }
+    if (ldpTask.ifNoneMatchList && ldpTask.ifNoneMatchList.indexOf(resourceData.etag) !== -1) { // ETag in blacklist
+      throw new ErrorResult(ResultType.PreconditionFailed)
+    }
+  } else { // resource does not exist
+    if (ldpTask.ifMatch) { // If-Match -> ETag should match so resource should first exist
+      throw new ErrorResult(ResultType.PreconditionFailed)
+    }
+  }
+  return blob
 }
 
 function determineAppendOnly (wacLdpTask: WacLdpTask, webId: string | undefined, storage: BlobTree, skipWac: boolean) {
