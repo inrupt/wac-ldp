@@ -1,4 +1,5 @@
 import * as http from 'http'
+import { URL } from 'url'
 import Debug from 'debug'
 import { WacLdpResponse, ResultType, ErrorResult } from './HttpResponder'
 import { Path } from '../../storage/BlobTree'
@@ -125,12 +126,19 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
 
 function determinePath (urlPath: string | undefined) {
   let pathToUse = (urlPath ? 'root' + urlPath : 'root/')
+  pathToUse = pathToUse.split('?')[0]
   if (pathToUse.substr(-2) === '/*') {
     pathToUse = pathToUse.substring(0, pathToUse.length - 2)
   } else if (pathToUse.substr(-1) === '/') {
     pathToUse = pathToUse.substring(0, pathToUse.length - 1)
   }
   return new Path((pathToUse).split('/'))
+}
+
+function determineSparqlQuery (urlPath: string | undefined): string | undefined {
+  const url = new URL('http://example.com' + urlPath)
+  debug('determining sparql query', urlPath, url.searchParams, url.searchParams.get('query'))
+  return url.searchParams.get('query') || undefined
 }
 
 function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): string {
@@ -155,6 +163,7 @@ export async function parseHttpRequest (hostname: string, httpReq: http.Incoming
     bearerToken: determineBearerToken(httpReq.headers),
     requestBody: undefined,
     path: determinePath(httpReq.url),
+    sparqlQuery: determineSparqlQuery(httpReq.url),
     fullUrl: determineFullUrl(hostname, httpReq)
   } as WacLdpTask
   await new Promise(resolve => {
@@ -164,17 +173,7 @@ export async function parseHttpRequest (hostname: string, httpReq: http.Incoming
     })
     httpReq.on('end', resolve)
   })
-  debug('parsed http request', {
-    method: httpReq.method,
-    headers: httpReq.headers,
-    omitBody: parsedTask.omitBody,
-    isContainer: parsedTask.isContainer,
-    origin: parsedTask.origin,
-    bearerToken: parsedTask.bearerToken,
-    ldpTaskType: parsedTask.wacLdpTaskType,
-    path: parsedTask.path,
-    requestBody: parsedTask.requestBody
-  })
+  debug('parsed http request', parsedTask)
   // if (errorCode === null) {
   return parsedTask
   // } else {
@@ -194,6 +193,7 @@ export interface WacLdpTask {
   bearerToken: string | undefined
   wacLdpTaskType: TaskType
   path: Path,
+  sparqlQuery: string | undefined
   fullUrl: string,
   requestBody: string | undefined
 }

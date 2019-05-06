@@ -10,6 +10,7 @@ import { Blob } from '../storage/Blob'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { streamToObject, objectToStream, makeResourceData, ResourceData } from '../rdf/ResourceDataUtils'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
+import { applyQuery } from '../rdf/applyQuery'
 
 export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>
 
@@ -50,6 +51,14 @@ async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> 
   if (task.asJsonLd) {
     const rdf = resourceDataToRdf(result.resourceData)
     result.resourceData = await rdfToResourceData(rdf, true)
+  }
+  if (task.sparqlQuery) {
+    debug('reading blob as rdf')
+    const rdf = resourceDataToRdf(result.resourceData)
+    debug('applying query', task.sparqlQuery)
+    await applyQuery(rdf, task.sparqlQuery)
+    debug('converting to requested representation')
+    result.resourceData = await rdfToResourceData(rdf, task.asJsonLd)
   }
   debug('result.resourceData set to ', result.resourceData)
   if (task.omitBody) {
