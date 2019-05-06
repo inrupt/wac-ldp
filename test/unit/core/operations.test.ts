@@ -3,7 +3,7 @@ import { Blob } from '../../../src/lib/storage/Blob'
 import { TaskType, WacLdpTask } from '../../../src/lib/api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../../../src/lib/api/http/HttpResponder'
 import { toChunkStream } from '../helpers/toChunkStream'
-import { makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
+import { makeResourceData, RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
 import { Container } from '../../../src/lib/storage/Container'
 
 test('delete blob', async () => {
@@ -90,7 +90,8 @@ test('read blob (omit body)', async () => {
     resourceData: {
       body: 'bla',
       contentType: 'text/plain',
-      etag: 'Eo7PVCo1rFJwqH3HQJGEBA=='
+      etag: 'Eo7PVCo1rFJwqH3HQJGEBA==',
+      rdfType: undefined
     },
     resultType: ResultType.OkayWithoutBody
   })
@@ -112,7 +113,8 @@ test('read blob (with body)', async () => {
     resourceData: {
       body: 'bla',
       contentType: 'text/plain',
-      etag: 'Eo7PVCo1rFJwqH3HQJGEBA=='
+      etag: 'Eo7PVCo1rFJwqH3HQJGEBA==',
+      rdfType: undefined
     },
     resultType: ResultType.OkayWithBody
   })
@@ -136,7 +138,8 @@ test('read container (omit body)', async () => {
     resourceData: {
       body: '',
       contentType: 'text/turtle',
-      etag: '1B2M2Y8AsgTpgAmY7PhCfg=='
+      etag: '1B2M2Y8AsgTpgAmY7PhCfg==',
+      rdfType: RdfType.Turtle
     }
   })
 })
@@ -159,7 +162,8 @@ test('read container (with body)', async () => {
     resourceData: {
       body: '',
       contentType: 'text/turtle',
-      etag: '1B2M2Y8AsgTpgAmY7PhCfg=='
+      etag: '1B2M2Y8AsgTpgAmY7PhCfg==',
+      rdfType: RdfType.Turtle
     }
   })
 })

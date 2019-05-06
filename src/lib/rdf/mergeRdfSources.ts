@@ -4,7 +4,7 @@ import convert from 'buffer-to-stream'
 import N3Parser from 'rdf-parser-n3'
 import JsonLdParser from 'rdf-parser-jsonld'
 
-import { ResourceData } from './ResourceDataUtils'
+import { ResourceData, RdfType } from './ResourceDataUtils'
 import { rdfToResourceData } from './rdfToResourceData'
 
 const debug = Debug('mergeRdfSources')
@@ -13,13 +13,15 @@ function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): Readabl
   const dataset = rdf.dataset()
   debug('created dataset')
   dataset.forEach((quad: any) => { debug(quad.toString()) })
-  // TODO: read and merge rdf sources
   for (let i in rdfSources) {
     let parser
-    if (rdfSources[i].contentType === 'application/ld+json') {
+    if (rdfSources[i].rdfType === RdfType.JsonLd) {
       parser = new JsonLdParser({ factory: rdf })
-    } else {
+    } else if (rdfSources[i].rdfType === RdfType.Turtle) {
       parser = new N3Parser({ factory: rdf })
+    }
+    if (!parser) {
+      continue
     }
     const bodyStream = convert(Buffer.from(rdfSources[i].body))
     const quadStream = parser.import(bodyStream)
