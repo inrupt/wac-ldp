@@ -1,6 +1,7 @@
 import jwt from 'jsonwebtoken'
 import Debug from 'debug'
 import { WacLdpTask } from '../api/http/HttpParser'
+import { ACL, FOAF, RDF } from '../rdf/rdf-constants'
 
 const debug = Debug('DetermineAllowedAgentsForModes')
 
@@ -20,12 +21,8 @@ const debug = Debug('DetermineAllowedAgentsForModes')
 // The result is a list of strings for each of the four access modes, where each string can
 // be a webid, or AGENT_CLASS_ANYBODY or AGENT_CLASS_ANYBODY_LOGGED_IN.
 
-export function ACL (str: string) {
-  return 'http://www.w3.org/ns/auth/acl#' + str
-}
-export const RDF_TYPE = 'http://www.w3.org/1999/02/22-rdf-syntax-ns#type'
-export const AGENT_CLASS_ANYBODY = 'http://xmlns.com/foaf/0.1/Agent'
-export const AGENT_CLASS_ANYBODY_LOGGED_IN = ACL('AuthenticatedAgent')
+export const AGENT_CLASS_ANYBODY = FOAF.Agent
+export const AGENT_CLASS_ANYBODY_LOGGED_IN = ACL.AuthenticatedAgent
 
 export interface ModesCheckTask {
   aclGraph: any,
@@ -46,16 +43,16 @@ function fetchGroupMembers (groupUri: string) {
 }
 
 export async function determineAllowedAgentsForModes (task: ModesCheckTask): Promise<AccessModes> {
-  const accessPredicate = (task.isAdjacent ? ACL('accessTo') : ACL('default'))
+  const accessPredicate = (task.isAdjacent ? ACL.accessTo : ACL.default)
   debug('task', task)
   const isAuthorization: { [subject: string]: boolean } = {}
   const aboutAgents: { [subject: string]: { [agentId: string]: boolean} | undefined } = {}
   const aboutThisResource: { [subject: string]: boolean } = {}
   const aboutMode: { [mode: string]: { [subject: string]: boolean} | undefined } = {
-    [ACL('Read')]: {},
-    [ACL('Write')]: {},
-    [ACL('Append')]: {},
-    [ACL('Control')]: {}
+    [ACL.Read]: {},
+    [ACL.Write]: {},
+    [ACL.Append]: {},
+    [ACL.Control]: {}
   }
   function addAgents (subject: string, agents: Array<string>) {
     if (typeof aboutAgents[subject] === 'undefined') {
@@ -68,15 +65,15 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
   task.aclGraph.filter((quad: any): boolean => {
     debug('using quad', quad.subject.value, quad.predicate.value, quad.object.value)
     // pass 1, sort all quads according to what they state about a subject
-    if (quad.predicate.value === ACL('mode') && typeof aboutMode[quad.object.value] === 'object') {
+    if (quad.predicate.value === ACL.mode && typeof aboutMode[quad.object.value] === 'object') {
       (aboutMode[quad.object.value] as { [agent: string]: boolean })[quad.subject.value] = true
-    } else if (quad.predicate.value === RDF_TYPE && quad.object.value === ACL('Authorization')) {
+    } else if (quad.predicate.value === RDF.type && quad.object.value === ACL.Authorization) {
       isAuthorization[quad.subject.value] = true
-    } else if (quad.predicate.value === ACL('agent')) {
+    } else if (quad.predicate.value === ACL.agent) {
       addAgents(quad.subject.value, [quad.object.value])
-    } else if (quad.predicate.value === ACL('agentGroup')) {
+    } else if (quad.predicate.value === ACL.agentGroup) {
       addAgents(quad.subject.value, fetchGroupMembers(quad.object.value))
-    } else if (quad.predicate.value === ACL('agentClass')) {
+    } else if (quad.predicate.value === ACL.agentClass) {
       if ([AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN].indexOf(quad.object.value) !== -1) {
         addAgents(quad.subject.value, [quad.object.value])
       }
@@ -123,9 +120,9 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
     return Object.keys(agentsMap)
   }
   return {
-    read: determineModeAgents(ACL('Read')),
-    write: determineModeAgents(ACL('Write')),
-    append: determineModeAgents(ACL('Append')),
-    control: determineModeAgents(ACL('Control'))
+    read: determineModeAgents(ACL.Read),
+    write: determineModeAgents(ACL.Write),
+    append: determineModeAgents(ACL.Append),
+    control: determineModeAgents(ACL.Control)
   }
 }

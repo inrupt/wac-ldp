@@ -3,6 +3,7 @@ import rdf from 'rdf-ext'
 import { Member } from '../storage/Container'
 import { rdfToResourceData } from './rdfToResourceData'
 import { ResourceData } from './ResourceDataUtils'
+import { LDP } from './rdf-constants'
 
 const debug = Debug('membersListAsResourceData')
 
@@ -11,7 +12,7 @@ function toRdf (containerUrl: string, membersList: Array<Member>): ReadableStrea
   membersList.map(member => {
     dataset.add(rdf.quad(
       rdf.namedNode(containerUrl),
-      rdf.namedNode('http://www.w3.org/ns/ldp#contains'),
+      rdf.namedNode(LDP.contains),
       rdf.namedNode(containerUrl + member.name)))
   })
   return dataset.toStream()
