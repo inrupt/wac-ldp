@@ -34,6 +34,7 @@ test('handles a GET request for a public resource', async () => {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
@@ -63,6 +64,7 @@ test('handles a GET request for a private resource', async () => {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
