@@ -5,10 +5,10 @@ import { Blob } from '../storage/Blob'
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { checkAccess, AccessCheckTask } from './checkAccess'
-import { determineOperation } from './determineOperation'
+import { basicOperations } from './basicOperations'
 
 import Debug from 'debug'
-import { readContainer } from '../operations/readContainer'
+
 import { ResourceData, streamToObject } from '../util/ResourceDataUtils'
 import { determineWebId } from '../auth/determineWebId'
 import { mergeRdfSources } from '../util/mergeRdfSources'
@@ -125,7 +125,7 @@ async function handleOperation (wacLdpTask: WacLdpTask, storage: BlobTree, appen
     node = await getBlobAndCheckETag(wacLdpTask, storage)
   }
 
-  const operation = determineOperation(wacLdpTask.wacLdpTaskType)
+  const operation = basicOperations(wacLdpTask.wacLdpTaskType)
 
   // Note that the operation is executed on the `node` that was retrieved earlier,
   // that means that the storage can tell if the underlying resource changed since
