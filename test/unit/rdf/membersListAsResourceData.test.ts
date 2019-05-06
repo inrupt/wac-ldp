@@ -1,5 +1,5 @@
 
-import { ResourceData, makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
+import { ResourceData, makeResourceData, RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
 import { membersListAsResourceData } from '../../../src/lib/rdf/membersListAsResourceData'
 import { Member } from '../../../src/lib/storage/Container'
 
@@ -16,7 +16,8 @@ test('asTurtle', async () => {
       '<https://example.com/foo/> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/1> .',
       '<https://example.com/foo/> <http://www.w3.org/ns/ldp#contains> <https://example.com/foo/2> .'
     ].join('\n') + '\n',
-    etag: 'NfmMi+TUwA4G37x4uBNEpA=='
+    etag: 'NfmMi+TUwA4G37x4uBNEpA==',
+    rdfType: RdfType.Turtle
   })
 })
 
@@ -38,6 +39,7 @@ test('asJsonLd', async () => {
         }
       }
     ]),
-    etag: '6fS0Q9y5iobzWMXFWSSYjQ=='
+    etag: '6fS0Q9y5iobzWMXFWSSYjQ==',
+    rdfType: RdfType.JsonLd
   })
 })
