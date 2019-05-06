@@ -5,7 +5,7 @@ import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ResultType, ErrorResult } from '../api/http/HttpResponder'
-import { Container } from '../storage/Container'
+import { Container, Member } from '../storage/Container'
 import { Blob } from '../storage/Blob'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { streamToObject, objectToStream, makeResourceData, ResourceData } from '../rdf/ResourceDataUtils'
@@ -19,7 +19,12 @@ const debug = Debug('Basic Operations')
 async function readContainer (task: WacLdpTask, container: Container): Promise<WacLdpResponse> {
   debug('operation readContainer!')
   debug(container)
-  const membersList = await container.getMembers()
+  let membersList: Array<Member>
+  if (task.preferMinimalContainer) {
+    membersList = []
+  } else {
+    membersList = await container.getMembers()
+  }
   debug(membersList)
   const resourceData = await membersListAsResourceData(task.fullUrl, membersList, task.asJsonLd)
   debug(resourceData)
