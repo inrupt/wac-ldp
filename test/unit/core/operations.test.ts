@@ -136,9 +136,9 @@ test('read container (omit body)', async () => {
     resultType: ResultType.OkayWithoutBody,
     isContainer: true,
     resourceData: {
-      body: '',
+      body: `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .\n`,
       contentType: 'text/turtle',
-      etag: '1B2M2Y8AsgTpgAmY7PhCfg==',
+      etag: 'LdNAjpZS8+e5hRW83Mq3Mg==',
       rdfType: RdfType.Turtle
     }
   })
@@ -160,9 +160,9 @@ test('read container (with body)', async () => {
     resultType: ResultType.OkayWithBody,
     isContainer: true,
     resourceData: {
-      body: '',
+      body: `<> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/ldp#BasicContainer> .\n`,
       contentType: 'text/turtle',
-      etag: '1B2M2Y8AsgTpgAmY7PhCfg==',
+      etag: 'LdNAjpZS8+e5hRW83Mq3Mg==',
       rdfType: RdfType.Turtle
     }
   })

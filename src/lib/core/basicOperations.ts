@@ -21,7 +21,7 @@ async function readContainer (task: WacLdpTask, container: Container): Promise<W
   debug(container)
   const membersList = await container.getMembers()
   debug(membersList)
-  const resourceData = await membersListAsResourceData(task.path.toString(), membersList, task.asJsonLd)
+  const resourceData = await membersListAsResourceData(task.fullUrl, membersList, task.asJsonLd)
   debug(resourceData)
   return {
     resultType: (task.omitBody ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
