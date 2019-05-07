@@ -53,6 +53,7 @@ async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> 
     return result
   }
   result.resourceData = await streamToObject(await blob.getData())
+  // TODO: use RdfType enum here
   if (task.asJsonLd) {
     const rdf = resourceDataToRdf(result.resourceData)
     result.resourceData = await rdfToResourceData(rdf, true)

@@ -107,6 +107,7 @@ function determineOmitBody (method: string | undefined): boolean {
 }
 
 function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
+  // TODO: use RdfType enum here and 'whatwg-mimetype' package from ResourceDataUtils
   try {
     return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/ld+json')
   } catch (e) {
