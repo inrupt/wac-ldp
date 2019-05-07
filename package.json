@@ -1,6 +1,6 @@
 {
   "name": "wac-ldp",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.",
   "main": "dist/lib/core/app.js",
   "dependencies": {
@@ -18,7 +18,6 @@
     "mocha": "^6.1.4",
     "node-fetch": "^2.5.0",
     "node-rsa": "^1.0.5",
-    "node-ursa": "0.0.6",
     "rdf-ext": "^1.2.2",
     "rdf-formats-common": "^1.4.0",
     "rdf-parser-jsonld": "^1.1.0",
