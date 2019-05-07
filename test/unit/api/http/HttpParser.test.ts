@@ -28,6 +28,8 @@ test('should parse a http request with Bearer token', async () => {
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
     fullUrl: 'http://localhost:8080/foo/bar',
+    preferMinimalContainer: false,
+    sparqlQuery: undefined,
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
@@ -57,6 +59,8 @@ test('should parse a http request with If-None-Match: * header', async () => {
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
     fullUrl: 'http://localhost:8080/foo/bar',
+    preferMinimalContainer: false,
+    sparqlQuery: undefined,
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
@@ -86,6 +90,8 @@ test('should parse a http request with If-None-Match: [list] header', async () =
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
     fullUrl: 'http://localhost:8080/foo/bar',
+    preferMinimalContainer: false,
+    sparqlQuery: undefined,
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
@@ -115,6 +121,8 @@ test('should parse a http request with If-Match header', async () => {
     origin: undefined,
     path: new Path(['root', 'foo', 'bar']),
     fullUrl: 'http://localhost:8080/foo/bar',
+    preferMinimalContainer: false,
+    sparqlQuery: undefined,
     requestBody: '',
     wacLdpTaskType: TaskType.blobDelete
   } as WacLdpTask)
