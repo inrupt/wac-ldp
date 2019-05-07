@@ -34,7 +34,7 @@ function determineRequiredAccessModes (wacLdpTaskType: TaskType, resourceIsAclDo
   throw new ErrorResult(ResultType.InternalServerError)
 }
 
-async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, webId: string | undefined, origin: string | undefined): Promise<boolean> {
+async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, webId: string | undefined, origin: string | undefined, serverBase: string, storage: BlobTree): Promise<boolean> {
   // first check agent:
   const agents = (allowedAgentsForModes as any)[mode]
   debug(mode, agents)
@@ -51,7 +51,7 @@ async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, we
     origin,
     mode,
     resourceOwners: allowedAgentsForModes.control
-  } as OriginCheckTask)
+  } as OriginCheckTask, serverBase, storage)
 }
 
 export interface AccessCheckTask {
@@ -59,7 +59,8 @@ export interface AccessCheckTask {
   isContainer: boolean,
   webId: string,
   origin: string,
-  wacLdpTaskType: TaskType
+  wacLdpTaskType: TaskType,
+  serverBase: string,
   storage: BlobTree
 }
 
@@ -89,13 +90,13 @@ export async function checkAccess (task: AccessCheckTask) {
   // throw if agent or origin does not have access
   await Promise.all(requiredAccessModes.map(async (mode: string) => {
     debug('required mode', mode)
-    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin)) {
+    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.serverBase, task.storage)) {
       debug(mode, 'is allowed!')
       return
     }
     debug(`mode ${mode} is not allowed, but checking for appendOnly now`)
     // SPECIAL CASE: append-only
-    if (mode === 'write' && await modeAllowed('append', allowedAgentsForModes, task.webId, task.origin)) {
+    if (mode === 'write' && await modeAllowed('append', allowedAgentsForModes, task.webId, task.origin, task.serverBase, task.storage)) {
       appendOnly = true
       debug('write was requested and is not allowed but append is; setting appendOnly to true')
       return

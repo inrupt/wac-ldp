@@ -20,6 +20,12 @@ function copyStringArray (arr: Array<string>): Array<string> {
   return JSON.parse(JSON.stringify(arr))
 }
 
+export function urlToPath (urlPath: string) {
+  const segments = urlPath.split('/')
+  segments[0] = 'root'
+  return new Path(segments)
+}
+
 export class Path {
   segments: Array<string>
   constructor (segments: Array<string>) {

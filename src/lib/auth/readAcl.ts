@@ -22,19 +22,14 @@
 // from there on.
 
 import Debug from 'debug'
-import rdf from 'rdf-ext'
-import N3Parser from 'rdf-parser-n3'
-import convert from 'buffer-to-stream'
-
+import { getGraphLocal, getEmptyGraph } from '../rdf/getGraph'
 import { Path, BlobTree } from '../storage/BlobTree'
-import { Blob } from '../storage/Blob'
-import { ResourceData, makeResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 
 const debug = Debug('readAcl')
 
 export const ACL_SUFFIX = '.acl'
 
-async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree): Promise<{ aclResourceData: ResourceData, topicPath: Path, isAdjacent: boolean }> {
+export async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree) {
   let currentGuessPath = resourcePath
   let currentIsContainer = resourceIsContainer
   let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
@@ -45,7 +40,7 @@ async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, sto
   while (!currentGuessBlobExists) {
     if (currentGuessPath.isRoot()) {
       // root ACL, nobody has access:
-      return { aclResourceData: makeResourceData('text/turtle', ''), topicPath: currentGuessPath, isAdjacent }
+      return { aclGraph: getEmptyGraph(), topicPath: currentGuessPath, isAdjacent }
     }
     currentGuessPath = currentGuessPath.toParent()
     isAdjacent = false
@@ -55,26 +50,9 @@ async function getAclBlob (resourcePath: Path, resourceIsContainer: boolean, sto
     currentGuessBlobExists = await currentGuessBlob.exists()
     debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
   }
-  const stream = await currentGuessBlob.getData()
-  debug('stream', typeof stream)
-  if (stream) {
-    return { aclResourceData: await streamToObject(stream) as ResourceData, topicPath: currentGuessPath, isAdjacent }
-  }
-  return { aclResourceData: makeResourceData('text/turtle', ''), topicPath: currentGuessPath, isAdjacent }
-}
-
-export async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree) {
-  const { aclResourceData, topicPath, isAdjacent } = await getAclBlob(resourcePath, resourceIsContainer, storage)
-  let parser = new N3Parser({
-    factory: rdf
-  })
-  debug('got ACL ResourceData', aclResourceData)
-  const bodyStream = convert(Buffer.from(aclResourceData.body))
-  let quadStream = parser.import(bodyStream)
-  const dataset = await rdf.dataset().import(quadStream)
   return {
-    aclGraph: dataset,
-    topicPath,
+    aclGraph: getGraphLocal(currentGuessBlob),
+    topicPath: currentGuessBlob,
     isAdjacent
   }
 }
