@@ -1,11 +1,18 @@
-// import { newEngine } from '@comunica/actor-init-sparql'
+import rdf from 'rdf-ext'
+import Debug from 'debug'
+import convert from 'buffer-to-stream'
+import N3Parser from 'rdf-parser-n3'
+import JsonLdParser from 'rdf-parser-jsonld'
 
-// const myEngine = newEngine();
-export async function applyQuery (store: any, sparqlQuery: string) {
-  // const engine = newEngine()
-  // const result = await engine.query(sparqlQuery, {
+import { newEngine } from '@comunica/actor-init-sparql'
 
-  // })
-  // const parsedQuery = parser.parse(sparqlQuery)
-  // TODO: implement
+const debug = Debug('apply-query')
+
+export async function applyQuery (dataset: any, sparqlQuery: string) {
+  const myEngine = newEngine()
+  console.log('executing')
+  const result = await myEngine.query(sparqlQuery,
+    { sources: [ dataset ] })
+  console.log(typeof result) // .bindingsStream.on('data', (data: any) => console.log(data.toObject()))
+  return result
 }

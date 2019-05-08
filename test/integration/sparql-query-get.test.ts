@@ -18,7 +18,7 @@ beforeEach(async () => {
 
 const handler = makeHandler(storage, 'http://localhost:8080', false)
 
-test.skip('handles a SPARQL query in the GET query parameter', async () => {
+test('handles a SPARQL query in the GET query parameter', async () => {
   const sparqlQuery = fs.readFileSync('test/fixtures/get-query.sparql').toString()
 
   let streamed = false
@@ -33,6 +33,9 @@ test.skip('handles a SPARQL query in the GET query parameter', async () => {
     end: jest.fn(() => { }) // tslint:disable-line: no-empty
   }
   await handler(httpReq, httpRes as unknown as http.ServerResponse)
+  expect(httpRes.end.mock.calls).toEqual([
+    [ '' ]
+  ])
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       200,
@@ -44,8 +47,5 @@ test.skip('handles a SPARQL query in the GET query parameter', async () => {
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
-  ])
-  expect(httpRes.end.mock.calls).toEqual([
-    [ '' ]
   ])
 })
