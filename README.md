@@ -6,27 +6,61 @@ A central component for Solid servers, handles Web Access Control and Linked Dat
 
 ## Code Structure
 
-![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/56473918-6e3c3680-6472-11e9-980d-2ed6c1c762dc.png)
+![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/57365052-a33fcd00-7184-11e9-848f-79e6da2361b1.png)
 
 
 ### Entry point
-The entry point is src/server.ts, which instantiates a http server, a BlobTree storage, and the core app.
+The entry point is src/server.ts, which instantiates a http server, a BlobTree storage, and the core app. This is not drawn in the diagram above.
 
-### BlobTree
+### Storage
 The BlobTree storage exposes a carefully tuned interface to the persistence layer, which is similar to the well-known "key-value store" concept, where opaque Blobs can be stored and retrieved, using arbitrary strings as keys. But the BlobTree interface differs from a key-value store interface in that it not only allows writing and reading blobs of data, but also querying 'Containers', which is similar to doing `ls` on a folder on a unix file system: it gives you a list of the directly contained blobs and containers.
 This means that if we store all LDP resources inside BlobTree blobs, using the resource path from the http level as the blob's path at the BlobTree level, then implementing LDP GET requests on containers becomes very easy out of the box.
 
-### Core
-The core application code is in src/lib/code/ and deals with:
-* calling src/lib/api/http/HttpParser to parse the HTTP request
+The interface looks as follows (`BlobTree` in the diagram):
+```ts
+interface BlobTree extends events.EventEmitter {
+  getContainer (path: Path): Container
+  getBlob (path: Path): Blob
+}
+interface Node {
+  exists (): Promise<boolean>,
+  delete (): Promise<void>
+}
+interface Blob extends Node {
+  getData (): Promise<ReadableStream | undefined>
+  setData (data: ReadableStream): Promise<void>
+}
+interface Container extends Node {
+  getMembers (): Promise<Array<Member>>
+}
+interface Member {
+  name: string
+  isContainer: boolean
+}
+interface Path {
+  constructor (segments: Array<string>)
+  toParent (): Path
+  toChild (segment: string): Path
+  isRoot (): boolean
+  toString (): string
+  toContainerPathPrefix (): string
+  hasSuffix (suffix: string): boolean
+  removeSuffix (suffix: string): Path
+  appendSuffix (suffix: string): Path
+}
+```
+
+### Execute Task
+The core application code is in src/lib/core/executeTask.ts and given a `WacLdpTask` (see below), it deals with:
 * calling the functions from src/lib/auth/ to determine whether the request is authorized to begin with
+* calling the functions from the 'operations on content' component (currently only 'RDF').
 * fetching the main resource from storage
 * in the case of Glob, checking authorization to read each of the contained resources, and fetching those
 * in the case of POST to a container, picking a name for the new resource and fetching a handle to that
 * check the ETag of the resource in case an If-Match or If-None-Match header was present on the request
-* given the necessary handle(s) to BlobTree node(s), execute the desired operation from src/lib/operations/ (in the case of PATCH, adding a parameter whether it should be executed append-only)
-* in case of succses, passing the result back to src/lib/api/http/HttpResponder
-* in case of an exception, passing the appropriate http response back to src/lib/api/http/HttpResponder
+* given the necessary handle(s) to BlobTree node(s), execute the desired operation from src/lib/core/basicOperations.ts (in the case of PATCH, adding a parameter whether it should be executed append-only)
+* in case of success, producing the `WacLdpResult` (see below) result for src/lib/api/http/HttpResponder
+* in case of an exception, throwing the appropriate `ErrorResult`, to be cast to `WacLdpResult`
 
 ### Auth
 The auth code is in src/lib/auth/ and deals with:
@@ -36,14 +70,81 @@ The auth code is in src/lib/auth/ and deals with:
 * based on the origin, find out whether at least one of the resource owner has that origin as a trusted app
 * decide if the required access mode is authorized (with a special case for append-only approval of a PATCH)
 
+The Auth Interface looks as follows:
+```ts
+async function determineWebId (bearerToken: string, audience: string): Promise<string | undefined>
+async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree)
+async function determineAllowedAgentsForModes (task: ModesCheckTask): Promise<AccessModes>
+interface ModesCheckTask {
+  aclGraph: any,
+  isAdjacent: boolean,
+  resourcePath: string
+}
+interface AccessModes {
+  read: Array<string>
+  write: Array<string>
+  append: Array<string>
+  control: Array<string>
+}
+async function appIsTrustedForMode (task: OriginCheckTask): Promise<boolean>
+interface OriginCheckTask {
+  origin: string,
+  mode: string,
+  resourceOwners: Array<string>
+}
+```
+
 ### HTTP
 In src/lib/api/http/ are two important classes, one for parsing an incoming http request, and one for constructing an outgoing http response. Although each step they do, like setting a numeric http response status code, or extracting a bearer token string from an authorization header, is computationally simple, a lot of the correctness of this module (looking at https://github.com/w3c/ldp-testsuite and the WAC test suite that is under development) depends on the details in these two files.
+```ts
+interface WacLdpTask {
+  isContainer: boolean
+  omitBody: boolean
+  parsedContentType: ParsedContentType | undefined // was: asJsonLd
+  origin: string | undefined
+  contentType: string | undefined
+  ifMatch: string | undefined
+  ifNoneMatchStar: boolean
+  ifNoneMatchList: Array<string> | undefined
+  bearerToken: string | undefined
+  wacLdpTaskType: TaskType
+  path: Path
+  requestBody: string | undefined
+}
+enum TaskType {
+  containerRead,
+  containerMemberAdd,
+  containerDelete,
+  globRead,
+  blobRead,
+  blobWrite,
+  blobUpdate,
+  blobDelete,
+  getOptions,
+  unknown
+}
+enum ParsedContentType {
+  RdfJsonLd,
+  RdfTurtle
+}
+interface WacLdpResponse {
+  resultType: ResultType
+  resourceData: ResourceData | undefined
+  createdLocation: string | undefined
+  isContainer: boolean
+}
+```
 
-### Operations
-This is where the action is, each file in src/lib/operations/ does the actual execution of the operation as intended in the incoming HTTP/LDP request. At the same time, each of these files is also really small because of all the preparation that already went before it (the parsing of the http request, and the access checks) and because of the way the BlobTree storage interface was designed, with these operations in mind. For instance a DeleteBlob operation just calls blob.delete, and that's it.
+### Operations on Content
+Currently the only type of content the server understands is RDF. In general, the following operations are available:
+* readFromBlob (looks at the content-type and the body and reads these into an in-memory object)
+* readFromContainer (looks at the container member list and reads that into an in-memory object)
+* writeToBlob (serializes an object to the requested representation)
+* applyPatch (patch type should be allowed for content type)
+* applyFilter (filter type should be allowed for content type)
 
-### Utils
-The ReadContainer operation does need to do a bit of work to convert the list of members as reported by the BlobTree Container into an RDF representation like Turtle or JSON-LD. We use RDF-EXT for this, and the calls to that module are wrapped into a util in the src/lib/utils/ folder. Likewise, there are some functions there to deal with how the body, content type, and ETag of a resource can be streamed from and to the BlobTree storage.
+For RDF, replace 'object' with 'rdf-ext dataset' in the above. Vurrently supported representations for RDF are Turtle and JSON-LD. The only currently allowed patch type for RDF are `SPARQL-update (any)` and `SPARQL-update (appendOnly)`. The currently allowed filter types for RDF are `SPARQL-SELECT`, `ldp-paging`, and `prefer-minimal-container`.
+
 
 Published under an MIT license by inrupt, Inc.
 
