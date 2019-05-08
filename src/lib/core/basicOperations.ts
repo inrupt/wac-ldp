@@ -62,9 +62,9 @@ async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> 
     debug('reading blob as rdf')
     const rdf = resourceDataToRdf(result.resourceData)
     debug('applying query', task.sparqlQuery)
-    await applyQuery(rdf, task.sparqlQuery)
-    debug('converting to requested representation')
-    result.resourceData = await rdfToResourceData(rdf, task.asJsonLd)
+    const body: string = await applyQuery(rdf, task.sparqlQuery)
+    debug('converting to requested representation', rdf)
+    result.resourceData = makeResourceData('application/sparql+json', body)
   }
   debug('result.resourceData set to ', result.resourceData)
   if (task.omitBody) {

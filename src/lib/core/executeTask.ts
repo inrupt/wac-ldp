@@ -141,13 +141,13 @@ async function handleOperation (wacLdpTask: WacLdpTask, storage: BlobTree, appen
 }
 
 export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree, skipWac: boolean): Promise<WacLdpResponse> {
-  const webId = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
-  debug({ webId, path: wacLdpTask.path, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
-
   // handle OPTIONS before checking WAC
   if (wacLdpTask.wacLdpTaskType === TaskType.getOptions) {
     return handleOptions(wacLdpTask)
   }
+
+  const webId = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
+  debug({ webId, path: wacLdpTask.path, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
 
   // may throw if access is denied:
   const appendOnly = await determineAppendOnly(wacLdpTask, webId, storage, skipWac)

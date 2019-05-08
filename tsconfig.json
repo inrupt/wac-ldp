@@ -15,6 +15,11 @@
     "esModuleInterop": true
   },
   "typeRoots": ["./types"],
+  "typedef": [
+    true,
+    "call-signature",
+    "property-declaration"
+  ],
   "exclude": [
     "test",
     "node_modules",
