@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
+import JsonLdParser from 'rdf-parser-jsonld'
 import convert from 'buffer-to-stream'
 
 import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
@@ -14,9 +15,20 @@ export function getEmptyGraph () {
 }
 
 function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
-  let parser = new N3Parser({
-    factory: rdf
-  })
+  let parser
+  switch (rdfType) {
+    case RdfType.JsonLd:
+      parser = new N3Parser({
+        factory: rdf
+      })
+      break
+    case RdfType.Turtle:
+    default:
+      parser = new N3Parser({
+        factory: rdf
+      })
+      break
+  }
   return parser.import(bodyStream)
 }
 
