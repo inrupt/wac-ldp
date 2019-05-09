@@ -1,63 +1,43 @@
 import rdf from 'rdf-ext'
 import Debug from 'debug'
-import { Store, DataFactory } from 'n3'
 import { newEngine } from '@comunica/actor-init-sparql-rdfjs'
-import { streamToBuffer } from './ResourceDataUtils'
+import { Store } from 'n3'
 const debug = Debug('apply-query')
+
+function removeLeadingQuestionMark (str: string) {
+  return str.substring(1)
+}
 
 export async function applyQuery (dataset: any, sparqlQuery: string): Promise<string> {
   const store = new Store()
-  store.addQuad(DataFactory.quad(
-    DataFactory.namedNode('a'), DataFactory.namedNode('b'), DataFactory.namedNode('http://dbpedia.org/resource/Belgium')))
-  store.addQuad(DataFactory.quad(
-    DataFactory.namedNode('a'), DataFactory.namedNode('b'), DataFactory.namedNode('http://dbpedia.org/resource/Ghent')))
+  dataset.forEach((quad: any) => {
+    debug('quad', quad.toString())
+    store.addQuad(quad)
+  })
   const myEngine = newEngine()
-  const result: any = await myEngine.query('SELECT * { ?s ?p <http://dbpedia.org/resource/Belgium>. ?s ?p ?o } LIMIT 100',
+  const result: any = await myEngine.query(sparqlQuery,
     { sources: [ { type: 'rdfjsSource', value: store } ] })
-  dataset.forEach((quad: any) => { debug('quad', quad.toString()) })
-  debug('done printing quads')
-  // const store = new Store()
-  // store.addQuad(DataFactory.quad(
-  //   DataFactory.namedNode('a'), DataFactory.namedNode('b'), DataFactory.namedNode('http://dbpedia.org/resource/Belgium')))
-  // store.addQuad(DataFactory.quad(
-  //   DataFactory.namedNode('a'), DataFactory.namedNode('b'), DataFactory.namedNode('http://dbpedia.org/resource/Ghent')))
-
-  // const myEngine = newEngine()
-  // const result: any = await myEngine.query(sparqlQuery, {
-  //   sources: [
-  //     {
-  //       type: 'rdfjsSource',
-  //       value: dataset
-  //     }
-  //   ]
-  // })
-  debug('query result', result)
-  const bindings: Array<any> = []
-  await new Promise((resolve) => {
-    result.bindingsStream.on('end', resolve)
+  const bindings = await new Promise((resolve) => {
+    const bindings: any = []
+    result.bindingsStream.on('end', () => {
+      resolve(bindings)
+    })
     result.bindingsStream.on('data', (data: any) => {
-          // Each data object contains a mapping from variables to RDFJS terms.
-      debug(data.get('?s'))
-      debug(data.get('?p'))
-      debug(data.get('?o'))
-      let binding: { [indexer: string]: string } = {}
-      for (let i of data) {
-        debug(i)
-        binding[i[0]] = i[1].value
+      const binding: any = {}
+      const obj = JSON.parse(JSON.stringify(data))
+      debug(obj)
+      for (const key in obj) {
+        binding[removeLeadingQuestionMark(key)] = {
+          type: obj[key].termType.toLowerCase(),
+          value: obj[key].value
+        }
       }
       bindings.push(binding)
-      // binding.push(binding)
     })
   })
-  // debug('done printing bindings')
-  // const sparqlResultJson = await myEngine.resultToString(result, 'application/json')
-  // debug('sparql result json object', sparqlResultJson)
-  // const buffer = await streamToBuffer(sparqlResultJson.data)
-  // debug('sparql result json', buffer.toString())
-  // return buffer.toString()
   return JSON.stringify({
     head: {
-      vars: [ result.variables ]
+      vars: result.variables.map(removeLeadingQuestionMark)
     },
     results: {
       ordered: false,

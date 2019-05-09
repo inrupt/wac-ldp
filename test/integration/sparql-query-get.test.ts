@@ -37,15 +37,14 @@ test('handles a SPARQL query in the GET query parameter', async () => {
     [
       JSON.stringify({
         head: {
-          vars: [ 'name', 'person' ]
+          vars: [ 'name' ]
         },
         results: {
           ordered: false,
           distinct: false,
           bindings: [
             {
-              name: { 'type': 'literal', 'value': 'Green Goblin' },
-              person: { 'type': 'uri', 'value': 'hhttp://example.org/#green-goblin' }
+              name: { 'type': 'literal', 'value': 'Green Goblin' }
             }
           ]
         }
@@ -59,7 +58,8 @@ test('handles a SPARQL query in the GET query parameter', async () => {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/sparql+json',
+        'ETag': '"fTeBCZUGRxPpeUUf4DpHFg=="',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
