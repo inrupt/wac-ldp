@@ -1,0 +1,15 @@
+{
+  "@context": "http://www.w3.org/ns/auth/acl#",
+  "@type": "http://www.w3.org/ns/auth/acl#Authorization",
+  "agent": [
+    "https://michielbdejong.inrupt.net/profile/card#me",
+    "mailto:michiel@unhosted.org"
+  ],
+  "accessTo": "/",
+  "default": "/",
+  "mode": [
+    "http://www.w3.org/ns/auth/acl#Read",
+    "http://www.w3.org/ns/auth/acl#Write",
+    "http://www.w3.org/ns/auth/acl#Control"
+  ]
+}

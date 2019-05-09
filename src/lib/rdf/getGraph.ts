@@ -18,12 +18,14 @@ function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
   let parser
   switch (rdfType) {
     case RdfType.JsonLd:
-      parser = new N3Parser({
+      debug('RdfType JSON-LD')
+      parser = new JsonLdParser({
         factory: rdf
       })
       break
     case RdfType.Turtle:
     default:
+      debug('RdfType N3')
       parser = new N3Parser({
         factory: rdf
       })
