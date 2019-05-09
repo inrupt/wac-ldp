@@ -18,7 +18,7 @@ beforeEach(async () => {
 
 const handler = makeHandler(storage, 'http://localhost:8080', false)
 
-test.skip('handles a SPARQL query in the GET query parameter', async () => {
+test('handles a SPARQL query in the GET query parameter', async () => {
   const sparqlQuery = fs.readFileSync('test/fixtures/get-query.sparql').toString()
 
   let streamed = false
@@ -33,6 +33,24 @@ test.skip('handles a SPARQL query in the GET query parameter', async () => {
     end: jest.fn(() => { }) // tslint:disable-line: no-empty
   }
   await handler(httpReq, httpRes as unknown as http.ServerResponse)
+  expect(httpRes.end.mock.calls).toEqual([
+    [
+      JSON.stringify({
+        head: {
+          vars: [ 'name' ]
+        },
+        results: {
+          ordered: false,
+          distinct: false,
+          bindings: [
+            {
+              name: { 'type': 'literal', 'value': 'Green Goblin' }
+            }
+          ]
+        }
+      })
+    ]
+  ])
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       200,
@@ -40,12 +58,10 @@ test.skip('handles a SPARQL query in the GET query parameter', async () => {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
+        'Content-Type': 'application/sparql+json',
+        'ETag': '"fTeBCZUGRxPpeUUf4DpHFg=="',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
-  ])
-  expect(httpRes.end.mock.calls).toEqual([
-    [ '' ]
   ])
 })

@@ -55,16 +55,18 @@ async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> 
   result.resourceData = await streamToObject(await blob.getData())
   // TODO: use RdfType enum here
   if (task.asJsonLd) {
-    const rdf = resourceDataToRdf(result.resourceData)
+    const rdf = await resourceDataToRdf(result.resourceData)
     result.resourceData = await rdfToResourceData(rdf, true)
   }
   if (task.sparqlQuery) {
-    debug('reading blob as rdf')
-    const rdf = resourceDataToRdf(result.resourceData)
+    debug('reading blob as rdf', result.resourceData)
+    const rdf = await resourceDataToRdf(result.resourceData)
+    rdf.forEach((quad: any) => { debug('quad', quad.toString()) })
+    debug('done here printing quads')
     debug('applying query', task.sparqlQuery)
-    await applyQuery(rdf, task.sparqlQuery)
-    debug('converting to requested representation')
-    result.resourceData = await rdfToResourceData(rdf, task.asJsonLd)
+    const body: string = await applyQuery(rdf, task.sparqlQuery)
+    debug('converting to requested representation', rdf)
+    result.resourceData = makeResourceData('application/sparql+json', body)
   }
   debug('result.resourceData set to ', result.resourceData)
   if (task.omitBody) {

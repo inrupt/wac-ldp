@@ -9,8 +9,8 @@ import { rdfToResourceData } from './rdfToResourceData'
 
 const debug = Debug('mergeRdfSources')
 
-function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): ReadableStream {
-  const dataset = rdf.dataset()
+async function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): Promise<any> {
+  let dataset = rdf.dataset()
   debug('created dataset')
   dataset.forEach((quad: any) => { debug(quad.toString()) })
   for (let i in rdfSources) {
@@ -25,18 +25,19 @@ function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): Readabl
     }
     const bodyStream = convert(Buffer.from(rdfSources[i].body))
     const quadStream = parser.import(bodyStream)
-    dataset.import(quadStream)
+    await dataset.import(quadStream)
     debug('after import', rdfSources[i].body)
     dataset.forEach((quad: any) => { debug(quad.toString()) })
+    debug('done listing quads', dataset)
   }
-  return dataset.toStream()
+  return dataset
 }
 
 export async function mergeRdfSources (rdfSources: { [indexer: string]: ResourceData }, asJsonLd: boolean) {
-  const dataset = readAndMerge(rdfSources)
-  return rdfToResourceData(dataset, asJsonLd)
+  const datasetStream = (await readAndMerge(rdfSources)).toStream()
+  return rdfToResourceData(datasetStream, asJsonLd)
 }
 
-export function resourceDataToRdf (resourceData: ResourceData) {
+export function resourceDataToRdf (resourceData: ResourceData): Promise<any> {
   return readAndMerge({ resourceData })
 }

@@ -1,5 +1,1 @@
-PREFIX foaf:  <http://xmlns.com/foaf/0.1/>
-SELECT ?name
-WHERE {
-  ?person foaf:name ?name .
-}
+SELECT ?name { ?person <http://xmlns.com/foaf/0.1/name> ?name. ?person ?z ?name } LIMIT 100

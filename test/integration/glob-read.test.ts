@@ -47,7 +47,7 @@ test('handles a GET /* request (glob read)', async () => {
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/turtle',
-        'ETag': '"v/I8yBrDQliUoJxmAw54pw=="',
+        'ETag': '"TmBqjXO24ygE+uQdtQuiOA=="',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"'
       }
     ]
