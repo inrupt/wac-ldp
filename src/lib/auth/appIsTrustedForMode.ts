@@ -1,6 +1,6 @@
 import Debug from 'debug'
 
-import { ACL, RDF_TYPE } from './determineAllowedAgentsForModes'
+import { ACL, RDF } from '../rdf/rdf-constants'
 
 const debug = Debug('DetermineAllowedModeForOrigin')
 

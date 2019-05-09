@@ -1,17 +1,46 @@
 import convert from 'buffer-to-stream'
-import { calculateETag } from './calculateETag'
+import { calculateETag } from '../util/calculateETag'
+import MIMEType from 'whatwg-mimetype'
+import Debug from 'debug'
+
+const debug = Debug('ResourceDataUtils')
+
+export enum RdfType {
+  JsonLd,
+  Turtle
+}
 
 export interface ResourceData {
   body: string
   contentType: string
   etag: string
+  rdfType: RdfType | undefined
 }
 
 export function makeResourceData (contentType: string, body: string): ResourceData {
+  let rdfType
+  try {
+    const mimeType = new MIMEType(contentType)
+    switch (mimeType.essence) {
+      case 'application/ld+json':
+        rdfType = RdfType.JsonLd
+        break
+      case 'text/turtle':
+        rdfType = RdfType.Turtle
+        break
+      default:
+        debug('not an RDF content-type', contentType, mimeType.essence)
+    }
+    debug({ rdfType, contentType, essence: mimeType.essence })
+  } catch (e) {
+    debug('error determining rdf type', e.message)
+    // leave rdfType as undefined
+  }
   return {
     contentType,
     body,
-    etag: calculateETag(body)
+    etag: calculateETag(body),
+    rdfType
   }
 }
 
@@ -26,12 +55,17 @@ export function objectToStream (obj: any): any {
 }
 
 export async function streamToBuffer (stream: any): Promise<Buffer> {
+  debug(stream)
+  // debug(stream._readableState.buffer.head.data.toString())
   const bufs: Array<Buffer> = []
   return new Promise(resolve => {
     stream.on('data', function (d: Buffer) {
+      debug('got chunk', d)
       bufs.push(d)
     })
+    debug('data event added')
     stream.on('end', function () {
+      debug('got end')
       resolve(Buffer.concat(bufs))
     })
   })

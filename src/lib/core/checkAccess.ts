@@ -1,6 +1,7 @@
 
 import { OriginCheckTask, appIsTrustedForMode } from '../auth/appIsTrustedForMode'
-import { ModesCheckTask, determineAllowedAgentsForModes, ACL, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from '../auth/determineAllowedAgentsForModes'
+import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from '../auth/determineAllowedAgentsForModes'
+import { ACL } from '../rdf/rdf-constants'
 import { determineWebId } from '../auth/determineWebId'
 import { readAcl, ACL_SUFFIX } from '../auth/readAcl'
 import { Path, BlobTree } from '../storage/BlobTree'
@@ -48,7 +49,7 @@ async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, we
   // then check origin:
   return appIsTrustedForMode({
     origin,
-    mode: ACL(mode),
+    mode,
     resourceOwners: allowedAgentsForModes.control
   } as OriginCheckTask)
 }

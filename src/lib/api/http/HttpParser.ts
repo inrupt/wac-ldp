@@ -1,4 +1,5 @@
 import * as http from 'http'
+import { URL } from 'url'
 import Debug from 'debug'
 import { WacLdpResponse, ResultType, ErrorResult } from './HttpResponder'
 import { Path } from '../../storage/BlobTree'
@@ -106,8 +107,9 @@ function determineOmitBody (method: string | undefined): boolean {
 }
 
 function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
+  // TODO: use RdfType enum here and 'whatwg-mimetype' package from ResourceDataUtils
   try {
-    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/json+ld')
+    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/ld+json')
   } catch (e) {
     return false
   }
@@ -125,6 +127,7 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
 
 function determinePath (urlPath: string | undefined) {
   let pathToUse = (urlPath ? 'root' + urlPath : 'root/')
+  pathToUse = pathToUse.split('?')[0]
   if (pathToUse.substr(-2) === '/*') {
     pathToUse = pathToUse.substring(0, pathToUse.length - 2)
   } else if (pathToUse.substr(-1) === '/') {
@@ -133,8 +136,29 @@ function determinePath (urlPath: string | undefined) {
   return new Path((pathToUse).split('/'))
 }
 
+function determineSparqlQuery (urlPath: string | undefined): string | undefined {
+  const url = new URL('http://example.com' + urlPath)
+  debug('determining sparql query', urlPath, url.searchParams, url.searchParams.get('query'))
+  return url.searchParams.get('query') || undefined
+}
+
+function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): string {
+  return hostname + httpReq.url
+}
+
+function determinePreferMinimalContainer (headers: http.IncomingHttpHeaders): boolean {
+  // FIXME: this implementation is just a placeholder, should find a proper prefer-header parsing lib for this:
+  if (headers['prefer'] && headers['prefer'] === 'return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"') {
+    return true
+  }
+  if (headers['prefer'] && headers['prefer'] === 'return=representation; omit="http://www.w3.org/ns/ldp#PreferContainment"') {
+    return true
+  }
+  return false
+}
+
 // parse the http request to extract some basic info (e.g. is it a container?)
-export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<WacLdpTask> {
+export async function parseHttpRequest (hostname: string, httpReq: http.IncomingMessage): Promise<WacLdpTask> {
   debug('LdpParserTask!')
   let errorCode = null // todo actually use this. maybe with try-catch?
   const isContainer = (httpReq.url && (httpReq.url.substr(-1) === '/' || httpReq.url.substr(-2) === '/*'))
@@ -150,7 +174,10 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     wacLdpTaskType: determineTaskType(httpReq.method, httpReq.url),
     bearerToken: determineBearerToken(httpReq.headers),
     requestBody: undefined,
-    path: determinePath(httpReq.url)
+    path: determinePath(httpReq.url),
+    sparqlQuery: determineSparqlQuery(httpReq.url),
+    fullUrl: determineFullUrl(hostname, httpReq),
+    preferMinimalContainer: determinePreferMinimalContainer(httpReq.headers)
   } as WacLdpTask
   await new Promise(resolve => {
     parsedTask.requestBody = ''
@@ -159,17 +186,7 @@ export async function parseHttpRequest (httpReq: http.IncomingMessage): Promise<
     })
     httpReq.on('end', resolve)
   })
-  debug('parsed http request', {
-    method: httpReq.method,
-    headers: httpReq.headers,
-    omitBody: parsedTask.omitBody,
-    isContainer: parsedTask.isContainer,
-    origin: parsedTask.origin,
-    bearerToken: parsedTask.bearerToken,
-    ldpTaskType: parsedTask.wacLdpTaskType,
-    path: parsedTask.path,
-    requestBody: parsedTask.requestBody
-  })
+  debug('parsed http request', parsedTask)
   // if (errorCode === null) {
   return parsedTask
   // } else {
@@ -188,6 +205,9 @@ export interface WacLdpTask {
   ifNoneMatchList: Array<string> | undefined
   bearerToken: string | undefined
   wacLdpTaskType: TaskType
-  path: Path
+  path: Path,
+  sparqlQuery: string | undefined
+  fullUrl: string,
   requestBody: string | undefined
+  preferMinimalContainer: boolean
 }

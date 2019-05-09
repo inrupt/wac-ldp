@@ -3,16 +3,16 @@ import * as http from 'http'
 import { makeHandler, Path } from '../../src/lib/core/app'
 import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
-import { objectToStream, ResourceData, makeResourceData } from '../../src/lib/util/ResourceDataUtils'
+import { objectToStream, ResourceData, makeResourceData } from '../../src/lib/rdf/ResourceDataUtils'
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
-  const aclDoc = fs.readFileSync('test/fixtures/aclDoc2.ttl')
+  const aclDoc = fs.readFileSync('test/fixtures/aclDoc-read.ttl')
   const publicContainerAclDocData = await objectToStream(makeResourceData('text/turtle', aclDoc.toString()))
   await storage.getBlob(new Path(['root', 'public', '.acl'])).setData(publicContainerAclDocData)
 })
 
-const handler = makeHandler(storage, 'audience')
+const handler = makeHandler(storage, 'audience', false)
 
 test('handles a GET request for a public resource', async () => {
   let streamed = false
@@ -34,6 +34,7 @@ test('handles a GET request for a public resource', async () => {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]
@@ -63,6 +64,7 @@ test('handles a GET request for a private resource', async () => {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
       }
     ]

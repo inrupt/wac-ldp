@@ -1,6 +1,7 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { ResourceData } from '../../util/ResourceDataUtils'
+import { ResourceData } from '../../rdf/ResourceDataUtils'
+import { LDP } from '../../rdf/rdf-constants'
 const debug = Debug('HttpResponder')
 
 export enum ResultType {
@@ -84,10 +85,10 @@ export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.Serv
   const responseBody = responses[task.resultType].responseBody || (task.resourceData ? task.resourceData.body : '')
 
   const types: Array<string> = [
-    '<http://www.w3.org/ns/ldp#Resource>; rel="type"'
+    `<${LDP.Resource}>; rel="type"`
   ]
   if (task.isContainer) {
-    types.push('<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
+    types.push(`<${LDP.BasicContainer}>; rel="type"`)
   }
   const responseHeaders = {
     'Link': `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join(', ')}`,
@@ -97,6 +98,8 @@ export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.Serv
   } as any
   if (task.resourceData) {
     responseHeaders['Content-Type'] = task.resourceData.contentType
+  } else {
+    responseHeaders['Content-Type'] = 'text/plain'
   }
   if (task.createdLocation) {
     responseHeaders['Location'] = task.createdLocation

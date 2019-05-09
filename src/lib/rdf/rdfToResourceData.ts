@@ -6,7 +6,7 @@ import rdf from 'rdf-ext'
 import { Member } from '../storage/Container'
 
 const formats = Formats()
-const debug = Debug('membersListAsResourceData')
+const debug = Debug('rdfToResourceData')
 
 function toFormat (input: ReadableStream, contentType: string): Promise<string> {
   const serializer = formats.serializers[ contentType ]
@@ -14,7 +14,7 @@ function toFormat (input: ReadableStream, contentType: string): Promise<string> 
   return new Promise(resolve => {
     let str = ''
     output.on('data', (chunk: Buffer) => {
-      debug('chunk', chunk)
+      debug('chunk', chunk.toString())
       str += chunk.toString()
     })
     output.on('end', () => {
@@ -25,5 +25,6 @@ function toFormat (input: ReadableStream, contentType: string): Promise<string> 
 
 export async function rdfToResourceData (dataset: ReadableStream, asJsonLd: boolean): Promise<ResourceData> {
   const contentType = (asJsonLd ? 'application/ld+json' : 'text/turtle')
-  return makeResourceData(contentType, await toFormat(dataset, contentType))
+  const str = await toFormat(dataset, contentType)
+  return makeResourceData(contentType, str)
 }
