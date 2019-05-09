@@ -6,7 +6,7 @@ A central component for Solid servers, handles Web Access Control and Linked Dat
 
 ## Code Structure
 
-![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/57365052-a33fcd00-7184-11e9-848f-79e6da2361b1.png)
+![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/57371602-6f1fd880-7193-11e9-8ae2-653f949b731d.png))
 
 
 ### Entry point
@@ -135,16 +135,16 @@ interface WacLdpResponse {
 }
 ```
 
-### Operations on Content
-Currently the only type of content the server understands is RDF. In general, the following operations are available:
-* readFromBlob (looks at the content-type and the body and reads these into an in-memory object)
-* readFromContainer (looks at the container member list and reads that into an in-memory object)
-* writeToBlob (serializes an object to the requested representation)
-* applyPatch (patch type should be allowed for content type)
-* applyFilter (filter type should be allowed for content type)
+### RDF
+The following operations are available:
+* readFromBlob (looks at the content-type and the body and reads these into an in-memory RDF graph object)
+* readFromContainer (looks at the container member list and reads that into an in-memory RDF graph object)
+* writeToBlob (serializes an RDF graph object to the requested representation)
+* applyPatch
+* applyFilter
 
-For RDF, replace 'object' with 'rdf-ext dataset' in the above. Vurrently supported representations for RDF are Turtle and JSON-LD. The only currently allowed patch type for RDF are `SPARQL-update (any)` and `SPARQL-update (appendOnly)`. The currently allowed filter types for RDF are `SPARQL-SELECT`, `ldp-paging`, and `prefer-minimal-container`.
-
+Currently supported representations for RDF are Turtle and JSON-LD. The only currently allowed patch type for RDF are `SPARQL-update (any)` and `SPARQL-update (appendOnly)`. The currently allowed filter types for RDF are `SPARQL-SELECT`, `ldp-paging`, and `prefer-minimal-container`.
+In the future, we might add similar modules for e.g. HTML/RDFa or partial updates to binary blobs, and when that happens we will turn this component into an abstract 'content operations' component, of which RDF, HTML/RDFa and Binary are instantiations.
 
 Published under an MIT license by inrupt, Inc.
 
