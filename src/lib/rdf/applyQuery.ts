@@ -17,6 +17,8 @@ export async function applyQuery (dataset: any, sparqlQuery: string): Promise<st
   const myEngine = newEngine()
   const result: any = await myEngine.query(sparqlQuery,
     { sources: [ { type: 'rdfjsSource', value: store } ] })
+  // const sparqlResult = await myEngine.resultToString(result, 'application/json')
+  // debug(sparqlResult)
   const bindings = await new Promise((resolve) => {
     const bindings: any = []
     result.bindingsStream.on('end', () => {
