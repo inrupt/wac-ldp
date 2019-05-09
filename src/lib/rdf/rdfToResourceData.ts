@@ -6,7 +6,7 @@ import rdf from 'rdf-ext'
 import { Member } from '../storage/Container'
 
 const formats = Formats()
-const debug = Debug('membersListAsResourceData')
+const debug = Debug('rdfToResourceData')
 
 function toFormat (input: ReadableStream, contentType: string): Promise<string> {
   const serializer = formats.serializers[ contentType ]

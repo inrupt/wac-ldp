@@ -35,7 +35,7 @@ var __generator = (this && this.__generator) || function (thisArg, body) {
     }
 };
 exports.__esModule = true;
-var actor_init_sparql_rdfjs_1 = require("@comunica/actor-init-sparql-rdfjs");
+var module_1 = require();
 var n3_1 = require("n3");
 function test() {
     return __awaiter(this, void 0, void 0, function () {
@@ -46,7 +46,7 @@ function test() {
                     store = new n3_1.Store();
                     store.addQuad(n3_1.DataFactory.quad(n3_1.DataFactory.namedNode('a'), n3_1.DataFactory.namedNode('b'), n3_1.DataFactory.namedNode('http://dbpedia.org/resource/Belgium')));
                     store.addQuad(n3_1.DataFactory.quad(n3_1.DataFactory.namedNode('a'), n3_1.DataFactory.namedNode('b'), n3_1.DataFactory.namedNode('http://dbpedia.org/resource/Ghent')));
-                    myEngine = actor_init_sparql_rdfjs_1.newEngine();
+                    myEngine = module_1.newEngine();
                     return [4 /*yield*/, myEngine.query('SELECT * { ?s ?p <http://dbpedia.org/resource/Belgium>. ?s ?p ?o } LIMIT 100', { sources: [{ type: 'rdfjsSource', value: store }] })];
                 case 1:
                     result = _a.sent();
