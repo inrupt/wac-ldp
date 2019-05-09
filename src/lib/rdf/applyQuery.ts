@@ -3,8 +3,6 @@ import Debug from 'debug'
 import { Store, DataFactory } from 'n3'
 import { newEngine } from '@comunica/actor-init-sparql-rdfjs'
 import { streamToBuffer } from './ResourceDataUtils'
-import { Binding } from '@babel/traverse';
-
 const debug = Debug('apply-query')
 
 export async function applyQuery (dataset: any, sparqlQuery: string): Promise<string> {
