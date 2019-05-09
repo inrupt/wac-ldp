@@ -24,6 +24,7 @@ async function checkOwnerProfile (webId: string, origin: string, mode: string, s
 }
 
 export async function appIsTrustedForMode (task: OriginCheckTask, serverBase: string, storage: BlobTree): Promise<boolean> {
+  return Promise.resolve(true) // FIXME
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve(false)

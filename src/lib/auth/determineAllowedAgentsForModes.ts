@@ -44,7 +44,7 @@ function fetchGroupMembers (groupUri: string) {
 
 export async function determineAllowedAgentsForModes (task: ModesCheckTask): Promise<AccessModes> {
   const accessPredicate = (task.isAdjacent ? ACL.accessTo : ACL.default)
-  debug('task', task)
+  // debug('task', task)
   const isAuthorization: { [subject: string]: boolean } = {}
   const aboutAgents: { [subject: string]: { [agentId: string]: boolean} | undefined } = {}
   const aboutThisResource: { [subject: string]: boolean } = {}
@@ -63,7 +63,7 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
     })
   }
   task.aclGraph.filter((quad: any): boolean => {
-    debug('using quad', quad.subject.value, quad.predicate.value, quad.object.value)
+    debug('using quad', quad.subject.value, quad.predicate.value, quad.object.value, quad.predicate.value === accessPredicate, task.resourcePath.toString())
     // pass 1, sort all quads according to what they state about a subject
     if (quad.predicate.value === ACL.mode && typeof aboutMode[quad.object.value] === 'object') {
       (aboutMode[quad.object.value] as { [agent: string]: boolean })[quad.subject.value] = true
@@ -80,21 +80,26 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
     } else if (quad.predicate.value === accessPredicate && quad.object.value === task.resourcePath) {
       aboutThisResource[quad.subject.value] = true
     }
-    debug('aboutThisResource - ', task, quad.predicate.value, accessPredicate, quad.object.value, task.resourcePath)
+    debug('aboutThisResource - ', quad.predicate.value, accessPredicate, quad.object.value, task.resourcePath)
     return false
   })
   debug(isAuthorization, aboutAgents, aboutThisResource, aboutMode)
   // pass 2, find the subjects for which all boxes are checked, and add up modes from them
   function determineModeAgents (mode: string): Array<string> {
+    debug('determineModeAgents A', mode)
     let anybody = false
     let anybodyLoggedIn = false
     const agentsMap: { [agent: string]: boolean } = {}
     for (const subject in aboutMode[mode]) {
+      debug('determineModeAgents B', mode, subject, isAuthorization[subject], aboutThisResource[subject])
       if ((isAuthorization[subject]) && (aboutThisResource[subject])) {
+        debug('determineModeAgents C', mode, subject)
         Object.keys(aboutAgents[subject] as any).map(agentId => {
           if (anybody) {
+            debug('determineModeAgents D', mode, subject)
             return
           }
+          debug('determineModeAgents E', mode, subject)
           if (agentId === AGENT_CLASS_ANYBODY) {
             debug(mode, 'considering agentId', agentId, 'case 1')
             anybody = true
