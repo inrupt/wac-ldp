@@ -5,7 +5,7 @@ import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 
 const debug = Debug('Apply Patch')
 
-export async function applyPatch(resourceData: ResourceData, sparqlQuery: string, fullUrl: string, appendOnly: boolean) {
+export async function applyPatch (resourceData: ResourceData, sparqlQuery: string, fullUrl: string, appendOnly: boolean) {
   const store = rdflib.graph()
   const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
   parse(resourceData.body, store, fullUrl, resourceData.contentType)
