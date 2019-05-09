@@ -51,7 +51,7 @@ export async function readAcl (resourcePath: Path, resourceIsContainer: boolean,
     debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
   }
   return {
-    aclGraph: getGraphLocal(currentGuessBlob),
+    aclGraph: await getGraphLocal(currentGuessBlob),
     topicPath: currentGuessBlob,
     isAdjacent
   }
