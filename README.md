@@ -156,3 +156,4 @@ Contributors:
 * Pat McBennett
 * Justin Bingham
 * Sebastien Dubois
+* elf Pavlik
