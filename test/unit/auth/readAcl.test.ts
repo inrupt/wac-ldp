@@ -2,7 +2,7 @@ import * as fs from 'fs'
 import { readAcl, ACL_SUFFIX } from '../../../src/lib/auth/readAcl'
 import { Path, BlobTree } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
-import { RdfType } from '../../../src/lib/rdf/ResourceDataUtils';
+import { RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
 
 const aclDoc1Turtle = fs.readFileSync('test/fixtures/aclDoc-from-NSS.ttl')
 const aclDoc1Json = fs.readFileSync('test/fixtures/aclDoc-from-NSS.json')

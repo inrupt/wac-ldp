@@ -7,7 +7,7 @@ import { objectToStream, ResourceData, makeResourceData } from '../../src/lib/rd
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
-  const aclDoc = fs.readFileSync('test/fixtures/aclDoc-read.ttl')
+  const aclDoc = fs.readFileSync('test/fixtures/aclDoc-read-abs-path.ttl')
   const publicContainerAclDocData = await objectToStream(makeResourceData('text/turtle', aclDoc.toString()))
   await storage.getBlob(new Path(['root', 'public', '.acl'])).setData(publicContainerAclDocData)
 })
