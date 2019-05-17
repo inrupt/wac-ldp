@@ -4,7 +4,7 @@ import { BlobTree } from '../storage/BlobTree'
 import { parseHttpRequest, WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
 import { executeTask } from './executeTask'
-import { makeResourceData } from '../rdf/ResourceDataUtils';
+import { makeResourceData, bufferToStream } from '../rdf/ResourceDataUtils'
 
 const debug = Debug('app')
 
@@ -30,8 +30,8 @@ export function makeHandler (storage: BlobTree, aud: string, skipWac: boolean) {
   return handle
 }
 
-export function makeRootAcl(owner: string) {
-  return makeResourceData('text/turtle', [
+export function makeRootAcl (owner: string): ReadableStream {
+  const obj = makeResourceData('text/turtle', [
     `@prefix acl: <http://www.w3.org/ns/auth/acl#>.`,
     `<#owner>`,
     `  a acl:Authorization;`,
@@ -41,6 +41,8 @@ export function makeRootAcl(owner: string) {
     `  acl:mode`,
     `    acl:Read, acl:Write, acl:Control.`
   ].join('\n'))
+  const buffer = Buffer.from(JSON.stringify(obj))
+  return bufferToStream(buffer)
 }
 export { checkAccess, AccessCheckTask } from './checkAccess'
 export { determineWebId } from '../auth/determineWebId'
