@@ -80,8 +80,9 @@ export async function checkAccess (task: AccessCheckTask) {
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
     aclGraph,
-    isAdjacent,
-    resourcePath: topicPath.toString()
+    resourceIsTarget: isAdjacent,
+    targetUrl: new URL(topicPath.toString()),
+    contextUrl: new URL(topicPath.toString() + ACL_SUFFIX)
   } as ModesCheckTask)
   debug('allowedAgentsForModes', allowedAgentsForModes)
   const requiredAccessModes = determineRequiredAccessModes(task.wacLdpTaskType, resourceIsAclDocument)

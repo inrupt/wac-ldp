@@ -13,12 +13,12 @@ const ownerProfilesCache: { [webId: string]: string } = {}
 export interface OriginCheckTask {
   origin: string,
   mode: string,
-  resourceOwners: Array<string>
+  resourceOwners: Array<URL>
 }
 
-async function checkOwnerProfile (webId: string, origin: string, mode: string, serverBase: string, storage: BlobTree): Promise<boolean> {
-  if (!ownerProfilesCache[webId]) {
-    ownerProfilesCache[webId] = await getGraph(webId, serverBase, storage)
+async function checkOwnerProfile (webId: URL, origin: string, mode: string, serverBase: string, storage: BlobTree): Promise<boolean> {
+  if (!ownerProfilesCache[webId.toString()]) {
+    ownerProfilesCache[webId.toString()] = await getGraph(webId, serverBase, storage)
   }
   return Promise.resolve(false)
 }
@@ -29,7 +29,7 @@ export async function appIsTrustedForMode (task: OriginCheckTask, serverBase: st
     setTimeout(() => {
       resolve(false)
     }, OWNER_PROFILES_FETCH_TIMEOUT)
-    const done = Promise.all(task.resourceOwners.map(async (webId: string) => {
+    const done = Promise.all(task.resourceOwners.map(async (webId: URL) => {
       if (await checkOwnerProfile(webId, task.origin, task.mode, serverBase, storage)) {
         resolve(true)
       }

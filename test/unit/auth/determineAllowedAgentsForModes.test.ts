@@ -12,8 +12,9 @@ test('finds acl:accessTo modes', async () => {
   const dataset = await rdf.dataset().import(quadStream)
   const task: ModesCheckTask = {
     aclGraph: dataset,
-    isAdjacent: true,
-    resourcePath: '/'
+    resourceIsTarget: true,
+    contextUrl: new URL('https://example.com'),
+    targetUrl: new URL('https://example.com')
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
@@ -33,8 +34,9 @@ test('finds acl:default modes', async () => {
   const dataset = await rdf.dataset().import(quadStream)
   const task: ModesCheckTask = {
     aclGraph: dataset,
-    isAdjacent: false,
-    resourcePath: '/'
+    contextUrl: new URL('/.acl', 'https://example.com/'),
+    targetUrl: new URL('/', 'https://example.com/'),
+    resourceIsTarget: true
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
@@ -59,15 +61,16 @@ function testUrlFormat (format: string) {
     const dataset = await rdf.dataset().import(quadStream)
     const task: ModesCheckTask = {
       aclGraph: dataset,
-      isAdjacent: true,
-      resourcePath: '/public/'
+      resourceIsTarget: false,
+      targetUrl: new URL('https://example.com/public'),
+      contextUrl: new URL('https://example.com/public/.acl')
     }
     const result = await determineAllowedAgentsForModes(task)
     expect(result).toEqual({
-      read: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
-      write: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+      read: ['http://xmlns.com/foaf/0.1/Agent'],
+      write: [],
       append: [],
-      control: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org']
+      control: []
     })
   })
 }

@@ -51,13 +51,13 @@ export async function getGraphLocal (blob: Blob): Promise<any> {
   return rdf.dataset().import(quadStream)
 }
 
-export async function getGraph (url: string, serverBase: string, storage: BlobTree) {
-  if (url.substring(0, serverBase.length) === serverBase) {
-    const path: Path = urlToPath(url.substring(serverBase.length))
+export async function getGraph (url: URL, serverHost: string, storage: BlobTree) {
+  if (url.host === serverHost) {
+    const path: Path = urlToPath(url)
     const blob: Blob = storage.getBlob(path)
     return getGraphLocal(blob)
   } else {
-    const response: Response = await fetch(url)
+    const response: Response = await fetch(url.toString())
     const rdfType = determineRdfType(response.headers.get('content-type'))
     const quadStream = readRdf(rdfType, response as unknown as ReadableStream)
   }

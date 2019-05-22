@@ -20,9 +20,9 @@ function copyStringArray (arr: Array<string>): Array<string> {
   return JSON.parse(JSON.stringify(arr))
 }
 
-export function urlToPath (urlPath: string) {
-  const segments = urlPath.split('/')
-  segments[0] = 'root'
+export function urlToPath (url: URL) {
+  const segments = url.pathname.split('/')
+  segments[0] = url.host
   return new Path(segments)
 }
 
@@ -45,15 +45,15 @@ export class Path {
   toContainerPathPrefix (): string {
     return this.toString() + '/'
   }
-  toChild (segment: string) {
+  toChild (segment: string): Path {
     const childSegments = copyStringArray(this.segments)
     childSegments.push(segment)
     return new Path(childSegments)
   }
-  isRoot () {
+  isRoot (): boolean {
     return (this.segments.length <= 1)
   }
-  toParent () {
+  toParent (): Path {
     if (this.isRoot()) {
       throw new Error('root has no parent!')
     }
@@ -61,11 +61,11 @@ export class Path {
     parentSegments.pop()
     return new Path(parentSegments)
   }
-  hasSuffix (suffix: string) {
+  hasSuffix (suffix: string): boolean {
     const lastSegment = this.segments[this.segments.length - 1]
     return (lastSegment.substr(-suffix.length) === suffix)
   }
-  removeSuffix (suffix: string) {
+  removeSuffix (suffix: string): Path {
     const withoutSuffixSegments: Array<string> = copyStringArray(this.segments)
     const remainingLength: number = withoutSuffixSegments[withoutSuffixSegments.length - 1].length - suffix.length
     debug(withoutSuffixSegments, remainingLength, suffix)
@@ -79,10 +79,13 @@ export class Path {
     withoutSuffixSegments[withoutSuffixSegments.length - 1] = withoutSuffix
     return new Path(withoutSuffixSegments)
   }
-  appendSuffix (suffix: string) {
+  appendSuffix (suffix: string): Path {
     const withSuffixSegments: Array<string> = copyStringArray(this.segments)
     withSuffixSegments[withSuffixSegments.length - 1] += suffix
     return new Path(withSuffixSegments)
+  }
+  equals (other: Path): boolean {
+    return (this.toString() === other.toString())
   }
 }
 
