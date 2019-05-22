@@ -1,8 +1,15 @@
 import { getBearerToken } from '../../fixtures/bearerToken'
 import { determineWebId } from '../../../src/lib/auth/determineWebId'
 
-// FIXME: https://github.com/inrupt/wac-ldp/issues/70
-test.skip('correctly reads webId from bearer token', async () => {
+import MockDate from 'mockdate'
+beforeEach(() => {
+  MockDate.set(1434319925275);
+})
+afterEach(() => {
+  MockDate.reset();
+})
+
+test('correctly reads webId from bearer token', async () => {
   const { bearerToken, expectedWebId, aud } = getBearerToken(true)
   const webId = await determineWebId(bearerToken, aud)
   expect(webId).toEqual(expectedWebId)
