@@ -7,13 +7,13 @@ import { LDP, RDF } from './rdf-constants'
 
 const debug = Debug('membersListAsResourceData')
 
-function toRdf (containerUrl: string, membersList: Array<Member>): ReadableStream {
+function toRdf (containerUrl: URL, membersList: Array<Member>): ReadableStream {
   const dataset = rdf.dataset()
   membersList.map(member => {
     dataset.add(rdf.quad(
       rdf.namedNode(''),
       rdf.namedNode(LDP.contains),
-      rdf.namedNode(containerUrl + member.name)))
+      rdf.namedNode(containerUrl.toString() + member.name)))
   })
   debug('setting container type', LDP, RDF)
   dataset.add(rdf.quad(
@@ -35,7 +35,7 @@ function toRdf (containerUrl: string, membersList: Array<Member>): ReadableStrea
   return dataset.toStream()
 }
 
-export async function membersListAsResourceData (containerUrl: string, membersList: Array<Member>, asJsonLd: boolean): Promise<ResourceData> {
+export async function membersListAsResourceData (containerUrl: URL, membersList: Array<Member>, asJsonLd: boolean): Promise<ResourceData> {
   debug('membersListAsResourceData', containerUrl, membersList, asJsonLd)
   const dataset = toRdf(containerUrl, membersList)
   return rdfToResourceData(dataset, asJsonLd)

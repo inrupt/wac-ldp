@@ -1,5 +1,5 @@
 import uuid from 'uuid/v4'
-import { BlobTree, Path } from '../storage/BlobTree'
+import { BlobTree, Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
@@ -12,6 +12,8 @@ import Debug from 'debug'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { determineWebId } from '../auth/determineWebId'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
+import { RdfFetcher } from '../rdf/RdfFetcher'
+
 const debug = Debug('executeTask')
 
 function handleOptions (wacLdpTask: WacLdpTask) {
@@ -46,18 +48,18 @@ async function getBlobAndCheckETag (ldpTask: WacLdpTask, storage: BlobTree): Pro
   return blob
 }
 
-function determineAppendOnly (wacLdpTask: WacLdpTask, webId: string | undefined, storage: BlobTree, skipWac: boolean) {
+function determineAppendOnly (wacLdpTask: WacLdpTask, webId: URL | undefined, rdfFetcher: RdfFetcher, skipWac: boolean) {
   let appendOnly = false
   if (skipWac) {
     return false
   }
   return checkAccess({
-    path: wacLdpTask.path,
+    url: wacLdpTask.fullUrl,
     isContainer: wacLdpTask.isContainer,
     webId,
     origin: wacLdpTask.origin,
     wacLdpTaskType: wacLdpTask.wacLdpTaskType,
-    storage
+    rdfFetcher
   } as AccessCheckTask) // may throw if access is denied
 }
 
@@ -67,21 +69,22 @@ function convertToBlobWrite (wacLdpTask: WacLdpTask) {
   wacLdpTask.path = wacLdpTask.path.toChild(childName)
   wacLdpTask.wacLdpTaskType = TaskType.blobWrite
   wacLdpTask.isContainer = false
-  wacLdpTask.fullUrl += childName
+  wacLdpTask.fullUrl = new URL(wacLdpTask.fullUrl + childName)
   debug('converted', wacLdpTask)
   return wacLdpTask
 }
 
-async function handleGlobRead (wacLdpTask: WacLdpTask, storage: BlobTree, skipWac: boolean, webId: string | undefined) {
-  const containerMembers = await storage.getContainer(wacLdpTask.path).getMembers()
+async function handleGlobRead (wacLdpTask: WacLdpTask, storage: BlobTree, skipWac: boolean, webId: URL | undefined) {
+  const containerPath = urlToPath(wacLdpTask.fullUrl)
+  const containerMembers = await storage.getContainer(containerPath).getMembers()
   const rdfSources: { [indexer: string]: ResourceData } = {}
   await Promise.all(containerMembers.map(async (member) => {
     debug('glob, considering member', member)
     if (member.isContainer) {// not an RDF source
       return
     }
-    const blobPath = wacLdpTask.path.toChild(member.name)
-    const data = await storage.getBlob(blobPath).getData()
+    const blobUrl = new URL(member.name, wacLdpTask.fullUrl)
+    const data = await storage.getBlob(urlToPath(blobUrl)).getData()
     const resourceData = await streamToObject(data)
     if (['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
       return
@@ -89,21 +92,21 @@ async function handleGlobRead (wacLdpTask: WacLdpTask, storage: BlobTree, skipWa
     try {
       if (!skipWac) {
         await checkAccess({
-          path: blobPath,
+          url: blobUrl,
           isContainer: false,
           webId,
           origin: wacLdpTask.origin,
           wacLdpTaskType: TaskType.blobRead,
-          storage
+          rdfFetcher: new RdfFetcher('', storage)
         } as AccessCheckTask) // may throw if access is denied
       }
       rdfSources[member.name] = resourceData
       debug('Found RDF source', member.name)
     } catch (error) {
       if (error instanceof ErrorResult && error.resultType === ResultType.AccessDenied) {
-        debug('access denied to blob in glob, skipping', blobPath.toString())
+        debug('access denied to blob in glob, skipping', blobUrl.toString())
       } else {
-        debug('unexpected error for blob in glob, skipping', error.message, blobPath.toString())
+        debug('unexpected error for blob in glob, skipping', error.message, blobUrl.toString())
       }
     }
   }))
@@ -146,11 +149,13 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
     return handleOptions(wacLdpTask)
   }
 
-  const webId = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
+  const webId: URL | undefined = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
   debug({ webId, path: wacLdpTask.path, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
 
+  const rdfFetcher = new RdfFetcher(aud, storage)
+
   // may throw if access is denied:
-  const appendOnly = await determineAppendOnly(wacLdpTask, webId, storage, skipWac)
+  const appendOnly = await determineAppendOnly(wacLdpTask, webId, rdfFetcher, skipWac)
 
   // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
   // but notice that access check for this is append on the container,

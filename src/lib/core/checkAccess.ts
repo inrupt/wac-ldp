@@ -3,11 +3,11 @@ import { OriginCheckTask, appIsTrustedForMode } from '../auth/appIsTrustedForMod
 import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from '../auth/determineAllowedAgentsForModes'
 import { ACL } from '../rdf/rdf-constants'
 import { determineWebId } from '../auth/determineWebId'
-import { readAcl, ACL_SUFFIX } from '../auth/readAcl'
 import { Path, BlobTree } from '../storage/BlobTree'
 import Debug from 'debug'
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
+import { RdfFetcher, ACL_SUFFIX } from '../rdf/RdfFetcher'
 
 const debug = Debug('checkAccess')
 
@@ -34,7 +34,7 @@ function determineRequiredAccessModes (wacLdpTaskType: TaskType, resourceIsAclDo
   throw new ErrorResult(ResultType.InternalServerError)
 }
 
-async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, webId: string | undefined, origin: string | undefined, serverBase: string, storage: BlobTree): Promise<boolean> {
+async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: RdfFetcher): Promise<boolean> {
   // first check agent:
   const agents = (allowedAgentsForModes as any)[mode]
   debug(mode, agents)
@@ -51,31 +51,46 @@ async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, we
     origin,
     mode,
     resourceOwners: allowedAgentsForModes.control
-  } as OriginCheckTask, serverBase, storage)
+  } as OriginCheckTask, graphFetcher)
 }
 
 export interface AccessCheckTask {
-  path: Path,
+  url: URL,
   isContainer: boolean,
-  webId: string,
+  webId: URL | undefined,
   origin: string,
   wacLdpTaskType: TaskType,
-  serverBase: string,
-  storage: BlobTree
+  rdfFetcher: RdfFetcher
+}
+
+function urlHasSuffix (url: URL, suffix: string) {
+  return (url.toString().substr(-suffix.length) === suffix)
+}
+
+function removeUrlSuffix (url: URL, suffix: string): URL {
+  const urlStr = url.toString()
+  const remainingLength: number = urlStr.length - suffix.length
+  if (remainingLength < 0) {
+    throw new Error('no suffix match (URL shorter than suffix)')
+  }
+  if (urlStr[urlStr.length - 1].substring(remainingLength) !== suffix) {
+    throw new Error('no suffix match')
+  }
+  return new URL(urlStr.substring(0, remainingLength))
 }
 
 export async function checkAccess (task: AccessCheckTask) {
-  let baseResourcePath: Path
+  let baseResourceUrl: URL
   let resourceIsAclDocument
-  if (task.path.hasSuffix(ACL_SUFFIX)) {
+  if (urlHasSuffix(task.url, ACL_SUFFIX)) {
     // editing an ACL file requires acl:Control on the base resource
-    baseResourcePath = task.path.removeSuffix(ACL_SUFFIX)
+    baseResourceUrl = removeUrlSuffix(task.url, ACL_SUFFIX)
     resourceIsAclDocument = true
   } else {
-    baseResourcePath = task.path
+    baseResourceUrl = task.url
     resourceIsAclDocument = false
   }
-  const { aclGraph, topicPath, isAdjacent } = await readAcl(baseResourcePath, task.isContainer, task.storage)
+  const { aclGraph, topicPath, isAdjacent } = await task.rdfFetcher.readAcl(baseResourceUrl, task.isContainer)
   debug('aclGraph', aclGraph)
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
@@ -91,13 +106,13 @@ export async function checkAccess (task: AccessCheckTask) {
   // throw if agent or origin does not have access
   await Promise.all(requiredAccessModes.map(async (mode: string) => {
     debug('required mode', mode)
-    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.serverBase, task.storage)) {
+    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.rdfFetcher)) {
       debug(mode, 'is allowed!')
       return
     }
     debug(`mode ${mode} is not allowed, but checking for appendOnly now`)
     // SPECIAL CASE: append-only
-    if (mode === 'write' && await modeAllowed('append', allowedAgentsForModes, task.webId, task.origin, task.serverBase, task.storage)) {
+    if (mode === 'write' && await modeAllowed('append', allowedAgentsForModes, task.webId, task.origin, task.rdfFetcher)) {
       appendOnly = true
       debug('write was requested and is not allowed but append is; setting appendOnly to true')
       return

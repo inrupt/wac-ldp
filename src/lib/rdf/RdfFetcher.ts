@@ -1,0 +1,153 @@
+import Debug from 'debug'
+import rdf from 'rdf-ext'
+import N3Parser from 'rdf-parser-n3'
+import JsonLdParser from 'rdf-parser-jsonld'
+import convert from 'buffer-to-stream'
+
+import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
+import { Blob } from '../storage/Blob'
+import { ResourceData, makeResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
+
+const debug = Debug('getGraph')
+
+export const ACL_SUFFIX = '.acl'
+
+export function getEmptyGraph () {
+  return rdf.dataset()
+}
+
+function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
+  let parser
+  switch (rdfType) {
+    case RdfType.JsonLd:
+      debug('RdfType JSON-LD')
+      parser = new JsonLdParser({
+        factory: rdf
+      })
+      break
+    case RdfType.Turtle:
+    default:
+      debug('RdfType N3')
+      parser = new N3Parser({
+        factory: rdf
+      })
+      break
+  }
+  return parser.import(bodyStream)
+}
+
+async function getGraphLocal (blob: Blob): Promise<any> {
+  const stream = await blob.getData()
+  debug('stream', typeof stream)
+  let resourceData
+  if (stream) {
+    resourceData = await streamToObject(stream) as ResourceData
+  } else {
+    return getEmptyGraph()
+  }
+  debug('got ACL ResourceData', resourceData)
+
+  const bodyStream = convert(Buffer.from(resourceData.body))
+
+  const quadStream = readRdf(resourceData.rdfType, bodyStream)
+  return rdf.dataset().import(quadStream)
+}
+
+export class RdfFetcher {
+  serverHost: string
+  storage: BlobTree
+  constructor (serverHost: string, storage: BlobTree) {
+    this.serverHost = serverHost
+    this.storage = storage
+  }
+  async fetchGraph (url: URL) {
+    if (url.host === this.serverHost) {
+      const path: Path = urlToPath(url)
+      const blob: Blob = this.storage.getBlob(path)
+      return getGraphLocal(blob)
+    } else {
+      const response: Response = await fetch(url.toString())
+      const rdfType = determineRdfType(response.headers.get('content-type'))
+      const quadStream = readRdf(rdfType, response as unknown as ReadableStream)
+    }
+  }
+
+  //  cases:
+  // * request path foo/bar/
+  // * resource path foo/bar/
+  //   * acl path foo/bar/.acl
+  //   * acl path foo/.acl (filter on acl:default)
+  // * request path foo/bar/baz
+  // * resource path foo/bar/baz
+  //   * acl path foo/bar/baz.acl
+  //   * acl path foo/bar/.acl (filter on acl:default)
+  // * request path foo/bar/.acl
+  // * resource path foo/bar/
+  //   * acl path foo/bar/.acl (look for acl:Control)
+  //   * acl path foo/.acl (filter on acl:default, look for acl:Control)
+  // * request path foo/bar/baz.acl
+  // * resource path foo/bar/baz
+  //   * acl path foo/bar/baz.acl (look for acl:Control)
+  //   * acl path foo/bar/.acl (filter on acl:default, look for acl:Control)
+
+  // this method should act on the resource path (not the request path) and
+  // filter on acl:default and just give the ACL triples that
+  // apply for the resource path, so that the acl path becomes irrelevant
+  // from there on.
+  // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
+  // from storage
+  async readAcl (resourceUrl: URL, resourceIsContainer: boolean) {
+    const resourcePath = urlToPath(resourceUrl)
+    let currentGuessPath = resourcePath
+    let currentIsContainer = resourceIsContainer
+    let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+    let isAdjacent = true
+    let currentGuessBlob = this.storage.getBlob(aclDocPath)
+    let currentGuessBlobExists = await currentGuessBlob.exists()
+    debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
+    while (!currentGuessBlobExists) {
+      if (currentGuessPath.isRoot()) {
+        // root ACL, nobody has access:
+        return { aclGraph: getEmptyGraph(), topicPath: currentGuessPath, isAdjacent }
+      }
+      currentGuessPath = currentGuessPath.toParent()
+      isAdjacent = false
+      currentIsContainer = true
+      aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+      currentGuessBlob = this.storage.getBlob(aclDocPath)
+      currentGuessBlobExists = await currentGuessBlob.exists()
+      debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
+    }
+    return {
+      aclGraph: await getGraphLocal(currentGuessBlob),
+      topicPath: currentGuessPath,
+      isAdjacent
+    }
+  }
+}
+
+// Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
+
+// # Root ACL resource for the user account
+// @prefix acl: <http://www.w3.org/ns/auth/acl#>.
+
+// <#owner>
+//     a acl:Authorization;
+
+//     acl:agent <https://michielbdejong.inrupt.net/profile/card#me> ;
+
+//     # Optional owner email, to be used for account recovery:
+//     acl:agent <mailto:michiel@unhosted.org>;
+
+//     # Set the access to the root storage folder itself
+//     acl:accessTo </>;
+
+//     # All resources will inherit this authorization, by default
+//     acl:defaultForNew </>;
+
+//     # The owner has all of the access modes allowed
+//     acl:mode
+//         acl:Read, acl:Write, acl:Control.
+
+// # Data is private by default; no other agents get access unless specifically
+// # authorized in other .acls

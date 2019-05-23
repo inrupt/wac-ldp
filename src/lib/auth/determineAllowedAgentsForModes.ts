@@ -44,18 +44,10 @@ function fetchGroupMembers (groupUri: string) {
   return []
 }
 
-function resolveContext (input: string, base: string): string {
-  const fullUrl = new URL(input, base)
-  return fullUrl.toString()
-}
-
-function pathsEquivalent (grantPath: string, resourcePath: string, contextPath: string): boolean {
-  debug('pathsEquivalent', { grantPath, resourcePath })
-  // GrantPaths 'https://example.com/public', 'https://example.com/public/', './', '../public/', '.',
-  const absoluteGrantPath = resolveContext(grantPath, contextPath)
-  // resourcePath: 'https://example.com/public'
-  // contextPath: 'https://example.com/public/.acl'
-  return (absoluteGrantPath === resourcePath)
+function urlsEquivalent (grantUrl: URL, targetURL: URL): boolean {
+  debug('urlsEquivalent', grantUrl.toString(), targetURL.toString())
+ 
+  return (grantUrl.toString() === targetURL.toString())
 }
 
 export async function determineAllowedAgentsForModes (task: ModesCheckTask): Promise<AccessModes> {
@@ -116,8 +108,8 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
       //  * target https://example.com/c1/c2/, acl doc https://example.com/c1/c2/.acl (non-adjacent, parent)
       //  * target https://example.com/c1/ acl doc https://example.com/c1/.acl (non-adjacent, parent)
       //  * target https://example.com/, acl doc https://example.com/.acl (non-adjacent, parent)
-
-      if (pathsEquivalent(quad.object.value, task.targetUrl.toString(), task.contextUrl.toString())) {
+      const valueUrl = new URL(quad.object.value, task.contextUrl)
+      if (urlsEquivalent(task.targetUrl, valueUrl)) {
         debug('using quad for path', quad.subject.value, quad.predicate.value, quad.object.value)
         aboutThisResource[quad.subject.value] = true
       } else {

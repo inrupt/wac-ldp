@@ -142,8 +142,8 @@ function determineSparqlQuery (urlPath: string | undefined): string | undefined 
   return url.searchParams.get('query') || undefined
 }
 
-function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): string {
-  return hostname + httpReq.url
+function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL {
+  return new URL(hostname + httpReq.url)
 }
 
 function determinePreferMinimalContainer (headers: http.IncomingHttpHeaders): boolean {
@@ -174,7 +174,6 @@ export async function parseHttpRequest (hostname: string, httpReq: http.Incoming
     wacLdpTaskType: determineTaskType(httpReq.method, httpReq.url),
     bearerToken: determineBearerToken(httpReq.headers),
     requestBody: undefined,
-    path: determinePath(httpReq.url),
     sparqlQuery: determineSparqlQuery(httpReq.url),
     fullUrl: determineFullUrl(hostname, httpReq),
     preferMinimalContainer: determinePreferMinimalContainer(httpReq.headers)
@@ -207,7 +206,7 @@ export interface WacLdpTask {
   wacLdpTaskType: TaskType
   path: Path,
   sparqlQuery: string | undefined
-  fullUrl: string,
+  fullUrl: URL,
   requestBody: string | undefined
   preferMinimalContainer: boolean
 }

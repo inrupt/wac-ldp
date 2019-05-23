@@ -1,5 +1,5 @@
-import { makeResourceData, bufferToStream } from '../rdf/ResourceDataUtils'
-import { ACL_SUFFIX } from './readAcl'
+import { makeResourceData, bufferToStream } from './ResourceDataUtils'
+import { ACL_SUFFIX } from '../rdf/RdfFetcher'
 import { Path, BlobTree } from '../storage/BlobTree'
 
 export async function setRootAcl (storage: BlobTree, owner: string) {

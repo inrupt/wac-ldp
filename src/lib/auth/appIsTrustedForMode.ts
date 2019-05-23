@@ -1,7 +1,7 @@
 
 import Debug from 'debug'
 import { ACL, RDF } from '../rdf/rdf-constants'
-import { getGraphLocal, getGraph } from '../rdf/getGraph'
+import { RdfFetcher } from '../rdf/RdfFetcher'
 import { BlobTree } from '../storage/BlobTree'
 
 const debug = Debug('DetermineAllowedModeForOrigin')
@@ -16,21 +16,21 @@ export interface OriginCheckTask {
   resourceOwners: Array<URL>
 }
 
-async function checkOwnerProfile (webId: URL, origin: string, mode: string, serverBase: string, storage: BlobTree): Promise<boolean> {
+async function checkOwnerProfile (webId: URL, origin: string, mode: string, graphFetcher: RdfFetcher): Promise<boolean> {
   if (!ownerProfilesCache[webId.toString()]) {
-    ownerProfilesCache[webId.toString()] = await getGraph(webId, serverBase, storage)
+    ownerProfilesCache[webId.toString()] = await graphFetcher.fetchGraph(webId)
   }
   return Promise.resolve(false)
 }
 
-export async function appIsTrustedForMode (task: OriginCheckTask, serverBase: string, storage: BlobTree): Promise<boolean> {
+export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: RdfFetcher): Promise<boolean> {
   return Promise.resolve(true) // FIXME
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve(false)
     }, OWNER_PROFILES_FETCH_TIMEOUT)
     const done = Promise.all(task.resourceOwners.map(async (webId: URL) => {
-      if (await checkOwnerProfile(webId, task.origin, task.mode, serverBase, storage)) {
+      if (await checkOwnerProfile(webId, task.origin, task.mode, graphFetcher)) {
         resolve(true)
       }
     }))

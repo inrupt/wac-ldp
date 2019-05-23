@@ -29,7 +29,7 @@ export function makeHandler (storage: BlobTree, aud: string, skipWac: boolean) {
   return handle
 }
 
-export { setRootAcl } from '../auth/setRootAcl'
+export { setRootAcl } from '../rdf/setRootAcl'
 export { checkAccess, AccessCheckTask } from './checkAccess'
 export { determineWebId } from '../auth/determineWebId'
 export { BlobTree, Path } from '../storage/BlobTree'
