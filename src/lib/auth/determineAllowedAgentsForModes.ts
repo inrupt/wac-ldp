@@ -46,7 +46,7 @@ function fetchGroupMembers (groupUri: string) {
 
 function urlsEquivalent (grantUrl: URL, targetURL: URL): boolean {
   debug('urlsEquivalent', grantUrl.toString(), targetURL.toString())
- 
+
   return (grantUrl.toString() === targetURL.toString())
 }
 
