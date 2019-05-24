@@ -1,11 +1,6 @@
-import jwt from 'jsonwebtoken'
 import Debug from 'debug'
-import { WacLdpTask } from '../api/http/HttpParser'
 import { ACL, FOAF, RDF, VCARD } from '../rdf/rdf-constants'
-import { Path } from '../storage/BlobTree'
 import { RdfFetcher } from '../rdf/RdfFetcher'
-import { quad } from 'rdf-ext'
-import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
 
 const debug = Debug('DetermineAllowedAgentsForModes')
 
@@ -47,16 +42,28 @@ async function fetchGroupMembers (groupUri: URL, rdfFetcher: RdfFetcher): Promis
   debug('fetchGroupMembers', groupUri, rdfFetcher)
   const vcardsGraph: any = await rdfFetcher.fetchGraph(groupUri)
   const members: { [indexer: string]: URL } = {}
-  vcardsGraph.map((quad: any): void => {
+  const quads: Array<any> = []
+  try {
+    vcardsGraph.map((quad: any): void => {
+      quads.push(quad)
+    })
+  } catch (err) {
+    debug('error looping over quads!', err)
+  }
+  quads.map((quad: any): void => {
+    debug('quad', quad)
     if (quad.predicate.value === VCARD.hasMember) {
       debug('group member!', quad.subject.value, quad.object.value)
-      debug('comparing', new URL(quad.subject.value, groupUri).toString(), groupUri.toString())
-      const memberUri = new URL(quad.subject.value, groupUri)
-      if (memberUri.toString() === groupUri.toString()) {
-        members[memberUri.toString()] = memberUri
+      const subjectUri = new URL(quad.subject.value, groupUri)
+      debug('comparing', subjectUri.toString(), groupUri.toString())
+      if (subjectUri.toString() === groupUri.toString()) {
+        const objectUri = new URL(quad.object.value, groupUri)
+        members[objectUri.toString()] = objectUri
       }
     }
+    debug('members now', Object.keys(members))
   })
+  debug('members  final', Object.keys(members))
   return Object.keys(members).map((str: string) => members[str])
 }
 
@@ -125,7 +132,7 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
         } catch (err) {
           debug('could not fetch group members', err)
         }
-        debug('group members', groupMembers)
+        debug('group members', groupMembers.map((url: URL): string => url.toString()))
         addAgents(quad.subject.value, groupMembers)
         break
       case ACL.agentClass:
