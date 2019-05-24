@@ -2,7 +2,8 @@ const PREFIX = {
   ACL: 'http://www.w3.org/ns/auth/acl#',
   FOAF: 'http://xmlns.com/foaf/0.1/',
   LDP: 'http://www.w3.org/ns/ldp#',
-  RDF: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#'
+  RDF: 'http://www.w3.org/1999/02/22-rdf-syntax-ns#',
+  VCARD: 'http://www.w3.org/2006/vcard/ns#'
 }
 
 export const ACL = {
@@ -36,4 +37,8 @@ export const LDP = {
 }
 export const RDF = {
   type: PREFIX.RDF + 'type'
+}
+
+export const VCARD = {
+  hasMember: PREFIX.VCARD + 'hasMember'
 }

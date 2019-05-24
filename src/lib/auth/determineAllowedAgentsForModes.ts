@@ -1,8 +1,11 @@
 import jwt from 'jsonwebtoken'
 import Debug from 'debug'
 import { WacLdpTask } from '../api/http/HttpParser'
-import { ACL, FOAF, RDF } from '../rdf/rdf-constants'
+import { ACL, FOAF, RDF, VCARD } from '../rdf/rdf-constants'
 import { Path } from '../storage/BlobTree'
+import { RdfFetcher } from '../rdf/RdfFetcher'
+import { quad } from 'rdf-ext'
+import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
 
 const debug = Debug('DetermineAllowedAgentsForModes')
 
@@ -29,7 +32,8 @@ export interface ModesCheckTask {
   aclGraph: any,
   targetUrl: URL,
   contextUrl: URL,
-  resourceIsTarget: boolean
+  resourceIsTarget: boolean,
+  rdfFetcher: RdfFetcher
 }
 
 export interface AccessModes {
@@ -39,9 +43,21 @@ export interface AccessModes {
   control: Array<URL>
 }
 
-function fetchGroupMembers (groupUri: string) {
-  // TODO: implement
-  return []
+async function fetchGroupMembers (groupUri: URL, rdfFetcher: RdfFetcher): Promise<Array<URL>> {
+  debug('fetchGroupMembers', groupUri, rdfFetcher)
+  const vcardsGraph: any = await rdfFetcher.fetchGraph(groupUri)
+  const members: { [indexer: string]: URL } = {}
+  vcardsGraph.map((quad: any): void => {
+    if (quad.predicate.value === VCARD.hasMember) {
+      debug('group member!', quad.subject.value, quad.object.value)
+      debug('comparing', new URL(quad.subject.value, groupUri).toString(), groupUri.toString())
+      const memberUri = new URL(quad.subject.value, groupUri)
+      if (memberUri.toString() === groupUri.toString()) {
+        members[memberUri.toString()] = memberUri
+      }
+    }
+  })
+  return Object.keys(members).map((str: string) => members[str])
 }
 
 function stripTrailingSlash (str: string) {
@@ -69,64 +85,85 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
     [ACL.Control]: {}
   }
 
-  function addAgents (subject: string, agents: Array<string>) {
+  function addAgents (subject: string, agents: Array<URL>) {
     if (typeof aboutAgents[subject] === 'undefined') {
       aboutAgents[subject] = {}
     }
     agents.map(agent => {
-      (aboutAgents[subject] as { [agent: string]: boolean })[agent] = true
+      (aboutAgents[subject] as { [agent: string]: boolean })[agent.toString()] = true
     })
   }
 
-  task.aclGraph.filter((quad: any): boolean => {
-    // pass 1, sort all quads according to what they state about a subject
-    if (quad.predicate.value === ACL.mode && typeof aboutMode[quad.object.value] === 'object') {
-      debug('using quad for mode', quad.subject.value, quad.predicate.value, quad.object.value)
-      ;(aboutMode[quad.object.value] as { [agent: string]: boolean })[quad.subject.value] = true
-    } else if (quad.predicate.value === RDF.type && quad.object.value === ACL.Authorization) {
-      debug('using quad for type', quad.subject.value, quad.predicate.value, quad.object.value)
-      isAuthorization[quad.subject.value] = true
-    } else if (quad.predicate.value === ACL.agent) {
-      debug('using quad for agent', quad.subject.value, quad.predicate.value, quad.object.value)
-      addAgents(quad.subject.value, [quad.object.value])
-    } else if (quad.predicate.value === ACL.agentGroup) {
-      debug('using quad for agentGroup', quad.subject.value, quad.predicate.value, quad.object.value)
-      addAgents(quad.subject.value, fetchGroupMembers(quad.object.value))
-    } else if (quad.predicate.value === ACL.agentClass) {
-      debug('using quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
-      if ([AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN].indexOf(quad.object.value) !== -1) {
-        debug('using quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
+  // pass 1, sort all quads according to what they state about a subject
+  await Promise.all(task.aclGraph.map(async (quad: any): Promise<void> => {
+    switch (quad.predicate.value) {
+      case ACL.mode:
+        if (typeof aboutMode[quad.object.value] === 'object') {
+          debug('using quad for mode', quad.subject.value, quad.predicate.value, quad.object.value)
+          ;(aboutMode[quad.object.value] as { [agent: string]: boolean })[quad.subject.value] = true
+        } else {
+          debug('invalid mode!', quad.object.value)
+        }
+        break
+      case RDF.type:
+        if (quad.object.value === ACL.Authorization) {
+          debug('using quad for type', quad.subject.value, quad.predicate.value, quad.object.value)
+          isAuthorization[quad.subject.value] = true
+        } else {
+          debug('invalid type!', quad.object.value)
+        }
+        break
+      case ACL.agent:
+        debug('using quad for agent', quad.subject.value, quad.predicate.value, quad.object.value)
         addAgents(quad.subject.value, [quad.object.value])
-      } else {
-        debug('rejecting quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
-      }
-    } else if (quad.predicate.value === accessPredicate) {
-      // Three cases: adjacent (doc), adjacent (container), non-adjacent (parent):
-      // * resource https://example.com/c1/c2/c3/doc
-      //  * target https://example.com/c1/c2/c3/doc, acl doc https://example.com/c1/c2/c3/doc.acl (adjacent, doc)
-      //  * target https://example.com/c1/c2/c3/, acl doc https://example.com/c1/c2/c3/.acl (non-adjacent, parent)
-      //  * target https://example.com/c1/c2/, acl doc https://example.com/c1/c2/.acl  (non-adjacent, parent)
-      //  * target https://example.com/c1/ acl doc https://example.com/c1/.acl (non-adjacent, parent)
-      //  * target https://example.com/, acl doc https://example.com/.acl (non-adjacent, parent)
-      // * resource https://example.com/c1/c2/c3/c4/ (non-adjacent, parent)
-      //  * target https://example.com/c1/c2/c3/c4/, acl doc https://example.com/c1/c2/c3/c4/.acl (adjacent, container)
-      //  * target https://example.com/c1/c2/c3/, acl doc https://example.com/c1/c2/c3/.acl (non-adjacent, parent)
-      //  * target https://example.com/c1/c2/, acl doc https://example.com/c1/c2/.acl (non-adjacent, parent)
-      //  * target https://example.com/c1/ acl doc https://example.com/c1/.acl (non-adjacent, parent)
-      //  * target https://example.com/, acl doc https://example.com/.acl (non-adjacent, parent)
-      const valueUrl = new URL(quad.object.value, task.contextUrl)
-      if (urlsEquivalent(task.targetUrl, valueUrl)) {
-        debug('using quad for path', quad.subject.value, quad.predicate.value, quad.object.value)
-        aboutThisResource[quad.subject.value] = true
-      } else {
-        debug('rejecting quad for path', quad.subject.value, quad.predicate.value, quad.object.value)
-      }
-    } else {
-      debug('rejecting quad', quad.subject.value, quad.predicate.value, quad.object.value)
+        break
+      case ACL.agentGroup:
+        debug('using quad for agentGroup', quad.subject.value, quad.predicate.value, quad.object.value)
+        let groupMembers: Array<URL> = []
+        try {
+          groupMembers = await fetchGroupMembers(new URL(quad.object.value, task.contextUrl), task.rdfFetcher)
+        } catch (err) {
+          debug('could not fetch group members', err)
+        }
+        debug('group members', groupMembers)
+        addAgents(quad.subject.value, groupMembers)
+        break
+      case ACL.agentClass:
+        debug('using quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
+        if ([AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN].indexOf(quad.object.value) !== -1) {
+          debug('using quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
+          addAgents(quad.subject.value, [quad.object.value])
+        } else {
+          debug('rejecting quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
+        }
+        break
+      case accessPredicate:
+        // Three cases: adjacent (doc), adjacent (container), non-adjacent (parent):
+        // * resource https://example.com/c1/c2/c3/doc
+        //  * target https://example.com/c1/c2/c3/doc, acl doc https://example.com/c1/c2/c3/doc.acl (adjacent, doc)
+        //  * target https://example.com/c1/c2/c3/, acl doc https://example.com/c1/c2/c3/.acl (non-adjacent, parent)
+        //  * target https://example.com/c1/c2/, acl doc https://example.com/c1/c2/.acl  (non-adjacent, parent)
+        //  * target https://example.com/c1/ acl doc https://example.com/c1/.acl (non-adjacent, parent)
+        //  * target https://example.com/, acl doc https://example.com/.acl (non-adjacent, parent)
+        // * resource https://example.com/c1/c2/c3/c4/ (non-adjacent, parent)
+        //  * target https://example.com/c1/c2/c3/c4/, acl doc https://example.com/c1/c2/c3/c4/.acl (adjacent, container)
+        //  * target https://example.com/c1/c2/c3/, acl doc https://example.com/c1/c2/c3/.acl (non-adjacent, parent)
+        //  * target https://example.com/c1/c2/, acl doc https://example.com/c1/c2/.acl (non-adjacent, parent)
+        //  * target https://example.com/c1/ acl doc https://example.com/c1/.acl (non-adjacent, parent)
+        //  * target https://example.com/, acl doc https://example.com/.acl (non-adjacent, parent)
+
+        const valueUrl = new URL(quad.object.value, task.contextUrl)
+        if (urlsEquivalent(task.targetUrl, valueUrl)) {
+          debug('using quad for path', quad.subject.value, quad.predicate.value, quad.object.value)
+          aboutThisResource[quad.subject.value] = true
+        } else {
+          debug('rejecting quad for path', quad.subject.value, quad.predicate.value, quad.object.value)
+        }
+        break
+      default:
+        debug('rejecting quad', quad.subject.value, quad.predicate.value, quad.object.value)
     }
-    // debug('aboutThisResource - ', quad.predicate.value, accessPredicate, quad.object.value, task.resourcePath)
-    return false
-  })
+  }))
 
   debug(isAuthorization, aboutAgents, aboutThisResource, aboutMode)
   // pass 2, find the subjects for which all boxes are checked, and add up modes from them
