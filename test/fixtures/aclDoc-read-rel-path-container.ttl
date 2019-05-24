@@ -4,6 +4,6 @@
 <#public>
     a acl:Authorization;
     acl:agentClass foaf:Agent;
-    acl:accessTo </foo/>;
-    acl:default </foo/>;
+    acl:accessTo <../foo/>;
     acl:mode acl:Read.
+    

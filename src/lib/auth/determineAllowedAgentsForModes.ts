@@ -44,10 +44,16 @@ function fetchGroupMembers (groupUri: string) {
   return []
 }
 
+function stripTrailingSlash (str: string) {
+  if (str.substr(-1) === '/') {
+    return str.substring(0, str.length - 1)
+  }
+  return str
+}
 function urlsEquivalent (grantUrl: URL, targetURL: URL): boolean {
   debug('urlsEquivalent', grantUrl.toString(), targetURL.toString())
 
-  return (grantUrl.toString() === targetURL.toString())
+  return (stripTrailingSlash(grantUrl.toString()) === stripTrailingSlash(targetURL.toString()))
 }
 
 export async function determineAllowedAgentsForModes (task: ModesCheckTask): Promise<AccessModes> {
