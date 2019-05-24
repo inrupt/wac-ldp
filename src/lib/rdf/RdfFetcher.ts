@@ -96,11 +96,12 @@ export class RdfFetcher {
   // from there on.
   // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
   // from storage
-  async readAcl (resourceUrl: URL, resourceIsContainer: boolean) {
+  async readAcl (resourceUrl: URL) {
     const resourcePath = urlToPath(resourceUrl)
     let currentGuessPath = resourcePath
-    let currentIsContainer = resourceIsContainer
-    let aclDocPath = (resourceIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+    let currentIsContainer = resourcePath.isContainer
+    let aclDocPath = (resourcePath.isContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+    debug('aclDocPath from resourcePath', resourcePath, aclDocPath)
     let isAdjacent = true
     let currentGuessBlob = this.storage.getBlob(aclDocPath)
     let currentGuessBlobExists = await currentGuessBlob.exists()
@@ -113,7 +114,7 @@ export class RdfFetcher {
       currentGuessPath = currentGuessPath.toParent()
       isAdjacent = false
       currentIsContainer = true
-      aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX) : currentGuessPath.appendSuffix(ACL_SUFFIX))
+      aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
       currentGuessBlob = this.storage.getBlob(aclDocPath)
       currentGuessBlobExists = await currentGuessBlob.exists()
       debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)

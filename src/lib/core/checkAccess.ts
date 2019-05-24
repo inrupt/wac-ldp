@@ -90,7 +90,7 @@ export async function checkAccess (task: AccessCheckTask) {
     baseResourceUrl = task.url
     resourceIsAclDocument = false
   }
-  const { aclGraph, topicPath, isAdjacent } = await task.rdfFetcher.readAcl(baseResourceUrl, task.isContainer)
+  const { aclGraph, topicPath, isAdjacent } = await task.rdfFetcher.readAcl(baseResourceUrl)
   debug('aclGraph', aclGraph)
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({

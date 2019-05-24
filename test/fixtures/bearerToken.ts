@@ -1,4 +1,4 @@
-export function getBearerToken (correct: boolean): { expectedWebId: string, bearerToken: string, aud: string } {
+export function getBearerToken (correct: boolean): { expectedWebId: URL, bearerToken: string, aud: string } {
   // jwt.sign(payload, secretOrPrivateKey, [options, callback])
   const bearerToken = `eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiI4M2M1M2U1MGIyNDhlNjZkYWVhNTRkYzRkNWYyZWQ0ZiIsImF1ZCI6I\
 mh0dHBzOi8vbG9jYWxob3N0Ojg0NDMiLCJleHAiOjE1NTU2NjkxMTYsImlhdCI6MTU1NTY2NTUxNiwiaWRfdG9rZW4iOiJleUpoYkdjaU9pSlNVekk\
@@ -23,7 +23,7 @@ sInRva2VuX3R5cGUiOiJwb3AifQ.I02ru_WW6tHpPBe113nchnCDqfa1oOmFOg4X3gLVLybP6at74v8V
 y82lU73J91juvjdNLJjBSy0S0QnirfmigTp8I9R3lXLoPzsBmObzYlzD8b81sIwPKi_ofIeM2fgAIWRFuVyuJVo-_-f3QrdOX6MEzTsmU3VwQvus4A\
 uo1P8OZPA8tNQrv4wDd0kVR50nvg`
   return {
-    expectedWebId: 'https://localhost:8443/profile/card#me',
+    expectedWebId: new URL('https://localhost:8443/profile/card#me'),
     bearerToken: (correct ? bearerToken : bearerToken.substring(0, 100)),
     aud: '83c53e50b248e66daea54dc4d5f2ed4f' // FIXME: should be 'https://localhost:8443', right?
   }

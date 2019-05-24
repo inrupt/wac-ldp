@@ -3,10 +3,10 @@ import { determineWebId } from '../../../src/lib/auth/determineWebId'
 
 import MockDate from 'mockdate'
 beforeEach(() => {
-  MockDate.set(1434319925275);
+  MockDate.set(1434319925275)
 })
 afterEach(() => {
-  MockDate.reset();
+  MockDate.reset()
 })
 
 test('correctly reads webId from bearer token', async () => {

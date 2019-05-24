@@ -66,7 +66,7 @@ function determineAppendOnly (wacLdpTask: WacLdpTask, webId: URL | undefined, rd
 function convertToBlobWrite (wacLdpTask: WacLdpTask) {
   debug('converting', wacLdpTask)
   const childName: string = uuid()
-  wacLdpTask.path = wacLdpTask.path.toChild(childName)
+  wacLdpTask.path = wacLdpTask.path.toChild(childName, false)
   wacLdpTask.wacLdpTaskType = TaskType.blobWrite
   wacLdpTask.isContainer = false
   wacLdpTask.fullUrl = new URL(wacLdpTask.fullUrl + childName)

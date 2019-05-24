@@ -5,6 +5,8 @@ import { Blob } from './Blob'
 
 const debug = Debug('BlobTree')
 
+const STORAGE_FORMAT = 'v1'
+
 // The BlobTree is a tree structure. Its internal Nodes are called Containers. Its leaves are called Blobs.
 // A Blob has methods setData and getData, which take and return a ReadableStream, so that you can store opaque
 // data in them.
@@ -21,16 +23,26 @@ function copyStringArray (arr: Array<string>): Array<string> {
 }
 
 export function urlToPath (url: URL) {
-  const segments = url.pathname.split('/')
+  let urlPath = url.pathname
+  let isContainer = false
+
+  if (urlPath.substr(-1) === '/') {
+    isContainer = true
+    urlPath = urlPath.substring(0, urlPath.length - 1)
+  }
+  debug('determined containerhood', url.pathname, isContainer, urlPath)
+  const segments = urlPath.split('/')
   segments[0] = url.host
-  return new Path(segments)
+  segments.unshift(STORAGE_FORMAT)
+  return new Path(segments, isContainer)
 }
 
 export class Path {
   segments: Array<string>
-  constructor (segments: Array<string>) {
-    if (!segments.length || segments[0] !== 'root') {
-      throw new Error('Path should start at the root')
+  isContainer: boolean
+  constructor (segments: Array<string>, isContainer: boolean) {
+    if (!segments.length || segments[0] !== STORAGE_FORMAT) {
+      throw new Error('Path should start with the current hard-coded storage format')
     }
     segments.map(segment => {
       if (segment.indexOf('/') !== -1) {
@@ -38,6 +50,7 @@ export class Path {
       }
     })
     this.segments = segments
+    this.isContainer = isContainer
   }
   toString (): string {
     return this.segments.join('/')
@@ -45,10 +58,10 @@ export class Path {
   toContainerPathPrefix (): string {
     return this.toString() + '/'
   }
-  toChild (segment: string): Path {
+  toChild (segment: string, childIsContainer: boolean): Path {
     const childSegments = copyStringArray(this.segments)
     childSegments.push(segment)
-    return new Path(childSegments)
+    return new Path(childSegments, childIsContainer)
   }
   isRoot (): boolean {
     return (this.segments.length <= 1)
@@ -59,7 +72,7 @@ export class Path {
     }
     const parentSegments = copyStringArray(this.segments)
     parentSegments.pop()
-    return new Path(parentSegments)
+    return new Path(parentSegments, true)
   }
   hasSuffix (suffix: string): boolean {
     const lastSegment = this.segments[this.segments.length - 1]
@@ -77,12 +90,12 @@ export class Path {
     }
     const withoutSuffix: string = withoutSuffixSegments[withoutSuffixSegments.length - 1].substring(0, remainingLength)
     withoutSuffixSegments[withoutSuffixSegments.length - 1] = withoutSuffix
-    return new Path(withoutSuffixSegments)
+    return new Path(withoutSuffixSegments, this.isContainer)
   }
   appendSuffix (suffix: string): Path {
     const withSuffixSegments: Array<string> = copyStringArray(this.segments)
     withSuffixSegments[withSuffixSegments.length - 1] += suffix
-    return new Path(withSuffixSegments)
+    return new Path(withSuffixSegments, this.isContainer)
   }
   equals (other: Path): boolean {
     return (this.toString() === other.toString())

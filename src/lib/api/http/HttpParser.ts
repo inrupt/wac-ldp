@@ -125,17 +125,6 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
   return undefined
 }
 
-function determinePath (urlPath: string | undefined) {
-  let pathToUse = (urlPath ? 'root' + urlPath : 'root/')
-  pathToUse = pathToUse.split('?')[0]
-  if (pathToUse.substr(-2) === '/*') {
-    pathToUse = pathToUse.substring(0, pathToUse.length - 2)
-  } else if (pathToUse.substr(-1) === '/') {
-    pathToUse = pathToUse.substring(0, pathToUse.length - 1)
-  }
-  return new Path((pathToUse).split('/'))
-}
-
 function determineSparqlQuery (urlPath: string | undefined): string | undefined {
   const url = new URL('http://example.com' + urlPath)
   debug('determining sparql query', urlPath, url.searchParams, url.searchParams.get('query'))

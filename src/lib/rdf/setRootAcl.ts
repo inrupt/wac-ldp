@@ -14,6 +14,6 @@ export async function setRootAcl (storage: BlobTree, owner: string) {
     `    acl:Read, acl:Write, acl:Control.`
   ].join('\n'))
   const buffer = Buffer.from(JSON.stringify(obj))
-  const blob = storage.getBlob(new Path(['root', ACL_SUFFIX]))
+  const blob = storage.getBlob(new Path(['root', ACL_SUFFIX], false))
   await blob.setData(bufferToStream(buffer))
 }
