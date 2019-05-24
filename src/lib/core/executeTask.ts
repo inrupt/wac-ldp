@@ -25,23 +25,23 @@ function handleOptions (wacLdpTask: WacLdpTask) {
   })
 }
 
-async function getBlobAndCheckETag (ldpTask: WacLdpTask, storage: BlobTree): Promise<Blob> {
-  const blob: Blob = storage.getBlob(ldpTask.path)
+async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, storage: BlobTree): Promise<Blob> {
+  const blob: Blob = storage.getBlob(urlToPath(wacLdpTask.fullUrl))
   const data = await blob.getData()
-  debug(data, ldpTask)
+  debug(data, wacLdpTask)
   if (data) { // resource exists
-    if (ldpTask.ifNoneMatchStar) { // If-None-Match: * -> resource should not exist
+    if (wacLdpTask.ifNoneMatchStar) { // If-None-Match: * -> resource should not exist
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
     const resourceData = await streamToObject(data)
-    if (ldpTask.ifMatch && resourceData.etag !== ldpTask.ifMatch) { // If-Match -> ETag should match
+    if (wacLdpTask.ifMatch && resourceData.etag !== wacLdpTask.ifMatch) { // If-Match -> ETag should match
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
-    if (ldpTask.ifNoneMatchList && ldpTask.ifNoneMatchList.indexOf(resourceData.etag) !== -1) { // ETag in blacklist
+    if (wacLdpTask.ifNoneMatchList && wacLdpTask.ifNoneMatchList.indexOf(resourceData.etag) !== -1) { // ETag in blacklist
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
   } else { // resource does not exist
-    if (ldpTask.ifMatch) { // If-Match -> ETag should match so resource should first exist
+    if (wacLdpTask.ifMatch) { // If-Match -> ETag should match so resource should first exist
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
   }
@@ -63,10 +63,21 @@ function determineAppendOnly (wacLdpTask: WacLdpTask, webId: URL | undefined, rd
   } as AccessCheckTask) // may throw if access is denied
 }
 
+function urlForContainerMember (container: URL, memberName: string): URL {
+  let str = container.toString()
+  if (str.substr(-1) !== '/') {
+    str += '/'
+  }
+  if (memberName.indexOf('/') !== -1) {
+    throw new Error('memberName cannot contain slashes')
+  }
+  str += memberName
+  return new URL(str)
+}
 function convertToBlobWrite (wacLdpTask: WacLdpTask) {
   debug('converting', wacLdpTask)
   const childName: string = uuid()
-  wacLdpTask.path = wacLdpTask.path.toChild(childName, false)
+  wacLdpTask.fullUrl = urlForContainerMember(wacLdpTask.fullUrl, childName)
   wacLdpTask.wacLdpTaskType = TaskType.blobWrite
   wacLdpTask.isContainer = false
   wacLdpTask.fullUrl = new URL(wacLdpTask.fullUrl + childName)
@@ -122,7 +133,7 @@ async function handleGlobRead (wacLdpTask: WacLdpTask, storage: BlobTree, skipWa
 async function handleOperation (wacLdpTask: WacLdpTask, storage: BlobTree, appendOnly: boolean) {
   let node: any
   if (wacLdpTask.isContainer) {
-    node = storage.getContainer(wacLdpTask.path)
+    node = storage.getContainer(urlToPath(wacLdpTask.fullUrl))
   } else {
     debug('not a container, getting blob and checking etag')
     node = await getBlobAndCheckETag(wacLdpTask, storage)
@@ -150,7 +161,7 @@ export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage:
   }
 
   const webId: URL | undefined = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
-  debug({ webId, path: wacLdpTask.path, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
+  debug({ webId, url: wacLdpTask.fullUrl, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
 
   const rdfFetcher = new RdfFetcher(aud, storage)
 

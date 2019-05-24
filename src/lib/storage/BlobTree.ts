@@ -53,10 +53,7 @@ export class Path {
     this.isContainer = isContainer
   }
   toString (): string {
-    return this.segments.join('/')
-  }
-  toContainerPathPrefix (): string {
-    return this.toString() + '/'
+    return this.segments.join('/') + (this.isContainer ? '/' : '')
   }
   toChild (segment: string, childIsContainer: boolean): Path {
     const childSegments = copyStringArray(this.segments)

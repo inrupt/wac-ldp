@@ -22,7 +22,6 @@ const storage = {
   getBlob: jest.fn((path) => {
     return {
       getData: jest.fn(() => {
-        console.log('getData', path)
         return toChunkStream(JSON.stringify({
           rdfType: kv[path].rdfType,
           body: kv[path].body,
@@ -30,7 +29,6 @@ const storage = {
         }))
       }),
       exists: jest.fn(() => {
-        console.log('exists', path)
         return (typeof kv[path] !== 'undefined')
       })
     }

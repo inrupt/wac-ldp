@@ -4,7 +4,7 @@ import fs from 'fs'
 import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/auth/determineAllowedAgentsForModes'
 
 test('finds acl:accessTo modes', async () => {
-  const bodyStream = fs.createReadStream('test/fixtures/aclDoc-from-NSS.ttl')
+  const bodyStream = fs.createReadStream('test/fixtures/aclDoc-from-NSS-1.ttl')
   let parser = new N3Parser({
     factory: rdf
   })
@@ -26,7 +26,7 @@ test('finds acl:accessTo modes', async () => {
 })
 
 test('finds acl:default modes', async () => {
-  const bodyStream = fs.createReadStream('test/fixtures/aclDoc-from-NSS.ttl')
+  const bodyStream = fs.createReadStream('test/fixtures/aclDoc-from-NSS-1.ttl')
   let parser = new N3Parser({
     factory: rdf
   })

@@ -21,7 +21,8 @@ class NodeInMem {
 
 class ContainerInMem extends NodeInMem implements Container {
   getDescendents () {
-    const containerPathPrefix = this.path.toContainerPathPrefix()
+    const containerPathPrefix = this.path.toString()
+    debug('getDescendents', containerPathPrefix)
     return Object.keys(this.tree.kv).filter(x => (
       (x.length > containerPathPrefix.length) && // x is longer than container/path/prefix/
       (x.substr(0, containerPathPrefix.length) === containerPathPrefix) // x srtarts with container/path/prefix/
@@ -29,7 +30,7 @@ class ContainerInMem extends NodeInMem implements Container {
   }
   getMembers () {
     const listAbsolutePaths = this.getDescendents()
-    const prefixLength = this.path.toString().length + 1
+    const prefixLength = this.path.toString().length
     const listRelativePaths = listAbsolutePaths.map(x => x.substring(prefixLength))
     const memberMap: { [memberName: string]: boolean } = {}
     listRelativePaths.map(x => {

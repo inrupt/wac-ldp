@@ -193,7 +193,6 @@ export interface WacLdpTask {
   ifNoneMatchList: Array<string> | undefined
   bearerToken: string | undefined
   wacLdpTaskType: TaskType
-  path: Path,
   sparqlQuery: string | undefined
   fullUrl: URL,
   requestBody: string | undefined
