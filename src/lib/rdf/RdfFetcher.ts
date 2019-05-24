@@ -96,7 +96,7 @@ export class RdfFetcher {
   // from there on.
   // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
   // from storage
-  async readAcl (resourceUrl: URL) {
+  async readAcl (resourceUrl: URL): Promise<{ aclGraph: any, targetUrl: URL, contextUrl: URL }> {
     const resourcePath = urlToPath(resourceUrl)
     let currentGuessPath = resourcePath
     let currentIsContainer = resourcePath.isContainer
@@ -109,7 +109,7 @@ export class RdfFetcher {
     while (!currentGuessBlobExists) {
       if (currentGuessPath.isRoot()) {
         // root ACL, nobody has access:
-        return { aclGraph: getEmptyGraph(), topicPath: currentGuessPath, isAdjacent }
+        return { aclGraph: getEmptyGraph(), targetUrl: currentGuessPath.toUrl(), contextUrl: aclDocPath.toUrl() }
       }
       currentGuessPath = currentGuessPath.toParent()
       isAdjacent = false
@@ -121,8 +121,8 @@ export class RdfFetcher {
     }
     return {
       aclGraph: await getGraphLocal(currentGuessBlob),
-      topicPath: currentGuessPath,
-      isAdjacent
+      targetUrl: currentGuessPath.toUrl(),
+      contextUrl: aclDocPath.toUrl()
     }
   }
 }

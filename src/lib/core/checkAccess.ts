@@ -36,11 +36,12 @@ function determineRequiredAccessModes (wacLdpTaskType: TaskType, resourceIsAclDo
 
 async function modeAllowed (mode: string, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: RdfFetcher): Promise<boolean> {
   // first check agent:
-  const agents = (allowedAgentsForModes as any)[mode]
-  debug(mode, agents)
+  const agents = (allowedAgentsForModes as any)[mode].map((url: URL) => url.toString())
+  const webIdAsString: string | undefined = (webId ? webId.toString() : undefined)
+  debug(mode, agents, webId)
   if ((agents.indexOf(AGENT_CLASS_ANYBODY) === -1) &&
       (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN) === -1) &&
-      (agents.indexOf(webId) === -1)) {
+      (!webIdAsString || agents.indexOf(webIdAsString) === -1)) {
     debug('agent check returning false')
     return false
   }
@@ -79,7 +80,11 @@ function removeUrlSuffix (url: URL, suffix: string): URL {
   return new URL(urlStr.substring(0, remainingLength))
 }
 
+function urlEquals (one: URL, two: URL) {
+  return one.toString() === two.toString()
+}
 export async function checkAccess (task: AccessCheckTask) {
+  debug('AccessCheckTask', task)
   let baseResourceUrl: URL
   let resourceIsAclDocument
   if (urlHasSuffix(task.url, ACL_SUFFIX)) {
@@ -90,14 +95,15 @@ export async function checkAccess (task: AccessCheckTask) {
     baseResourceUrl = task.url
     resourceIsAclDocument = false
   }
-  const { aclGraph, topicPath, isAdjacent } = await task.rdfFetcher.readAcl(baseResourceUrl)
-  debug('aclGraph', aclGraph)
+  const { aclGraph, targetUrl, contextUrl } = await task.rdfFetcher.readAcl(baseResourceUrl)
+  const resourceIsTarget = urlEquals(baseResourceUrl, targetUrl)
+  debug('aclGraph', aclGraph, targetUrl, contextUrl, resourceIsTarget)
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
     aclGraph,
-    resourceIsTarget: isAdjacent,
-    targetUrl: new URL(topicPath.toString()),
-    contextUrl: new URL(topicPath.toString() + ACL_SUFFIX)
+    resourceIsTarget,
+    targetUrl,
+    contextUrl
   } as ModesCheckTask)
   debug('allowedAgentsForModes', allowedAgentsForModes)
   const requiredAccessModes = determineRequiredAccessModes(task.wacLdpTaskType, resourceIsAclDocument)

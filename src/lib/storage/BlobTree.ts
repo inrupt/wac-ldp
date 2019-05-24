@@ -55,6 +55,11 @@ export class Path {
   toString (): string {
     return this.segments.join('/') + (this.isContainer ? '/' : '')
   }
+  toUrl (): URL {
+    const host: string = this.segments[1]
+    const pathnameWithoutLeadingSlash = this.segments.slice(2).join('/') + (this.isContainer ? '/' : '')
+    return new URL(`https://${host}/${pathnameWithoutLeadingSlash}`)
+  }
   toChild (segment: string, childIsContainer: boolean): Path {
     const childSegments = copyStringArray(this.segments)
     childSegments.push(segment)

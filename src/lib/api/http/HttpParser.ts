@@ -132,6 +132,9 @@ function determineSparqlQuery (urlPath: string | undefined): string | undefined 
 }
 
 function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL {
+  if (httpReq.url && httpReq.url.substr(-1) === '*') {
+    return new URL(hostname + httpReq.url.substring(0, httpReq.url.length - 1))
+  }
   return new URL(hostname + httpReq.url)
 }
 
