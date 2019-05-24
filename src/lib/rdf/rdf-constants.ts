@@ -21,7 +21,11 @@ export const ACL = {
   agent: PREFIX.ACL + 'agent',
   agentGroup: PREFIX.ACL + 'agentGroup',
   agentClass: PREFIX.ACL + 'agentClass',
-  mode: PREFIX.ACL + 'mode'
+  mode: PREFIX.ACL + 'mode',
+
+  origin: PREFIX.ACL + 'origin',
+  trustedApp: PREFIX.ACL + 'trustedApp'
+
 }
 
 export const FOAF = {

@@ -34,7 +34,51 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: string, grap
   } catch (err) {
     debug('error looping over quads', err)
   }
-  return false
+  const appNodes: { [indexer: string]: any } = {}
+  function ensure (str: string) {
+    if (!appNodes[str]) {
+      appNodes[str] = {}
+    }
+  }
+  quads.map((quad: any): void => {
+    debug('considering quad', quad)
+    switch (quad.predicate.value) {
+      case ACL.mode:
+        debug('mode predicate!', quad.predicate.value, mode)
+        if (mode === quad.object.value) {
+          ensure(quad.subject.value)
+          appNodes[quad.subject.value].modeMatches = true
+        }
+        break
+      case ACL.origin:
+        debug('origin predicate!', quad.predicate.value, origin)
+        if (origin === quad.object.value) {
+          ensure(quad.subject.value)
+          appNodes[quad.subject.value].originMatches = true
+        }
+        break
+      case ACL.trustedApp:
+        debug('trustedApp predicate!', quad.predicate.value, webId.toString())
+        if (webId.toString() === quad.subject.value) {
+          ensure(quad.object.value)
+          appNodes[quad.object.value].webIdMatches = true
+        }
+        break
+      default:
+        debug('unknown predicate!', quad.predicate.value)
+    }
+  })
+  debug('appNodes', appNodes)
+  let found = false
+  Object.keys(appNodes).map(nodeName => {
+    debug('considering', nodeName, appNodes[nodeName])
+    if (appNodes[nodeName].webIdMatches && appNodes[nodeName].originMatches && appNodes[nodeName].modeMatches) {
+      debug('found')
+      found = true
+    }
+  })
+  debug('returning', found)
+  return found
 }
 
 export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: RdfFetcher): Promise<boolean> {
