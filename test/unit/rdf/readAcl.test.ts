@@ -95,7 +95,7 @@ afterEach(() => {
 
 test('reads an adjacent ACL doc for a container (Turtle)', async () => {
   const url = new URL('https://localhost:8080/foo/bar/')
-  let { aclGraph, topicPath, isAdjacent } = await rdfFetcher.readAcl(url)
+  let { aclGraph } = await rdfFetcher.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -109,7 +109,7 @@ test('reads an adjacent ACL doc for a container (Turtle)', async () => {
 
 test('reads an adjacent ACL doc for a container (JSON-LD))', async () => {
   const url = new URL('https://localhost:8080/foo/jay/')
-  let { aclGraph, topicPath, isAdjacent } = await rdfFetcher.readAcl(url)
+  let { aclGraph } = await rdfFetcher.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -123,7 +123,7 @@ test('reads an adjacent ACL doc for a container (JSON-LD))', async () => {
 
 test('reads an adjacent ACL doc for a non-container', async () => {
   const url = new URL('https://localhost:8080/foo/bar/baz')
-  const { aclGraph, topicPath, isAdjacent } = await rdfFetcher.readAcl(url)
+  const { aclGraph } = await rdfFetcher.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -136,7 +136,7 @@ test('reads an adjacent ACL doc for a non-container', async () => {
 
 test('falls back to parent ACL doc for a container', async () => {
   const url = new URL('https://localhost:8080/foo/bar/no/')
-  const { aclGraph, topicPath, isAdjacent } = await rdfFetcher.readAcl(url)
+  const { aclGraph } = await rdfFetcher.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -150,7 +150,7 @@ test('falls back to parent ACL doc for a container', async () => {
 
 test('falls back to container ACL doc for a non-container', async () => {
   const url = new URL('https://localhost:8080/foo/bar/no')
-  const { aclGraph, topicPath, isAdjacent } = await rdfFetcher.readAcl(url)
+  const { aclGraph } = await rdfFetcher.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -164,7 +164,7 @@ test('falls back to container ACL doc for a non-container', async () => {
 
 test('falls back to ancestor ACL doc for a container', async () => {
   const url = new URL('https://localhost:8080/foo/no/no/')
-  const { aclGraph, topicPath, isAdjacent } = await rdfFetcher.readAcl(url)
+  const { aclGraph } = await rdfFetcher.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -179,7 +179,7 @@ test('falls back to ancestor ACL doc for a container', async () => {
 
 test('falls back to ancestor ACL doc for a non-container', async () => {
   const url = new URL('https://localhost:8080/foo/no/no')
-  const { aclGraph, topicPath, isAdjacent } = await rdfFetcher.readAcl(url)
+  const { aclGraph } = await rdfFetcher.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
