@@ -17,6 +17,7 @@ export interface OriginCheckTask {
 }
 
 async function checkOwnerProfile (webId: URL, origin: string, mode: string, graphFetcher: RdfFetcher): Promise<boolean> {
+  // TODO: move this cache into a decorator pattern, see #81
   if (!ownerProfilesCache[webId.toString()]) {
     ownerProfilesCache[webId.toString()] = await graphFetcher.fetchGraph(webId)
   }
@@ -24,7 +25,6 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: string, grap
 }
 
 export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: RdfFetcher): Promise<boolean> {
-  return Promise.resolve(true) // FIXME
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve(false)
