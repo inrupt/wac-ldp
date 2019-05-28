@@ -17,7 +17,7 @@ beforeEach(async () => {
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/public/ldp-rs1.ttl'))).setData(ldpRs1Data)
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', false)
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080/'), false)
 
 test.skip('handles an append-only PATCH request with Write permissions', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge-alt.ttl').toString()
@@ -43,7 +43,8 @@ test.skip('handles an append-only PATCH request with Write permissions', async (
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/'
       }
     ]
   ])
@@ -156,7 +157,8 @@ test('handles a destructive PATCH request (not allowed but append is allowed)', 
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/'
       }
     ]
   ])
@@ -195,7 +197,8 @@ test('handles a destructive PATCH request (not allowed but append is allowed)', 
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/'
       }
     ]
   ])

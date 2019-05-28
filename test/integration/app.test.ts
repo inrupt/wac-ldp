@@ -16,7 +16,7 @@ beforeEach(async () => {
   // Which says origin https://pheyvaer.github.io is trusted by owner https://michielbdejong.com/profile/card#me
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', false)
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false)
 
 test('handles a GET request for a public resource', async () => {
   let streamed = false
@@ -41,7 +41,8 @@ test('handles a GET request for a public resource', async () => {
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/'
       }
     ]
   ])
@@ -71,7 +72,8 @@ test('handles a GET request for a private resource', async () => {
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/'
       }
     ]
   ])
