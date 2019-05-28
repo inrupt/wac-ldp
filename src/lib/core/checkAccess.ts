@@ -39,8 +39,8 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
   const agents = (allowedAgentsForModes as any)[mode.toString()].map((url: URL) => url.toString())
   const webIdAsString: string | undefined = (webId ? webId.toString() : undefined)
   debug(mode, agents, webId)
-  if ((agents.indexOf(AGENT_CLASS_ANYBODY) === -1) &&
-      (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN) === -1) &&
+  if ((agents.indexOf(AGENT_CLASS_ANYBODY.toString()) === -1) &&
+      (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN.toString()) === -1) &&
       (!webIdAsString || agents.indexOf(webIdAsString) === -1)) {
     debug('agent check returning false')
     return false

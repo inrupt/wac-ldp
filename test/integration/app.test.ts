@@ -12,13 +12,13 @@ beforeEach(async () => {
   const publicContainerAclDocData = await objectToStream(makeResourceData('text/turtle', aclDoc.toString()))
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/.acl'))).setData(publicContainerAclDocData)
 
-  // src/rdf/_mocks_/node-fetch.ts will use test/fixtures/web/michielbdejong.com/443/profile/card
+  // src/__mocks__/node-fetch.ts will use test/fixtures/web/michielbdejong.com/443/profile/card
   // Which says origin https://pheyvaer.github.io is trusted by owner https://michielbdejong.com/profile/card#me
 })
 
 const handler = makeHandler(storage, 'http://localhost:8080', false)
 
-test.only('handles a GET request for a public resource', async () => {
+test('handles a GET request for a public resource', async () => {
   let streamed = false
   let endCallback: () => void
   let httpReq: any = toChunkStream('')
