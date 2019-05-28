@@ -55,7 +55,9 @@ test('handles a GET request for a private resource', async () => {
   let streamed = false
   let endCallback: () => void
   let httpReq: any = toChunkStream('')
-  httpReq.headers = {} as http.IncomingHttpHeaders
+  httpReq.headers = {
+    origin: 'https://pheyvaer.github.io'
+  } as http.IncomingHttpHeaders
   httpReq.url = '/private/bar' as string
   httpReq.method = 'GET'
   httpReq = httpReq as http.IncomingMessage
@@ -79,5 +81,39 @@ test('handles a GET request for a private resource', async () => {
   ])
   expect(httpRes.end.mock.calls).toEqual([
     ['Access denied']
+  ])
+})
+
+test('sets bearerToken in Updates-Via', async () => {
+  let streamed = false
+  let endCallback: () => void
+  let httpReq: any = toChunkStream('')
+  httpReq.headers = {
+    origin: 'https://pheyvaer.github.io',
+    authorization: 'Bearer some-bearer-token'
+  } as http.IncomingHttpHeaders
+  httpReq.url = '/foo/bar' as string
+  httpReq.method = 'GET'
+  httpReq = httpReq as http.IncomingMessage
+  const httpRes = {
+    writeHead: jest.fn(() => { }), // tslint:disable-line: no-empty
+    end: jest.fn(() => { }) // tslint:disable-line: no-empty
+  }
+  await handler(httpReq, httpRes as unknown as http.ServerResponse)
+  expect(httpRes.writeHead.mock.calls).toEqual([
+    [
+      404,
+      {
+        'Accept-Patch': 'application/sparql-update',
+        'Accept-Post': 'application/sparql-update',
+        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
+        'Content-Type': 'text/plain',
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/?bearerToken=some-bearer-token'
+      }
+    ]
+  ])
+  expect(httpRes.end.mock.calls).toEqual([
+    ['Not found']
   ])
 })
