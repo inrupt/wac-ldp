@@ -7,9 +7,11 @@ import { executeTask } from './executeTask'
 
 const debug = Debug('app')
 
-function addBearerToken (baseUrl: URL, bearerToken: string): URL {
+function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
   const ret = new URL(baseUrl.toString())
-  // ret.query.bearerToken = bearerToken
+  if (bearerToken) {
+    ret.searchParams.set('bearerToken', bearerToken)
+  }
   return ret
 }
 
@@ -18,10 +20,10 @@ export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL,
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
     let response: WacLdpResponse
-    let bearerToken: string = ''
+    let bearerToken: string | undefined
     try {
       const wacLdpTask: WacLdpTask = await parseHttpRequest(aud, httpReq)
-      bearerToken = wacLdpTask.bearerToken || ''
+      bearerToken = wacLdpTask.bearerToken
       response = await executeTask(wacLdpTask, aud, storage, skipWac)
     } catch (error) {
       debug('errored', error)
