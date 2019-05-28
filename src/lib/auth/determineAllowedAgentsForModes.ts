@@ -32,10 +32,10 @@ export interface ModesCheckTask {
 }
 
 export interface AccessModes {
-  read: Array<URL>
-  write: Array<URL>
-  append: Array<URL>
-  control: Array<URL>
+  'http://www.w3.org/ns/auth/acl#Read': Array<URL>
+  'http://www.w3.org/ns/auth/acl#Write': Array<URL>
+  'http://www.w3.org/ns/auth/acl#Append': Array<URL>
+  'http://www.w3.org/ns/auth/acl#Control': Array<URL>
 }
 
 async function fetchGroupMembers (groupUri: URL, rdfFetcher: RdfFetcher): Promise<Array<URL>> {
@@ -52,7 +52,7 @@ async function fetchGroupMembers (groupUri: URL, rdfFetcher: RdfFetcher): Promis
   }
   quads.map((quad: any): void => {
     debug('quad', quad)
-    if (quad.predicate.value === VCARD.hasMember) {
+    if (quad.predicate.value === VCARD.hasMember.toString()) {
       debug('group member!', quad.subject.value, quad.object.value)
       const subjectUri = new URL(quad.subject.value, groupUri)
       debug('comparing', subjectUri.toString(), groupUri.toString())
@@ -80,16 +80,17 @@ function urlsEquivalent (grantUrl: URL, targetURL: URL): boolean {
 }
 
 export async function determineAllowedAgentsForModes (task: ModesCheckTask): Promise<AccessModes> {
-  const accessPredicate = (task.resourceIsTarget ? ACL.accessTo : ACL.default)
+  const accessPredicate: string = (task.resourceIsTarget ? ACL.accessTo.toString() : ACL.default.toString())
   // debug('task', task)
+  debug('accessPredicate', accessPredicate)
   const isAuthorization: { [subject: string]: boolean } = {}
   const aboutAgents: { [subject: string]: { [agentId: string]: boolean} | undefined } = {}
   const aboutThisResource: { [subject: string]: boolean } = {}
   const aboutMode: { [mode: string]: { [subject: string]: boolean} | undefined } = {
-    [ACL.Read]: {},
-    [ACL.Write]: {},
-    [ACL.Append]: {},
-    [ACL.Control]: {}
+    [ACL.Read.toString()]: {},
+    [ACL.Write.toString()]: {},
+    [ACL.Append.toString()]: {},
+    [ACL.Control.toString()]: {}
   }
 
   function addAgents (subject: string, agents: Array<URL>) {
@@ -104,7 +105,7 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
   // pass 1, sort all quads according to what they state about a subject
   await Promise.all(task.aclGraph.map(async (quad: any): Promise<void> => {
     switch (quad.predicate.value) {
-      case ACL.mode:
+      case ACL.mode.toString():
         if (typeof aboutMode[quad.object.value] === 'object') {
           debug('using quad for mode', quad.subject.value, quad.predicate.value, quad.object.value)
           ;(aboutMode[quad.object.value] as { [agent: string]: boolean })[quad.subject.value] = true
@@ -112,19 +113,19 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
           debug('invalid mode!', quad.object.value)
         }
         break
-      case RDF.type:
-        if (quad.object.value === ACL.Authorization) {
+      case RDF.type.toString():
+        if (quad.object.value === ACL.Authorization.toString()) {
           debug('using quad for type', quad.subject.value, quad.predicate.value, quad.object.value)
           isAuthorization[quad.subject.value] = true
         } else {
           debug('invalid type!', quad.object.value)
         }
         break
-      case ACL.agent:
+      case ACL.agent.toString():
         debug('using quad for agent', quad.subject.value, quad.predicate.value, quad.object.value)
         addAgents(quad.subject.value, [quad.object.value])
         break
-      case ACL.agentGroup:
+      case ACL.agentGroup.toString():
         debug('using quad for agentGroup', quad.subject.value, quad.predicate.value, quad.object.value)
         let groupMembers: Array<URL> = []
         try {
@@ -135,9 +136,9 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
         debug('group members', groupMembers.map((url: URL): string => url.toString()))
         addAgents(quad.subject.value, groupMembers)
         break
-      case ACL.agentClass:
+      case ACL.agentClass.toString():
         debug('using quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
-        if ([AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN].indexOf(quad.object.value) !== -1) {
+        if ([AGENT_CLASS_ANYBODY.toString(), AGENT_CLASS_ANYBODY_LOGGED_IN.toString()].indexOf(quad.object.value) !== -1) {
           debug('using quad for agentClass', quad.subject.value, quad.predicate.value, quad.object.value)
           addAgents(quad.subject.value, [quad.object.value])
         } else {
@@ -174,49 +175,49 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
 
   debug(isAuthorization, aboutAgents, aboutThisResource, aboutMode)
   // pass 2, find the subjects for which all boxes are checked, and add up modes from them
-  function determineModeAgents (mode: string): Array<URL> {
-    debug('determineModeAgents A', mode)
+  function determineModeAgents (mode: URL): Array<URL> {
+    debug('determineModeAgents A', mode.toString())
     let anybody = false
     let anybodyLoggedIn = false
     const agentsMap: { [agent: string]: boolean } = {}
-    for (const subject in aboutMode[mode]) {
-      debug('determineModeAgents B', mode, subject, isAuthorization[subject], aboutThisResource[subject])
+    for (const subject in aboutMode[mode.toString()]) {
+      debug('determineModeAgents B', mode.toString(), subject, isAuthorization[subject], aboutThisResource[subject])
       if ((isAuthorization[subject]) && (aboutThisResource[subject])) {
-        debug('determineModeAgents C', mode, subject)
-        Object.keys(aboutAgents[subject] as any).map(agentId => {
+        debug('determineModeAgents C', mode.toString(), subject)
+        Object.keys(aboutAgents[subject] as any).map((agentIdStr: string) => {
           if (anybody) {
-            debug('determineModeAgents D', mode, subject)
+            debug('determineModeAgents D', mode.toString(), subject)
             return
           }
-          debug('determineModeAgents E', mode, subject)
-          if (agentId === AGENT_CLASS_ANYBODY) {
-            debug(mode, 'considering agentId', agentId, 'case 1')
+          debug('determineModeAgents E', mode.toString(), subject)
+          if (agentIdStr === AGENT_CLASS_ANYBODY.toString()) {
+            debug(mode, 'considering agentId', agentIdStr, 'case 1')
             anybody = true
-          } else if (agentId === AGENT_CLASS_ANYBODY_LOGGED_IN) {
-            debug(mode, 'considering agentId', agentId, 'case 2')
+          } else if (agentIdStr === AGENT_CLASS_ANYBODY_LOGGED_IN.toString()) {
+            debug(mode, 'considering agentId', agentIdStr, 'case 2')
             anybodyLoggedIn = true
           } else {
-            debug(mode, 'considering agentId', agentId, 'case 3')
-            agentsMap[agentId] = true
+            debug(mode, 'considering agentId', agentIdStr, 'case 3')
+            agentsMap[agentIdStr] = true
           }
         })
       }
     }
     if (anybody) {
       debug(mode, 'anybody')
-      return [new URL(AGENT_CLASS_ANYBODY)]
+      return [ AGENT_CLASS_ANYBODY ]
     }
     if (anybodyLoggedIn) {
       debug(mode, 'anybody logged in')
-      return [new URL(AGENT_CLASS_ANYBODY_LOGGED_IN)]
+      return [ AGENT_CLASS_ANYBODY_LOGGED_IN ]
     }
     debug(mode, 'specific webIds', Object.keys(agentsMap))
     return Object.keys(agentsMap).map(str => new URL(str))
   }
   return {
-    read: determineModeAgents(ACL.Read),
-    write: determineModeAgents(ACL.Write),
-    append: determineModeAgents(ACL.Append),
-    control: determineModeAgents(ACL.Control)
+    'http://www.w3.org/ns/auth/acl#Read': determineModeAgents(ACL.Read),
+    'http://www.w3.org/ns/auth/acl#Write': determineModeAgents(ACL.Write),
+    'http://www.w3.org/ns/auth/acl#Append': determineModeAgents(ACL.Append),
+    'http://www.w3.org/ns/auth/acl#Control': determineModeAgents(ACL.Control)
   }
 }

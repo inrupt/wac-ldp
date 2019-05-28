@@ -2,6 +2,9 @@ import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
 import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/auth/determineAllowedAgentsForModes'
+import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
+import { BlobTreeInMem } from '../../../src/lib/core/app'
+import { ACL } from '../../../src/lib/rdf/rdf-constants'
 
 test('finds acl:accessTo modes', async () => {
   const bodyStream = fs.createReadStream('test/fixtures/aclDoc-from-NSS-1.ttl')
@@ -14,14 +17,15 @@ test('finds acl:accessTo modes', async () => {
     aclGraph: dataset,
     resourceIsTarget: true,
     contextUrl: new URL('https://example.com'),
-    targetUrl: new URL('https://example.com')
+    targetUrl: new URL('https://example.com'),
+    rdfFetcher: new RdfFetcher('https://example.com', new BlobTreeInMem())
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
-    read: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
-    write: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
-    append: [],
-    control: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')]
+    [ACL.Read.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
+    [ACL.Write.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
+    [ACL.Append.toString()]: [],
+    [ACL.Control.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')]
   })
 })
 
@@ -36,14 +40,15 @@ test('finds acl:default modes', async () => {
     aclGraph: dataset,
     contextUrl: new URL('/.acl', 'https://example.com/'),
     targetUrl: new URL('/', 'https://example.com/'),
-    resourceIsTarget: true
+    resourceIsTarget: true,
+    rdfFetcher: new RdfFetcher('https://example.com', new BlobTreeInMem())
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
-    read: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
-    write: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
-    append: [],
-    control: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')]
+    [ACL.Read.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
+    [ACL.Write.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
+    [ACL.Append.toString()]: [],
+    [ACL.Control.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')]
   })
 })
 
@@ -62,14 +67,15 @@ function testUrlFormat (format: string, target: string, resourceIsTarget: boolea
       aclGraph: dataset,
       resourceIsTarget,
       targetUrl: new URL(target),
-      contextUrl: new URL(target + '.acl')
+      contextUrl: new URL(target + '.acl'),
+      rdfFetcher: new RdfFetcher('https://example.com', new BlobTreeInMem())
     }
     const result = await determineAllowedAgentsForModes(task)
     expect(result).toEqual({
-      read: [new URL('http://xmlns.com/foaf/0.1/Agent')],
-      write: [],
-      append: [],
-      control: []
+      [ACL.Read.toString()]: [new URL('http://xmlns.com/foaf/0.1/Agent')],
+      [ACL.Write.toString()]: [],
+      [ACL.Append.toString()]: [],
+      [ACL.Control.toString()]: []
     })
   })
 }
@@ -98,13 +104,14 @@ test(`acl:default does not imply acl:accessTo`, async () => {
     aclGraph: dataset,
     resourceIsTarget: true,
     targetUrl: new URL('https://example.org/foo/'),
-    contextUrl: new URL('https://example.org/foo/.acl')
+    contextUrl: new URL('https://example.org/foo/.acl'),
+    rdfFetcher: new RdfFetcher('https://example.com', new BlobTreeInMem())
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
-    read: [],
-    write: [],
-    append: [],
-    control: []
+    [ACL.Read.toString()]: [],
+    [ACL.Write.toString()]: [],
+    [ACL.Append.toString()]: [],
+    [ACL.Control.toString()]: []
   })
 })

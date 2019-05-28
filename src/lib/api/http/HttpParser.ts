@@ -61,6 +61,7 @@ function determineTaskType (method: string | undefined, url: string | undefined)
 }
 
 function determineOrigin (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('determining origin', headers)
   if (Array.isArray(headers.origin)) {
     return headers.origin[0]
   } else {

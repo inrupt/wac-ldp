@@ -1,3 +1,4 @@
+import fetch from 'node-fetch'
 import Debug from 'debug'
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
@@ -33,6 +34,7 @@ function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
       })
       break
   }
+  debug('importing bodystream', bodyStream)
   return parser.import(bodyStream)
 }
 
@@ -64,11 +66,16 @@ export class RdfFetcher {
     if (url.host === this.serverHost) {
       const path: Path = urlToPath(url)
       const blob: Blob = this.storage.getBlob(path)
+      debug('fetching graph locally')
       return getGraphLocal(blob)
     } else {
-      const response: Response = await fetch(url.toString())
+      debug('calling node-fetch', url.toString())
+      const response: any = await fetch(url.toString())
       const rdfType = determineRdfType(response.headers.get('content-type'))
       const quadStream = readRdf(rdfType, response as unknown as ReadableStream)
+      const dataset = await rdf.dataset().import(quadStream)
+      debug('got dataset', dataset)
+      return dataset
     }
   }
 

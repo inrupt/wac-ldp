@@ -12,24 +12,24 @@ function toRdf (containerUrl: URL, membersList: Array<Member>): ReadableStream {
   membersList.map(member => {
     dataset.add(rdf.quad(
       rdf.namedNode(''),
-      rdf.namedNode(LDP.contains),
+      rdf.namedNode(LDP.contains.toString()),
       rdf.namedNode(containerUrl.toString() + member.name)))
   })
   debug('setting container type', LDP, RDF)
   dataset.add(rdf.quad(
     rdf.namedNode(''),
-    rdf.namedNode(RDF.type),
-    rdf.namedNode(LDP.BasicContainer)
+    rdf.namedNode(RDF.type.toString()),
+    rdf.namedNode(LDP.BasicContainer.toString())
   ))
   dataset.add(rdf.quad(
     rdf.namedNode(''),
-    rdf.namedNode(RDF.type),
-    rdf.namedNode(LDP.Container)
+    rdf.namedNode(RDF.type.toString()),
+    rdf.namedNode(LDP.Container.toString())
   ))
   dataset.add(rdf.quad(
     rdf.namedNode(''),
-    rdf.namedNode(RDF.type),
-    rdf.namedNode(LDP.RDFSource)
+    rdf.namedNode(RDF.type.toString()),
+    rdf.namedNode(LDP.RDFSource.toString())
   ))
   debug(dataset)
   return dataset.toStream()

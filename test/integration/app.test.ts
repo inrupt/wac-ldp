@@ -8,18 +8,23 @@ import { urlToPath } from '../../src/lib/storage/BlobTree'
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
-  const aclDoc = fs.readFileSync('test/fixtures/aclDoc-read-rel-path-parent-container.ttl')
+  const aclDoc = fs.readFileSync('test/fixtures/aclDoc-read-rel-path-parent-container-with-owner.ttl')
   const publicContainerAclDocData = await objectToStream(makeResourceData('text/turtle', aclDoc.toString()))
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/.acl'))).setData(publicContainerAclDocData)
+
+  // src/rdf/_mocks_/node-fetch.ts will use test/fixtures/web/michielbdejong.com/443/profile/card
+  // Which says origin https://pheyvaer.github.io is trusted by owner https://michielbdejong.com/profile/card#me
 })
 
 const handler = makeHandler(storage, 'http://localhost:8080', false)
 
-test('handles a GET request for a public resource', async () => {
+test.only('handles a GET request for a public resource', async () => {
   let streamed = false
   let endCallback: () => void
   let httpReq: any = toChunkStream('')
-  httpReq.headers = {} as http.IncomingHttpHeaders
+  httpReq.headers = {
+    origin: 'https://pheyvaer.github.io'
+  } as http.IncomingHttpHeaders
   httpReq.url = '/foo/bar' as string
   httpReq.method = 'GET'
   httpReq = httpReq as http.IncomingMessage

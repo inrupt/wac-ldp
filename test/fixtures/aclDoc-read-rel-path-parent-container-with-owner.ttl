@@ -6,3 +6,9 @@
     acl:agentClass foaf:Agent;
     acl:default <../foo/>;
     acl:mode acl:Read.
+
+<#owner>
+    a acl:Authorization;
+    acl:agent <https://michielbdejong.com/profile/card#me>;
+    acl:default <../foo/>;
+    acl:mode acl:Control.
