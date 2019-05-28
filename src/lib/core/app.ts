@@ -7,13 +7,21 @@ import { executeTask } from './executeTask'
 
 const debug = Debug('app')
 
-export function makeHandler (storage: BlobTree, aud: string, skipWac: boolean) {
+function addBearerToken (baseUrl: URL, bearerToken: string): URL {
+  const ret = new URL(baseUrl.toString())
+  // ret.query.bearerToken = bearerToken
+  return ret
+}
+
+export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
   const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
     let response: WacLdpResponse
+    let bearerToken: string = ''
     try {
       const wacLdpTask: WacLdpTask = await parseHttpRequest(aud, httpReq)
+      bearerToken = wacLdpTask.bearerToken || ''
       response = await executeTask(wacLdpTask, aud, storage, skipWac)
     } catch (error) {
       debug('errored', error)
@@ -21,7 +29,7 @@ export function makeHandler (storage: BlobTree, aud: string, skipWac: boolean) {
     }
     try {
       debug('response is', response)
-      return sendHttpResponse(response, httpRes)
+      return sendHttpResponse(response, addBearerToken(updatesViaUrl, bearerToken), httpRes)
     } catch (error) {
       debug('errored while responding', error)
     }
