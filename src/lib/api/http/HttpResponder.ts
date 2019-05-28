@@ -77,7 +77,7 @@ const responses: Responses = {
   }
 } as unknown as Responses
 
-export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.ServerResponse) {
+export async function sendHttpResponse (task: WacLdpResponse, updatesVia: URL, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!', task)
 
   debug(responses[task.resultType])
@@ -94,7 +94,8 @@ export async function sendHttpResponse (task: WacLdpResponse, httpRes: http.Serv
     'Link': `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join(', ')}`,
     'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Accept-Patch': 'application/sparql-update',
-    'Accept-Post': 'application/sparql-update'
+    'Accept-Post': 'application/sparql-update',
+    'Updates-Via': updatesVia.toString()
   } as any
   if (task.resourceData) {
     responseHeaders['Content-Type'] = task.resourceData.contentType

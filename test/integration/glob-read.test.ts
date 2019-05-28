@@ -24,7 +24,7 @@ beforeEach(async () => {
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/ldp-rs2.ttl'))).setData(ldpRs2Data)
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', false)
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false)
 
 test.only('handles a GET /* request (glob read)', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge.ttl').toString()
@@ -54,7 +54,8 @@ test.only('handles a GET /* request (glob read)', async () => {
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/turtle',
         'ETag': '"TmBqjXO24ygE+uQdtQuiOA=="',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"'
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/'
       }
     ]
   ])

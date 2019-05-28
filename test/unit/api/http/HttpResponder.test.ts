@@ -13,7 +13,7 @@ test('should produce a http response', async () => {
     writeHead: jest.fn(() => { }), // tslint:disable-line: no-empty
     end: jest.fn(() => { }) // tslint:disable-line: no-empty
   }
-  await sendHttpResponse(responseTask, res as unknown as http.ServerResponse)
+  await sendHttpResponse(responseTask, new URL('wss://localhost:8080/'), res as unknown as http.ServerResponse)
   expect(res.writeHead.mock.calls).toEqual([
     [
       200,
@@ -23,7 +23,8 @@ test('should produce a http response', async () => {
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'content/type',
         'ETag': '"rxrYx2/aLkjqmu0pN+ly6g=="',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Updates-Via': 'wss://localhost:8080/'
       }
     ]
   ])
