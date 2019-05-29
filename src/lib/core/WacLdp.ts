@@ -3,7 +3,8 @@ import Debug from 'debug'
 import { BlobTree } from '../storage/BlobTree'
 import { parseHttpRequest, WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { mainHandler } from './executeTask'
+import { mainHandler } from '../operationHandlers/mainHandler'
+import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 
 const debug = Debug('app')
@@ -33,6 +34,7 @@ export class WacLdp extends EventEmitter {
     this.updatesViaUrl = updatesViaUrl
     this.skipWac = skipWac
     this.operationHandlers = [
+      optionsHandler,
       mainHandler
     ]
   }

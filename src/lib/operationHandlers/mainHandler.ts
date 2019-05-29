@@ -4,8 +4,8 @@ import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask } from './checkAccess'
-import { basicOperations } from './basicOperations'
+import { checkAccess, AccessCheckTask } from '../core/checkAccess'
+import { basicOperations } from '../core/basicOperations'
 
 import Debug from 'debug'
 
@@ -14,16 +14,7 @@ import { determineWebId } from '../auth/determineWebId'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
 import { RdfFetcher } from '../rdf/RdfFetcher'
 
-const debug = Debug('executeTask')
-
-function handleOptions (wacLdpTask: WacLdpTask) {
-  return Promise.resolve({
-    resultType: ResultType.OkayWithoutBody,
-    resourceData: undefined,
-    createdLocation: undefined,
-    isContainer: wacLdpTask.isContainer
-  })
-}
+const debug = Debug('main-handler')
 
 async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, storage: BlobTree): Promise<Blob> {
   const blob: Blob = storage.getBlob(urlToPath(wacLdpTask.fullUrl))
@@ -157,11 +148,6 @@ async function handleOperation (wacLdpTask: WacLdpTask, storage: BlobTree, appen
 export const mainHandler = {
   canHandle: () => true,
   handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree, skipWac: boolean): Promise<WacLdpResponse> {
-    // handle OPTIONS before checking WAC
-    if (wacLdpTask.wacLdpTaskType === TaskType.getOptions) {
-      return handleOptions(wacLdpTask)
-    }
-
     const webId: URL | undefined = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
     debug({ webId, url: wacLdpTask.fullUrl, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
 
