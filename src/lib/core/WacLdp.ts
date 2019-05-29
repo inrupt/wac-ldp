@@ -15,26 +15,33 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
   return ret
 }
 
-export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
-  const handle = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
-    debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
+export class WacLdp {
+  handler: (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => Promise<void>
+  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
+    this.handler = async (httpReq: http.IncomingMessage, httpRes: http.ServerResponse) => {
+      debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
-    let response: WacLdpResponse
-    let bearerToken: string | undefined
-    try {
-      const wacLdpTask: WacLdpTask = await parseHttpRequest(aud, httpReq)
-      bearerToken = wacLdpTask.bearerToken
-      response = await executeTask(wacLdpTask, aud, storage, skipWac)
-    } catch (error) {
-      debug('errored', error)
-      response = error as WacLdpResponse
-    }
-    try {
-      debug('response is', response)
-      return sendHttpResponse(response, addBearerToken(updatesViaUrl, bearerToken), httpRes)
-    } catch (error) {
-      debug('errored while responding', error)
+      let response: WacLdpResponse
+      let bearerToken: string | undefined
+      try {
+        const wacLdpTask: WacLdpTask = await parseHttpRequest(aud, httpReq)
+        bearerToken = wacLdpTask.bearerToken
+        response = await executeTask(wacLdpTask, aud, storage, skipWac)
+      } catch (error) {
+        debug('errored', error)
+        response = error as WacLdpResponse
+      }
+      try {
+        debug('response is', response)
+        return sendHttpResponse(response, addBearerToken(updatesViaUrl, bearerToken), httpRes)
+      } catch (error) {
+        debug('errored while responding', error)
+      }
     }
   }
-  return handle
+}
+
+export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
+  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac)
+  return wacLdp.handler.bind(wacLdp)
 }
