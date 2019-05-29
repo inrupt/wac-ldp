@@ -154,35 +154,38 @@ async function handleOperation (wacLdpTask: WacLdpTask, storage: BlobTree, appen
   return response
 }
 
-export async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree, skipWac: boolean): Promise<WacLdpResponse> {
-  // handle OPTIONS before checking WAC
-  if (wacLdpTask.wacLdpTaskType === TaskType.getOptions) {
-    return handleOptions(wacLdpTask)
+export const mainHandler = {
+  canHandle: () => true,
+  handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree, skipWac: boolean): Promise<WacLdpResponse> {
+    // handle OPTIONS before checking WAC
+    if (wacLdpTask.wacLdpTaskType === TaskType.getOptions) {
+      return handleOptions(wacLdpTask)
+    }
+
+    const webId: URL | undefined = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
+    debug({ webId, url: wacLdpTask.fullUrl, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
+
+    const rdfFetcher = new RdfFetcher(aud, storage)
+
+    // may throw if access is denied:
+    const appendOnly = await determineAppendOnly(wacLdpTask, webId, rdfFetcher, skipWac)
+
+    // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
+    // but notice that access check for this is append on the container,
+    // write access on the Blob is not required!
+    // See https://github.com/solid/web-access-control-spec#aclappend
+    if (wacLdpTask.wacLdpTaskType === TaskType.containerMemberAdd) {
+      wacLdpTask = convertToBlobWrite(wacLdpTask)
+    }
+
+    // For TaskType.globRead, at this point will have checked read access over the
+    // container, but need to collect all RDF sources, filter on access, and then
+    // concatenate them.
+    if (wacLdpTask.wacLdpTaskType === TaskType.globRead) {
+      return handleGlobRead(wacLdpTask, storage, skipWac, webId)
+    }
+
+    // all other operations:
+    return handleOperation(wacLdpTask, storage, appendOnly)
   }
-
-  const webId: URL | undefined = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
-  debug({ webId, url: wacLdpTask.fullUrl, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
-
-  const rdfFetcher = new RdfFetcher(aud, storage)
-
-  // may throw if access is denied:
-  const appendOnly = await determineAppendOnly(wacLdpTask, webId, rdfFetcher, skipWac)
-
-  // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
-  // but notice that access check for this is append on the container,
-  // write access on the Blob is not required!
-  // See https://github.com/solid/web-access-control-spec#aclappend
-  if (wacLdpTask.wacLdpTaskType === TaskType.containerMemberAdd) {
-    wacLdpTask = convertToBlobWrite(wacLdpTask)
-  }
-
-  // For TaskType.globRead, at this point will have checked read access over the
-  // container, but need to collect all RDF sources, filter on access, and then
-  // concatenate them.
-  if (wacLdpTask.wacLdpTaskType === TaskType.globRead) {
-    return handleGlobRead(wacLdpTask, storage, skipWac, webId)
-  }
-
-  // all other operations:
-  return handleOperation(wacLdpTask, storage, appendOnly)
 }
