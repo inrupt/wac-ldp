@@ -3,7 +3,7 @@ import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
 import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/auth/determineAllowedAgentsForModes'
 import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
-import { BlobTreeInMem } from '../../../src/lib/core/app'
+import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
 
 test('finds acl:accessTo modes', async () => {

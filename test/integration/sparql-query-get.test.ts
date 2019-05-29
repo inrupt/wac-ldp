@@ -1,9 +1,9 @@
 import * as fs from 'fs'
 import * as http from 'http'
-import { makeHandler, Path } from '../../src/lib/core/app'
+import { makeHandler } from '../../src/lib/core/WacLdp'
 import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
-import { objectToStream, ResourceData, makeResourceData, streamToObject } from '../../src/lib/rdf/ResourceDataUtils'
+import { objectToStream, makeResourceData } from '../../src/lib/rdf/ResourceDataUtils'
 import { urlToPath } from '../../src/lib/storage/BlobTree'
 
 const storage = new BlobTreeInMem()
