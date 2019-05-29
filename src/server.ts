@@ -17,7 +17,7 @@ process.env.DEBUG = '*'
 import * as http from 'http'
 import Debug from 'debug'
 import { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
-import { makeHandler } from './lib/core/app'
+import { makeHandler } from './lib/core/WacLdp'
 import { BlobTree, Path } from './lib/storage/BlobTree'
 
 const debug = Debug('server')

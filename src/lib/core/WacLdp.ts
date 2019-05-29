@@ -38,10 +38,3 @@ export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL,
   }
   return handle
 }
-
-export { setRootAcl } from '../rdf/setRootAcl'
-export { checkAccess, AccessCheckTask } from './checkAccess'
-export { determineWebId } from '../auth/determineWebId'
-export { BlobTree, Path } from '../storage/BlobTree'
-export { BlobTreeInMem } from '../storage/BlobTreeInMem'
-export { TaskType } from '../api/http/HttpParser'

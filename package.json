@@ -2,7 +2,7 @@
   "name": "wac-ldp",
   "version": "0.2.1",
   "description": "A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.",
-  "main": "dist/lib/core/app.js",
+  "main": "dist/exports.js",
   "dependencies": {
     "@comunica/actor-init-sparql": "^1.7.2",
     "@comunica/actor-init-sparql-rdfjs": "^1.7.2",
