@@ -1,3 +1,4 @@
+import * as http from 'http'
 import { basicOperations, Operation } from '../../../src/lib/core/basicOperations'
 import { Blob } from '../../../src/lib/storage/Blob'
 import { TaskType, WacLdpTask } from '../../../src/lib/api/http/HttpParser'
@@ -14,7 +15,8 @@ test('delete blob', async () => {
     exists: () => true
   } as unknown as Blob
   const operation: Operation = basicOperations(TaskType.blobDelete)
-  const result: WacLdpResponse = await operation({} as WacLdpTask, node, false)
+  const task = new WacLdpTask('', {} as http.IncomingMessage)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -31,7 +33,8 @@ test.skip('write blob', async () => {
     exists: () => true
   } as unknown as Blob
   const operation = basicOperations(TaskType.blobWrite)
-  const result: WacLdpResponse = await operation({} as WacLdpTask, node, false)
+  const task = new WacLdpTask('', {} as http.IncomingMessage)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).setData.mock.calls).toEqual([
     []
   ])
@@ -48,7 +51,8 @@ test.skip('update blob', async () => {
     exists: () => true
   } as unknown as Blob
   const operation = basicOperations(TaskType.blobUpdate)
-  const result: WacLdpResponse = await operation({} as WacLdpTask, node, false)
+  const task = new WacLdpTask('', {} as http.IncomingMessage)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).setData.mock.calls).toEqual([
     []
   ])
@@ -65,7 +69,8 @@ test('delete container', async () => {
     exists: () => true
   } as unknown as Container
   const operation = basicOperations(TaskType.containerDelete)
-  const result: WacLdpResponse = await operation({} as WacLdpTask, node, false)
+  const task = new WacLdpTask('', {} as http.IncomingMessage)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -82,7 +87,12 @@ test('read blob (omit body)', async () => {
     exists: () => true
   } as unknown as Blob
   const operation = basicOperations(TaskType.blobRead)
-  const result: WacLdpResponse = await operation({ omitBody: true } as WacLdpTask, node, false)
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo',
+    method: 'HEAD'
+  } as http.IncomingMessage)
+  console.log(task)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).getData.mock.calls).toEqual([
     []
   ])
@@ -105,7 +115,11 @@ test('read blob (with body)', async () => {
     exists: () => true
   } as unknown as Blob
   const operation = basicOperations(TaskType.blobRead)
-  const result: WacLdpResponse = await operation({ omitBody: false } as WacLdpTask, node, false)
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo',
+    method: 'GET'
+  } as http.IncomingMessage)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).getData.mock.calls).toEqual([
     []
   ])
@@ -128,7 +142,12 @@ test('read container (omit body)', async () => {
     exists: () => true
   } as unknown as Container
   const operation = basicOperations(TaskType.containerRead)
-  const result: WacLdpResponse = await operation({ path: '/foo', omitBody: true } as unknown as WacLdpTask, node, false)
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo/',
+    method: 'HEAD',
+    headers: {}
+  } as http.IncomingMessage)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
@@ -155,9 +174,14 @@ test('read container (with body)', async () => {
       return []
     }),
     exists: () => true
-  }as unknown as Container
+  } as unknown as Container
   const operation = basicOperations(TaskType.containerRead)
-  const result: WacLdpResponse = await operation({ path: '/foo', omitBody: false } as unknown as WacLdpTask, node, false)
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo/',
+    method: 'GET',
+    headers: {}
+  } as http.IncomingMessage)
+  const result: WacLdpResponse = await operation(task, node, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])

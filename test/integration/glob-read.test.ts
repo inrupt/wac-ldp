@@ -26,7 +26,7 @@ beforeEach(async () => {
 
 const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false)
 
-test.only('handles a GET /* request (glob read)', async () => {
+test('handles a GET /* request (glob read)', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge.ttl').toString()
   let streamed = false
   let endCallback: () => void
@@ -53,7 +53,7 @@ test.only('handles a GET /* request (glob read)', async () => {
         'Accept-Post': 'application/sparql-update',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/turtle',
-        'ETag': '"TmBqjXO24ygE+uQdtQuiOA=="',
+        'ETag': '"nTlfytRKUogadLYNnvpYjQ=="',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
         'Updates-Via': 'wss://localhost:8080/'
       }

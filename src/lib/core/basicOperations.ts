@@ -19,7 +19,7 @@ async function readContainer (task: WacLdpTask, container: Container): Promise<W
   debug('operation readContainer!')
   debug(container)
   let membersList: Array<Member>
-  if (task.preferMinimalContainer) {
+  if (task.preferMinimalContainer()) {
     membersList = []
   } else {
     membersList = await container.getMembers()
@@ -28,7 +28,7 @@ async function readContainer (task: WacLdpTask, container: Container): Promise<W
   const resourceData = await membersListAsResourceData(task.fullUrl(), membersList, task.asJsonLd())
   debug(resourceData)
   return {
-    resultType: (task.omitBody ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
+    resultType: (task.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
     resourceData,
     isContainer: true
   } as WacLdpResponse
@@ -43,7 +43,7 @@ async function deleteContainer (task: WacLdpTask, container: Container) {
 }
 
 async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> {
-  debug('operation readBlob!', task.asJsonLd)
+  debug('operation readBlob!', task.asJsonLd())
   let result = {
   } as any
   const exists = await blob.exists()
@@ -53,7 +53,7 @@ async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> 
   }
   result.resourceData = await streamToObject(await blob.getData())
   // TODO: use RdfType enum here
-  if (task.asJsonLd) {
+  if (task.asJsonLd()) {
     const rdf = await resourceDataToRdf(result.resourceData)
     result.resourceData = await rdfToResourceData(rdf, true)
   }
@@ -63,13 +63,13 @@ async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> 
     const rdf = await resourceDataToRdf(result.resourceData)
     rdf.forEach((quad: any) => { debug('quad', quad.toString()) })
     debug('done here printing quads')
-    debug('applying query', task.sparqlQuery)
+    debug('applying query', task.sparqlQuery())
     const body: string = await applyQuery(rdf, sparqlQuery)
     debug('converting to requested representation', rdf)
     result.resourceData = makeResourceData('application/sparql+json', body)
   }
   debug('result.resourceData set to ', result.resourceData)
-  if (task.omitBody) {
+  if (task.omitBody()) {
     result.resultType = ResultType.OkayWithoutBody
   } else {
     result.resultType = ResultType.OkayWithBody
@@ -86,12 +86,12 @@ async function writeBlob (task: WacLdpTask, blob: Blob) {
   await blob.setData(objectToStream(resourceData))
   return {
     resultType,
-    createdLocation: (blobExists ? undefined : task.fullUrl)
+    createdLocation: (blobExists ? undefined : task.fullUrl())
   } as WacLdpResponse
 }
 
 async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: boolean): Promise<WacLdpResponse> {
-  debug('operation updateBlob!', { appendOnly })
+  debug('operation updateBlob!', { appendOnly, blob })
   const resourceData = await streamToObject(await blob.getData()) as ResourceData
   const turtleDoc: string = await applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
   await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))

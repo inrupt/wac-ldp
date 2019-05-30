@@ -51,7 +51,7 @@ test('handles a GET request for a public resource', async () => {
   ])
 })
 
-test('handles a GET request for a private resource', async () => {
+test.only('handles a GET request for a private resource', async () => {
   let streamed = false
   let endCallback: () => void
   let httpReq: any = toChunkStream('')

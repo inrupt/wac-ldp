@@ -21,11 +21,12 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
   const data = await blob.getData()
   debug(data, wacLdpTask)
   if (data) { // resource exists
-    if (wacLdpTask.ifNoneMatchStar) { // If-None-Match: * -> resource should not exist
+    if (wacLdpTask.ifNoneMatchStar()) { // If-None-Match: * -> resource should not exist
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
     const resourceData = await streamToObject(data)
-    if (wacLdpTask.ifMatch && resourceData.etag !== wacLdpTask.ifMatch) { // If-Match -> ETag should match
+    const ifMatch = wacLdpTask.ifMatch()
+    if (ifMatch && resourceData.etag !== ifMatch) { // If-Match -> ETag should match
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
     const ifNoneMatchList: Array<string> | undefined = wacLdpTask.ifNoneMatchList()
@@ -33,7 +34,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
   } else { // resource does not exist
-    if (wacLdpTask.ifMatch) { // If-Match -> ETag should match so resource should first exist
+    if (wacLdpTask.ifMatch()) { // If-Match -> ETag should match so resource should first exist
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
   }
@@ -93,7 +94,7 @@ async function handleGlobRead (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, s
   }))
 
   return {
-    resultType: (wacLdpTask.omitBody ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
+    resultType: (wacLdpTask.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
     resourceData: await mergeRdfSources(rdfSources, wacLdpTask.asJsonLd()),
     createdLocation: undefined,
     isContainer: true
@@ -102,7 +103,7 @@ async function handleGlobRead (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, s
 
 async function handleOperation (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, appendOnly: boolean) {
   let node: any
-  if (wacLdpTask.isContainer) {
+  if (wacLdpTask.isContainer()) {
     node = rdfFetcher.getLocalContainer(wacLdpTask.fullUrl())
   } else {
     debug('not a container, getting blob and checking etag')
