@@ -15,14 +15,6 @@ export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendO
 
 const debug = Debug('Basic Operations')
 
-async function deleteContainer (task: WacLdpTask, container: Container) {
-  debug('operation deleteContainer!')
-  await container.delete()
-  return {
-    resultType: ResultType.OkayWithoutBody
-  } as WacLdpResponse
-}
-
 async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> {
   debug('operation readBlob!', task.asJsonLd())
   let result = {
@@ -98,7 +90,6 @@ export function basicOperations (taskType: TaskType): Operation {
   const operations: { [taskType in keyof typeof TaskType]: Operation } = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.containerDelete]: deleteContainer as Operation,
     [TaskType.blobRead]: readBlob as unknown as Operation,
     [TaskType.blobWrite]: writeBlob as unknown as Operation,
     [TaskType.blobUpdate]: updateBlob as unknown as Operation,

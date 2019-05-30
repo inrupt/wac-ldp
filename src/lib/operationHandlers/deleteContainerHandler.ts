@@ -11,7 +11,7 @@ import { RdfFetcher } from '../rdf/RdfFetcher'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
 
-const debug = Debug('read-container-handler')
+const debug = Debug('delete-container-handler')
 
 async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher): Promise<Blob> {
   const blob: Blob = rdfFetcher.getLocalBlob(wacLdpTask.fullUrl())
@@ -38,8 +38,8 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
   return blob
 }
 
-export const readContainerHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
+export const deleteContainerHandler = {
+  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerDelete),
   handle: async function (task: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
       await checkAccess({
@@ -56,21 +56,11 @@ export const readContainerHandler = {
     // debug('not a container, getting blob and checking etag')
     // container = await getBlobAndCheckETag(task, rdfFetcher)
 
-    debug('operation readContainer!')
+    debug('operation deleteContainer!')
     debug(container)
-    let membersList: Array<Member>
-    if (task.preferMinimalContainer()) {
-      membersList = []
-    } else {
-      membersList = await container.getMembers()
-    }
-    debug(membersList)
-    const resourceData = await membersListAsResourceData(task.fullUrl(), membersList, task.asJsonLd())
-    debug(resourceData)
+    await container.delete()
     return {
-      resultType: (task.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
-      resourceData,
-      isContainer: true
+      resultType: ResultType.OkayWithoutBody
     } as WacLdpResponse
   }
 }

@@ -9,6 +9,7 @@ import { Container } from '../../../src/lib/storage/Container'
 import { readContainerHandler } from '../../../src/lib/operationHandlers/readContainerHandler'
 import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
 import { BlobTree } from '../../../src/lib/storage/BlobTree'
+import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler';
 
 test('delete blob', async () => {
   const node: Blob = {
@@ -71,9 +72,16 @@ test('delete container', async () => {
     }),
     exists: () => true
   } as unknown as Container
-  const operation = basicOperations(TaskType.containerDelete)
-  const task = new WacLdpTask('', {} as http.IncomingMessage)
-  const result: WacLdpResponse = await operation(task, node, false)
+  const storage = {
+    getContainer: () => node
+  } as unknown
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo/',
+    method: 'GET',
+    headers: {}
+  } as http.IncomingMessage)
+  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await deleteContainerHandler.handle(task, 'https://example.com', rdfFetcher, true)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
