@@ -15,14 +15,6 @@ export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendO
 
 const debug = Debug('Basic Operations')
 
-async function deleteBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> {
-  debug('operation deleteBlob!')
-  await blob.delete()
-  return {
-    resultType: ResultType.OkayWithoutBody
-  } as WacLdpResponse
-}
-
 async function unknownOperation (): Promise<WacLdpResponse> {
   debug('operation unknownOperation!')
   throw new ErrorResult(ResultType.MethodNotAllowed)
@@ -32,7 +24,6 @@ export function basicOperations (taskType: TaskType): Operation {
   const operations: { [taskType in keyof typeof TaskType]: Operation } = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.blobDelete]: deleteBlob as unknown as Operation,
     [TaskType.unknown]: unknownOperation
   } as unknown as { [taskType in keyof typeof TaskType]: Operation }
   return operations[taskType]

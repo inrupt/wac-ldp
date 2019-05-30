@@ -10,7 +10,7 @@ import { streamToObject, makeResourceData, objectToStream, ResourceData } from '
 import { RdfFetcher } from '../rdf/RdfFetcher'
 import { applyPatch } from '../rdf/applyPatch'
 
-const debug = Debug('update-blob-handler')
+const debug = Debug('delete-blob-handler')
 
 async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher): Promise<Blob> {
   const blob: Blob = rdfFetcher.getLocalBlob(wacLdpTask.fullUrl())
@@ -37,12 +37,11 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
   return blob
 }
 
-export const updateBlobHandler = {
+export const deleteBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate),
   handle: async function (task: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<WacLdpResponse> {
-    let appendOnly = false
     if (!skipWac) {
-      appendOnly = await checkAccess({
+      await checkAccess({
         url: task.fullUrl(),
         isContainer: task.isContainer(),
         webId: await task.webId(),
@@ -52,10 +51,8 @@ export const updateBlobHandler = {
       } as AccessCheckTask) // may throw if access is denied
     }
     const blob = await getBlobAndCheckETag(task, rdfFetcher)
-    debug('operation updateBlob!', { appendOnly, blob })
-    const resourceData = await streamToObject(await blob.getData()) as ResourceData
-    const turtleDoc: string = await applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
-    await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
+    debug('operation deleteBlob!')
+    await blob.delete()
     return {
       resultType: ResultType.OkayWithoutBody
     } as WacLdpResponse

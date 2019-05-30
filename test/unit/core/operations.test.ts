@@ -11,17 +11,28 @@ import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
 import { BlobTree } from '../../../src/lib/storage/BlobTree'
 import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler'
 import { readBlobHandler } from '../../../src/lib/operationHandlers/readBlobHandler'
+import { deleteBlobHandler } from '../../../src/lib/operationHandlers/deleteBlobHandler'
 
 test('delete blob', async () => {
   const node: Blob = {
+    getData: jest.fn(() => {
+      return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
+    }),
+    exists: () => true,
     delete: jest.fn(() => {
       //
-    }),
-    exists: () => true
+    })
   } as unknown as Blob
-  const operation: Operation = basicOperations(TaskType.blobDelete)
-  const task = new WacLdpTask('', {} as http.IncomingMessage)
-  const result: WacLdpResponse = await operation(task, node, false)
+  const storage = {
+    getBlob: () => node
+  } as unknown
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo',
+    method: 'DELETE',
+    headers: {}
+  } as http.IncomingMessage)
+  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await deleteBlobHandler.handle(task, 'https://example.com', rdfFetcher, true)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
