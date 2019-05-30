@@ -6,6 +6,9 @@ import { WacLdpResponse, ResultType } from '../../../src/lib/api/http/HttpRespon
 import { toChunkStream } from '../helpers/toChunkStream'
 import { makeResourceData, RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
 import { Container } from '../../../src/lib/storage/Container'
+import { readContainerHandler } from '../../../src/lib/operationHandlers/readContainerHandler'
+import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
+import { BlobTree } from '../../../src/lib/storage/BlobTree'
 
 test('delete blob', async () => {
   const node: Blob = {
@@ -141,13 +144,16 @@ test('read container (omit body)', async () => {
     }),
     exists: () => true
   } as unknown as Container
-  const operation = basicOperations(TaskType.containerRead)
+  const storage = {
+    getContainer: () => node
+  } as unknown
   const task = new WacLdpTask('https://example.com', {
     url: '/foo/',
     method: 'HEAD',
     headers: {}
   } as http.IncomingMessage)
-  const result: WacLdpResponse = await operation(task, node, false)
+  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfFetcher, true)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
@@ -175,13 +181,16 @@ test('read container (with body)', async () => {
     }),
     exists: () => true
   } as unknown as Container
-  const operation = basicOperations(TaskType.containerRead)
+  const storage = {
+    getContainer: () => node
+  } as unknown
   const task = new WacLdpTask('https://example.com', {
     url: '/foo/',
     method: 'GET',
     headers: {}
   } as http.IncomingMessage)
-  const result: WacLdpResponse = await operation(task, node, false)
+  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfFetcher, true)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])

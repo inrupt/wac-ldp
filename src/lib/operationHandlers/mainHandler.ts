@@ -85,15 +85,6 @@ export const mainHandler = {
     // may throw if access is denied:
     const appendOnly = await determineAppendOnly(wacLdpTask, rdfFetcher, skipWac)
 
-    // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
-    // but notice that access check for this is append on the container,
-    // write access on the Blob is not required!
-    // See https://github.com/solid/web-access-control-spec#aclappend
-    if (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd) {
-      const childName: string = uuid()
-      wacLdpTask.convertToBlobWrite(childName)
-    }
-
     // all other operations:
     return handleOperation(wacLdpTask, rdfFetcher, appendOnly)
   }

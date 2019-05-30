@@ -15,25 +15,6 @@ export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendO
 
 const debug = Debug('Basic Operations')
 
-async function readContainer (task: WacLdpTask, container: Container): Promise<WacLdpResponse> {
-  debug('operation readContainer!')
-  debug(container)
-  let membersList: Array<Member>
-  if (task.preferMinimalContainer()) {
-    membersList = []
-  } else {
-    membersList = await container.getMembers()
-  }
-  debug(membersList)
-  const resourceData = await membersListAsResourceData(task.fullUrl(), membersList, task.asJsonLd())
-  debug(resourceData)
-  return {
-    resultType: (task.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
-    resourceData,
-    isContainer: true
-  } as WacLdpResponse
-}
-
 async function deleteContainer (task: WacLdpTask, container: Container) {
   debug('operation deleteContainer!')
   await container.delete()
@@ -117,7 +98,6 @@ export function basicOperations (taskType: TaskType): Operation {
   const operations: { [taskType in keyof typeof TaskType]: Operation } = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.containerRead]: readContainer as Operation,
     [TaskType.containerDelete]: deleteContainer as Operation,
     [TaskType.blobRead]: readBlob as unknown as Operation,
     [TaskType.blobWrite]: writeBlob as unknown as Operation,

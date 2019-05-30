@@ -9,6 +9,7 @@ import { EventEmitter } from 'events'
 import { RdfFetcher } from '../rdf/RdfFetcher'
 import { globReadHandler } from '../operationHandlers/globReadHandler'
 import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
+import { readContainerHandler } from '../operationHandlers/readContainerHandler'
 
 const debug = Debug('app')
 
@@ -40,6 +41,7 @@ export class WacLdp extends EventEmitter {
       optionsHandler,
       globReadHandler,
       containerMemberAddHandler,
+      readContainerHandler,
       mainHandler
     ]
   }
