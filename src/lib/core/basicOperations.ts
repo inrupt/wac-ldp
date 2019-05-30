@@ -15,16 +15,6 @@ export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendO
 
 const debug = Debug('Basic Operations')
 
-async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: boolean): Promise<WacLdpResponse> {
-  debug('operation updateBlob!', { appendOnly, blob })
-  const resourceData = await streamToObject(await blob.getData()) as ResourceData
-  const turtleDoc: string = await applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
-  await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
-  return {
-    resultType: ResultType.OkayWithoutBody
-  } as WacLdpResponse
-}
-
 async function deleteBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> {
   debug('operation deleteBlob!')
   await blob.delete()
@@ -42,7 +32,6 @@ export function basicOperations (taskType: TaskType): Operation {
   const operations: { [taskType in keyof typeof TaskType]: Operation } = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.blobUpdate]: updateBlob as unknown as Operation,
     [TaskType.blobDelete]: deleteBlob as unknown as Operation,
     [TaskType.unknown]: unknownOperation
   } as unknown as { [taskType in keyof typeof TaskType]: Operation }
