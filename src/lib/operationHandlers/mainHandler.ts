@@ -1,5 +1,4 @@
 import uuid from 'uuid/v4'
-import { BlobTree, Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
@@ -9,9 +8,7 @@ import { basicOperations } from '../core/basicOperations'
 
 import Debug from 'debug'
 
-import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
-import { determineWebId } from '../auth/determineWebId'
-import { mergeRdfSources } from '../rdf/mergeRdfSources'
+import { streamToObject } from '../rdf/ResourceDataUtils'
 import { RdfFetcher } from '../rdf/RdfFetcher'
 
 const debug = Debug('main-handler')
@@ -57,51 +54,6 @@ async function determineAppendOnly (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
   return false
 }
 
-async function handleGlobRead (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, skipWac: boolean) {
-  const containerMembers = await rdfFetcher.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
-  const webId = await wacLdpTask.webId()
-  const rdfSources: { [indexer: string]: ResourceData } = {}
-  await Promise.all(containerMembers.map(async (member) => {
-    debug('glob, considering member', member)
-    if (member.isContainer) {// not an RDF source
-      return
-    }
-    const blobUrl = new URL(member.name, wacLdpTask.fullUrl())
-    const data = await rdfFetcher.getLocalBlob(blobUrl).getData()
-    const resourceData = await streamToObject(data)
-    if (['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
-      return
-    }
-    try {
-      if (!skipWac) {
-        await checkAccess({
-          url: blobUrl,
-          isContainer: false,
-          webId,
-          origin: wacLdpTask.origin(),
-          wacLdpTaskType: TaskType.blobRead,
-          rdfFetcher
-        } as AccessCheckTask) // may throw if access is denied
-      }
-      rdfSources[member.name] = resourceData
-      debug('Found RDF source', member.name)
-    } catch (error) {
-      if (error instanceof ErrorResult && error.resultType === ResultType.AccessDenied) {
-        debug('access denied to blob in glob, skipping', blobUrl.toString())
-      } else {
-        debug('unexpected error for blob in glob, skipping', error.message, blobUrl.toString())
-      }
-    }
-  }))
-
-  return {
-    resultType: (wacLdpTask.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
-    resourceData: await mergeRdfSources(rdfSources, wacLdpTask.asJsonLd()),
-    createdLocation: undefined,
-    isContainer: true
-  } as WacLdpResponse
-}
-
 async function handleOperation (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, appendOnly: boolean) {
   let node: any
   if (wacLdpTask.isContainer()) {
@@ -140,13 +92,6 @@ export const mainHandler = {
     if (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd) {
       const childName: string = uuid()
       wacLdpTask.convertToBlobWrite(childName)
-    }
-
-    // For TaskType.globRead, at this point will have checked read access over the
-    // container, but need to collect all RDF sources, filter on access, and then
-    // concatenate them.
-    if (wacLdpTask.wacLdpTaskType() === TaskType.globRead) {
-      return handleGlobRead(wacLdpTask, rdfFetcher, skipWac)
     }
 
     // all other operations:

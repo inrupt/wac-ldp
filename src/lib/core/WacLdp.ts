@@ -7,6 +7,8 @@ import { mainHandler } from '../operationHandlers/mainHandler'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 import { RdfFetcher } from '../rdf/RdfFetcher'
+import { globReadHandler } from '../operationHandlers/globReadHandler'
+import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 
 const debug = Debug('app')
 
@@ -36,6 +38,8 @@ export class WacLdp extends EventEmitter {
     this.skipWac = skipWac
     this.operationHandlers = [
       optionsHandler,
+      globReadHandler,
+      containerMemberAddHandler,
       mainHandler
     ]
   }
