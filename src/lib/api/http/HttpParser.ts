@@ -311,10 +311,10 @@ export class WacLdpTask {
   }
   // edge case if we can still consider this as lazy request parsing,
   // but had to move it here because most operation handlers rely on it.
-  webId (aud: string): Promise<URL | undefined> {
+  webId (): Promise<URL | undefined> {
     if (!this.cache.webId) {
       this.cache.webId = {
-        value: determineWebId(this.bearerToken(), aud)
+        value: determineWebId(this.bearerToken(), this.hostName)
       }
     }
     return this.cache.webId.value

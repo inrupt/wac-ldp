@@ -46,19 +46,20 @@ async function determineAppendOnly (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
   if (skipWac) {
     return false
   }
-  // return checkAccess({
-  //   url: wacLdpTask.fullUrl,
-  //   isContainer: wacLdpTask.isContainer,
-  //   webId,
-  //   origin: wacLdpTask.origin,
-  //   wacLdpTaskType: wacLdpTask.wacLdpTaskType,
-  //   rdfFetcher
-  // } as AccessCheckTask) // may throw if access is denied
+  return checkAccess({
+    url: wacLdpTask.fullUrl(),
+    isContainer: wacLdpTask.isContainer(),
+    webId: await wacLdpTask.webId(),
+    origin: wacLdpTask.origin(),
+    wacLdpTaskType: wacLdpTask.wacLdpTaskType(),
+    rdfFetcher
+  } as AccessCheckTask) // may throw if access is denied
   return false
 }
 
 async function handleGlobRead (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, skipWac: boolean) {
   const containerMembers = await rdfFetcher.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
+  const webId = await wacLdpTask.webId()
   const rdfSources: { [indexer: string]: ResourceData } = {}
   await Promise.all(containerMembers.map(async (member) => {
     debug('glob, considering member', member)
@@ -73,14 +74,14 @@ async function handleGlobRead (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, s
     }
     try {
       if (!skipWac) {
-        // await checkAccess({
-        //   url: blobUrl,
-        //   isContainer: false,
-        //   webId,
-        //   origin: wacLdpTask.origin,
-        //   wacLdpTaskType: TaskType.blobRead,
-        //   rdfFetcher: new RdfFetcher('', storage)
-        // } as AccessCheckTask) // may throw if access is denied
+        await checkAccess({
+          url: blobUrl,
+          isContainer: false,
+          webId,
+          origin: wacLdpTask.origin(),
+          wacLdpTaskType: TaskType.blobRead,
+          rdfFetcher
+        } as AccessCheckTask) // may throw if access is denied
       }
       rdfSources[member.name] = resourceData
       debug('Found RDF source', member.name)
