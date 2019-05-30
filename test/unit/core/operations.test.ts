@@ -9,7 +9,8 @@ import { Container } from '../../../src/lib/storage/Container'
 import { readContainerHandler } from '../../../src/lib/operationHandlers/readContainerHandler'
 import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
 import { BlobTree } from '../../../src/lib/storage/BlobTree'
-import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler';
+import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler'
+import { readBlobHandler } from '../../../src/lib/operationHandlers/readBlobHandler'
 
 test('delete blob', async () => {
   const node: Blob = {
@@ -97,14 +98,19 @@ test('read blob (omit body)', async () => {
     }),
     exists: () => true
   } as unknown as Blob
-  const operation = basicOperations(TaskType.blobRead)
+  const storage = {
+    getBlob: () => node
+  } as unknown
   const task = new WacLdpTask('https://example.com', {
     url: '/foo',
     method: 'HEAD'
   } as http.IncomingMessage)
   console.log(task)
-  const result: WacLdpResponse = await operation(task, node, false)
+  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
+    [],
     []
   ])
   expect(result).toEqual({
@@ -125,13 +131,19 @@ test('read blob (with body)', async () => {
     }),
     exists: () => true
   } as unknown as Blob
-  const operation = basicOperations(TaskType.blobRead)
+  const storage = {
+    getBlob: () => node
+  } as unknown
   const task = new WacLdpTask('https://example.com', {
     url: '/foo',
     method: 'GET'
   } as http.IncomingMessage)
-  const result: WacLdpResponse = await operation(task, node, false)
+  console.log(task)
+  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
+    [],
     []
   ])
   expect(result).toEqual({

@@ -15,41 +15,6 @@ export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendO
 
 const debug = Debug('Basic Operations')
 
-async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> {
-  debug('operation readBlob!', task.asJsonLd())
-  let result = {
-  } as any
-  const exists = await blob.exists()
-  if (!exists) {
-    result.resultType = ResultType.NotFound
-    return result
-  }
-  result.resourceData = await streamToObject(await blob.getData())
-  // TODO: use RdfType enum here
-  if (task.asJsonLd()) {
-    const rdf = await resourceDataToRdf(result.resourceData)
-    result.resourceData = await rdfToResourceData(rdf, true)
-  }
-  const sparqlQuery: string | undefined = task.sparqlQuery()
-  if (sparqlQuery) {
-    debug('reading blob as rdf', result.resourceData)
-    const rdf = await resourceDataToRdf(result.resourceData)
-    rdf.forEach((quad: any) => { debug('quad', quad.toString()) })
-    debug('done here printing quads')
-    debug('applying query', task.sparqlQuery())
-    const body: string = await applyQuery(rdf, sparqlQuery)
-    debug('converting to requested representation', rdf)
-    result.resourceData = makeResourceData('application/sparql+json', body)
-  }
-  debug('result.resourceData set to ', result.resourceData)
-  if (task.omitBody()) {
-    result.resultType = ResultType.OkayWithoutBody
-  } else {
-    result.resultType = ResultType.OkayWithBody
-  }
-  return result as WacLdpResponse
-}
-
 async function writeBlob (task: WacLdpTask, blob: Blob) {
   const blobExists: boolean = await blob.exists()
   debug('operation writeBlob!', blobExists)
@@ -90,7 +55,6 @@ export function basicOperations (taskType: TaskType): Operation {
   const operations: { [taskType in keyof typeof TaskType]: Operation } = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.blobRead]: readBlob as unknown as Operation,
     [TaskType.blobWrite]: writeBlob as unknown as Operation,
     [TaskType.blobUpdate]: updateBlob as unknown as Operation,
     [TaskType.blobDelete]: deleteBlob as unknown as Operation,
