@@ -1,11 +1,3 @@
-<#public> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/auth/acl#Authorization> .
-<#public> <http://www.w3.org/ns/auth/acl#agentClass> <http://xmlns.com/foaf/0.1/Agent> .
-<#public> <http://www.w3.org/ns/auth/acl#default> <../foo/> .
-<#public> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Read> .
-<#owner> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://www.w3.org/ns/auth/acl#Authorization> .
-<#owner> <http://www.w3.org/ns/auth/acl#default> <../foo/> .
-<#owner> <http://www.w3.org/ns/auth/acl#mode> <http://www.w3.org/ns/auth/acl#Control> .
-<#owner> <http://www.w3.org/ns/auth/acl#agent> <https://michielbdejong.com/profile/card#me> .
 <http://example.org/#green-goblin> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://xmlns.com/foaf/0.1/Person> .
 <http://example.org/#green-goblin> <http://www.perceive.net/schemas/relationship/enemyOf> <http://example.org/#spiderman> .
 <http://example.org/#green-goblin> <http://xmlns.com/foaf/0.1/name> "Green Goblin" .
