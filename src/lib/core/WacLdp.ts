@@ -3,7 +3,6 @@ import Debug from 'debug'
 import { BlobTree } from '../storage/BlobTree'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { mainHandler } from '../operationHandlers/mainHandler'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 import { RdfFetcher } from '../rdf/RdfFetcher'
@@ -15,6 +14,7 @@ import { readBlobHandler } from '../operationHandlers/readBlobHandler'
 import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
 import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
+import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
 
 const debug = Debug('app')
 
@@ -52,7 +52,7 @@ export class WacLdp extends EventEmitter {
       writeBlobHandler,
       updateBlobHandler,
       deleteBlobHandler,
-      mainHandler
+      unknownOperationCatchAll
     ]
   }
   handleOperation (wacLdpTask: WacLdpTask): Promise<WacLdpResponse> {

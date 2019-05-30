@@ -1,5 +1,4 @@
 import * as http from 'http'
-import { basicOperations, Operation } from '../../../src/lib/core/basicOperations'
 import { Blob } from '../../../src/lib/storage/Blob'
 import { TaskType, WacLdpTask } from '../../../src/lib/api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../../../src/lib/api/http/HttpResponder'
@@ -42,39 +41,39 @@ test('delete blob', async () => {
 })
 
 test.skip('write blob', async () => {
-  const node: Blob = {
-    setData: jest.fn(() => {
-      //
-    }),
-    exists: () => true
-  } as unknown as Blob
-  const operation = basicOperations(TaskType.blobWrite)
-  const task = new WacLdpTask('', {} as http.IncomingMessage)
-  const result: WacLdpResponse = await operation(task, node, false)
-  expect((node as any).setData.mock.calls).toEqual([
-    []
-  ])
-  expect(result).toEqual({
-    resultType: ResultType.OkayWithoutBody
-  })
+  // const node: Blob = {
+  //   setData: jest.fn(() => {
+  //     //
+  //   }),
+  //   exists: () => true
+  // } as unknown as Blob
+  // const operation = basicOperations(TaskType.blobWrite)
+  // const task = new WacLdpTask('', {} as http.IncomingMessage)
+  // const result: WacLdpResponse = await operation(task, node, false)
+  // expect((node as any).setData.mock.calls).toEqual([
+  //   []
+  // ])
+  // expect(result).toEqual({
+  //   resultType: ResultType.OkayWithoutBody
+  // })
 })
 
 test.skip('update blob', async () => {
-  const node: Blob = {
-    setData: jest.fn(() => {
-      //
-    }),
-    exists: () => true
-  } as unknown as Blob
-  const operation = basicOperations(TaskType.blobUpdate)
-  const task = new WacLdpTask('', {} as http.IncomingMessage)
-  const result: WacLdpResponse = await operation(task, node, false)
-  expect((node as any).setData.mock.calls).toEqual([
-    []
-  ])
-  expect(result).toEqual({
-    resultType: ResultType.OkayWithoutBody
-  })
+  // const node: Blob = {
+  //   setData: jest.fn(() => {
+  //     //
+  //   }),
+  //   exists: () => true
+  // } as unknown as Blob
+  // const operation = basicOperations(TaskType.blobUpdate)
+  // const task = new WacLdpTask('', {} as http.IncomingMessage)
+  // const result: WacLdpResponse = await operation(task, node, false)
+  // expect((node as any).setData.mock.calls).toEqual([
+  //   []
+  // ])
+  // expect(result).toEqual({
+  //   resultType: ResultType.OkayWithoutBody
+  // })
 })
 
 test('delete container', async () => {
