@@ -12,6 +12,7 @@ import { containerMemberAddHandler } from '../operationHandlers/containerMemberA
 import { readContainerHandler } from '../operationHandlers/readContainerHandler'
 import { deleteContainerHandler } from '../operationHandlers/deleteContainerHandler'
 import { readBlobHandler } from '../operationHandlers/readBlobHandler'
+import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
 
 const debug = Debug('app')
 
@@ -46,6 +47,7 @@ export class WacLdp extends EventEmitter {
       readContainerHandler,
       deleteContainerHandler,
       readBlobHandler,
+      writeBlobHandler,
       mainHandler
     ]
   }

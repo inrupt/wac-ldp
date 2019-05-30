@@ -15,19 +15,6 @@ export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendO
 
 const debug = Debug('Basic Operations')
 
-async function writeBlob (task: WacLdpTask, blob: Blob) {
-  const blobExists: boolean = await blob.exists()
-  debug('operation writeBlob!', blobExists)
-  const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)
-  const contentType: string | undefined = task.contentType()
-  const resourceData = makeResourceData(contentType ? contentType : '', await task.requestBody())
-  await blob.setData(objectToStream(resourceData))
-  return {
-    resultType,
-    createdLocation: (blobExists ? undefined : task.fullUrl())
-  } as WacLdpResponse
-}
-
 async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: boolean): Promise<WacLdpResponse> {
   debug('operation updateBlob!', { appendOnly, blob })
   const resourceData = await streamToObject(await blob.getData()) as ResourceData
@@ -55,7 +42,6 @@ export function basicOperations (taskType: TaskType): Operation {
   const operations: { [taskType in keyof typeof TaskType]: Operation } = {
     // input type: LdpTask, BlobTree
     // output type: LdpResponse
-    [TaskType.blobWrite]: writeBlob as unknown as Operation,
     [TaskType.blobUpdate]: updateBlob as unknown as Operation,
     [TaskType.blobDelete]: deleteBlob as unknown as Operation,
     [TaskType.unknown]: unknownOperation
