@@ -8,6 +8,7 @@ import convert from 'buffer-to-stream'
 import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 import { ResourceData, makeResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
+import { Container } from '../storage/Container'
 
 const debug = Debug('getGraph')
 
@@ -62,10 +63,17 @@ export class RdfFetcher {
     this.serverHost = serverHost
     this.storage = storage
   }
+  getLocalBlob (url: URL): Blob {
+    const path: Path = urlToPath(url)
+    return this.storage.getBlob(path)
+  }
+  getLocalContainer (url: URL): Container {
+    const path: Path = urlToPath(url)
+    return this.storage.getContainer(path)
+  }
   async fetchGraph (url: URL) {
     if (url.host === this.serverHost) {
-      const path: Path = urlToPath(url)
-      const blob: Blob = this.storage.getBlob(path)
+      const blob: Blob = this.getLocalBlob(url)
       debug('fetching graph locally')
       return getGraphLocal(blob)
     } else {

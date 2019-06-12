@@ -25,7 +25,7 @@ async function readContainer (task: WacLdpTask, container: Container): Promise<W
     membersList = await container.getMembers()
   }
   debug(membersList)
-  const resourceData = await membersListAsResourceData(task.fullUrl, membersList, task.asJsonLd)
+  const resourceData = await membersListAsResourceData(task.fullUrl(), membersList, task.asJsonLd())
   debug(resourceData)
   return {
     resultType: (task.omitBody ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
@@ -57,13 +57,14 @@ async function readBlob (task: WacLdpTask, blob: Blob): Promise<WacLdpResponse> 
     const rdf = await resourceDataToRdf(result.resourceData)
     result.resourceData = await rdfToResourceData(rdf, true)
   }
-  if (task.sparqlQuery) {
+  const sparqlQuery: string | undefined = task.sparqlQuery()
+  if (sparqlQuery) {
     debug('reading blob as rdf', result.resourceData)
     const rdf = await resourceDataToRdf(result.resourceData)
     rdf.forEach((quad: any) => { debug('quad', quad.toString()) })
     debug('done here printing quads')
     debug('applying query', task.sparqlQuery)
-    const body: string = await applyQuery(rdf, task.sparqlQuery)
+    const body: string = await applyQuery(rdf, sparqlQuery)
     debug('converting to requested representation', rdf)
     result.resourceData = makeResourceData('application/sparql+json', body)
   }
@@ -80,7 +81,8 @@ async function writeBlob (task: WacLdpTask, blob: Blob) {
   const blobExists: boolean = await blob.exists()
   debug('operation writeBlob!', blobExists)
   const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)
-  const resourceData = makeResourceData(task.contentType ? task.contentType : '', task.requestBody ? task.requestBody : '')
+  const contentType: string | undefined = task.contentType()
+  const resourceData = makeResourceData(contentType ? contentType : '', await task.requestBody())
   await blob.setData(objectToStream(resourceData))
   return {
     resultType,
@@ -91,7 +93,7 @@ async function writeBlob (task: WacLdpTask, blob: Blob) {
 async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: boolean): Promise<WacLdpResponse> {
   debug('operation updateBlob!', { appendOnly })
   const resourceData = await streamToObject(await blob.getData()) as ResourceData
-  const turtleDoc: string = await applyPatch(resourceData, task.requestBody || '', task.fullUrl, appendOnly)
+  const turtleDoc: string = await applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
   await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
   return {
     resultType: ResultType.OkayWithoutBody

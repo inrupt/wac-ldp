@@ -16,8 +16,8 @@ import { RdfFetcher } from '../rdf/RdfFetcher'
 
 const debug = Debug('main-handler')
 
-async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, storage: BlobTree): Promise<Blob> {
-  const blob: Blob = storage.getBlob(urlToPath(wacLdpTask.fullUrl))
+async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher): Promise<Blob> {
+  const blob: Blob = rdfFetcher.getLocalBlob(wacLdpTask.fullUrl())
   const data = await blob.getData()
   debug(data, wacLdpTask)
   if (data) { // resource exists
@@ -28,7 +28,8 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, storage: BlobTree): 
     if (wacLdpTask.ifMatch && resourceData.etag !== wacLdpTask.ifMatch) { // If-Match -> ETag should match
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
-    if (wacLdpTask.ifNoneMatchList && wacLdpTask.ifNoneMatchList.indexOf(resourceData.etag) !== -1) { // ETag in blacklist
+    const ifNoneMatchList: Array<string> | undefined = wacLdpTask.ifNoneMatchList()
+    if (ifNoneMatchList && ifNoneMatchList.indexOf(resourceData.etag) !== -1) { // ETag in blacklist
       throw new ErrorResult(ResultType.PreconditionFailed)
     }
   } else { // resource does not exist
@@ -39,68 +40,46 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, storage: BlobTree): 
   return blob
 }
 
-function determineAppendOnly (wacLdpTask: WacLdpTask, webId: URL | undefined, rdfFetcher: RdfFetcher, skipWac: boolean) {
+async function determineAppendOnly (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<boolean> {
   let appendOnly = false
   if (skipWac) {
     return false
   }
-  return checkAccess({
-    url: wacLdpTask.fullUrl,
-    isContainer: wacLdpTask.isContainer,
-    webId,
-    origin: wacLdpTask.origin,
-    wacLdpTaskType: wacLdpTask.wacLdpTaskType,
-    rdfFetcher
-  } as AccessCheckTask) // may throw if access is denied
+  // return checkAccess({
+  //   url: wacLdpTask.fullUrl,
+  //   isContainer: wacLdpTask.isContainer,
+  //   webId,
+  //   origin: wacLdpTask.origin,
+  //   wacLdpTaskType: wacLdpTask.wacLdpTaskType,
+  //   rdfFetcher
+  // } as AccessCheckTask) // may throw if access is denied
+  return false
 }
 
-function urlForContainerMember (container: URL, memberName: string): URL {
-  let str = container.toString()
-  if (str.substr(-1) !== '/') {
-    str += '/'
-  }
-  if (memberName.indexOf('/') !== -1) {
-    throw new Error('memberName cannot contain slashes')
-  }
-  str += memberName
-  return new URL(str)
-}
-function convertToBlobWrite (wacLdpTask: WacLdpTask) {
-  debug('converting', wacLdpTask)
-  const childName: string = uuid()
-  wacLdpTask.fullUrl = urlForContainerMember(wacLdpTask.fullUrl, childName)
-  wacLdpTask.wacLdpTaskType = TaskType.blobWrite
-  wacLdpTask.isContainer = false
-  wacLdpTask.fullUrl = new URL(wacLdpTask.fullUrl + childName)
-  debug('converted', wacLdpTask)
-  return wacLdpTask
-}
-
-async function handleGlobRead (wacLdpTask: WacLdpTask, storage: BlobTree, skipWac: boolean, webId: URL | undefined) {
-  const containerPath = urlToPath(wacLdpTask.fullUrl)
-  const containerMembers = await storage.getContainer(containerPath).getMembers()
+async function handleGlobRead (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, skipWac: boolean) {
+  const containerMembers = await rdfFetcher.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
   const rdfSources: { [indexer: string]: ResourceData } = {}
   await Promise.all(containerMembers.map(async (member) => {
     debug('glob, considering member', member)
     if (member.isContainer) {// not an RDF source
       return
     }
-    const blobUrl = new URL(member.name, wacLdpTask.fullUrl)
-    const data = await storage.getBlob(urlToPath(blobUrl)).getData()
+    const blobUrl = new URL(member.name, wacLdpTask.fullUrl())
+    const data = await rdfFetcher.getLocalBlob(blobUrl).getData()
     const resourceData = await streamToObject(data)
     if (['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
       return
     }
     try {
       if (!skipWac) {
-        await checkAccess({
-          url: blobUrl,
-          isContainer: false,
-          webId,
-          origin: wacLdpTask.origin,
-          wacLdpTaskType: TaskType.blobRead,
-          rdfFetcher: new RdfFetcher('', storage)
-        } as AccessCheckTask) // may throw if access is denied
+        // await checkAccess({
+        //   url: blobUrl,
+        //   isContainer: false,
+        //   webId,
+        //   origin: wacLdpTask.origin,
+        //   wacLdpTaskType: TaskType.blobRead,
+        //   rdfFetcher: new RdfFetcher('', storage)
+        // } as AccessCheckTask) // may throw if access is denied
       }
       rdfSources[member.name] = resourceData
       debug('Found RDF source', member.name)
@@ -115,22 +94,22 @@ async function handleGlobRead (wacLdpTask: WacLdpTask, storage: BlobTree, skipWa
 
   return {
     resultType: (wacLdpTask.omitBody ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
-    resourceData: await mergeRdfSources(rdfSources, wacLdpTask.asJsonLd),
+    resourceData: await mergeRdfSources(rdfSources, wacLdpTask.asJsonLd()),
     createdLocation: undefined,
     isContainer: true
   } as WacLdpResponse
 }
 
-async function handleOperation (wacLdpTask: WacLdpTask, storage: BlobTree, appendOnly: boolean) {
+async function handleOperation (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher, appendOnly: boolean) {
   let node: any
   if (wacLdpTask.isContainer) {
-    node = storage.getContainer(urlToPath(wacLdpTask.fullUrl))
+    node = rdfFetcher.getLocalContainer(wacLdpTask.fullUrl())
   } else {
     debug('not a container, getting blob and checking etag')
-    node = await getBlobAndCheckETag(wacLdpTask, storage)
+    node = await getBlobAndCheckETag(wacLdpTask, rdfFetcher)
   }
 
-  const operation = basicOperations(wacLdpTask.wacLdpTaskType)
+  const operation = basicOperations(wacLdpTask.wacLdpTaskType())
 
   // Note that the operation is executed on the `node` that was retrieved earlier,
   // that means that the storage can tell if the underlying resource changed since
@@ -147,31 +126,28 @@ async function handleOperation (wacLdpTask: WacLdpTask, storage: BlobTree, appen
 
 export const mainHandler = {
   canHandle: () => true,
-  handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, storage: BlobTree, skipWac: boolean): Promise<WacLdpResponse> {
-    const webId: URL | undefined = (wacLdpTask.bearerToken ? await determineWebId(wacLdpTask.bearerToken, aud) : undefined)
-    debug({ webId, url: wacLdpTask.fullUrl, isContainer: wacLdpTask.isContainer, origin: wacLdpTask.origin, wacLdpTaskType: wacLdpTask.wacLdpTaskType })
-
-    const rdfFetcher = new RdfFetcher(aud, storage)
+  handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<WacLdpResponse> {
 
     // may throw if access is denied:
-    const appendOnly = await determineAppendOnly(wacLdpTask, webId, rdfFetcher, skipWac)
+    const appendOnly = await determineAppendOnly(wacLdpTask, rdfFetcher, skipWac)
 
     // convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
     // but notice that access check for this is append on the container,
     // write access on the Blob is not required!
     // See https://github.com/solid/web-access-control-spec#aclappend
-    if (wacLdpTask.wacLdpTaskType === TaskType.containerMemberAdd) {
-      wacLdpTask = convertToBlobWrite(wacLdpTask)
+    if (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd) {
+      const childName: string = uuid()
+      wacLdpTask.convertToBlobWrite(childName)
     }
 
     // For TaskType.globRead, at this point will have checked read access over the
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
-    if (wacLdpTask.wacLdpTaskType === TaskType.globRead) {
-      return handleGlobRead(wacLdpTask, storage, skipWac, webId)
+    if (wacLdpTask.wacLdpTaskType() === TaskType.globRead) {
+      return handleGlobRead(wacLdpTask, rdfFetcher, skipWac)
     }
 
     // all other operations:
-    return handleOperation(wacLdpTask, storage, appendOnly)
+    return handleOperation(wacLdpTask, rdfFetcher, appendOnly)
   }
 }
