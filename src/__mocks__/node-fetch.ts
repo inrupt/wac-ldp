@@ -7,6 +7,8 @@ const debug = Debug('fetch-mock')
 
 const WEB_FIXTURES = './test/fixtures/web'
 
+// We want to mock `fetch` but not `Response`,
+// so passing that through as-is from the real node-fetch module:
 export interface Response extends Response {}
 
 export default function fetch (urlStr: string): Promise<Response> {
