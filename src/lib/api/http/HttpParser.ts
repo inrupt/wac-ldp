@@ -1,8 +1,7 @@
 import * as http from 'http'
 import { URL } from 'url'
 import Debug from 'debug'
-import { WacLdpResponse, ResultType, ErrorResult } from './HttpResponder'
-import { Path } from '../../storage/BlobTree'
+import { determineWebId } from '../../auth/determineWebId'
 
 const debug = Debug('HttpParser')
 
@@ -150,55 +149,192 @@ function determinePreferMinimalContainer (headers: http.IncomingHttpHeaders): bo
   return false
 }
 
-// parse the http request to extract some basic info (e.g. is it a container?)
-export async function parseHttpRequest (hostname: string, httpReq: http.IncomingMessage): Promise<WacLdpTask> {
-  debug('LdpParserTask!')
-  let errorCode = null // todo actually use this. maybe with try-catch?
-  const isContainer = (httpReq.url && (httpReq.url.substr(-1) === '/' || httpReq.url.substr(-2) === '/*'))
-  const parsedTask = {
-    isContainer,
-    omitBody: determineOmitBody(httpReq.method),
-    origin: determineOrigin(httpReq.headers),
-    contentType: determineContentType(httpReq.headers),
-    ifMatch: determineIfMatch(httpReq.headers),
-    ifNoneMatchStar: determineIfNoneMatchStar(httpReq.headers),
-    ifNoneMatchList: determineIfNoneMatchList(httpReq.headers),
-    asJsonLd: determineAsJsonLd(httpReq.headers),
-    wacLdpTaskType: determineTaskType(httpReq.method, httpReq.url),
-    bearerToken: determineBearerToken(httpReq.headers),
-    requestBody: undefined,
-    sparqlQuery: determineSparqlQuery(httpReq.url),
-    fullUrl: determineFullUrl(hostname, httpReq),
-    preferMinimalContainer: determinePreferMinimalContainer(httpReq.headers)
-  } as WacLdpTask
-  await new Promise(resolve => {
-    parsedTask.requestBody = ''
-    httpReq.on('data', chunk => {
-      parsedTask.requestBody += chunk
-    })
-    httpReq.on('end', resolve)
-  })
-  debug('parsed http request', parsedTask)
-  // if (errorCode === null) {
-  return parsedTask
-  // } else {
-  //   throw new ErrorResult(ResultType.CouldNotParse)
-  // }
-}
+export class WacLdpTask {
+  cache: {
+    bearerToken?: { value: string | undefined },
+    isContainer?: { value: boolean },
+    origin?: { value: string | undefined },
+    contentType?: { value: string | undefined },
+    ifMatch?: { value: string | undefined },
+    ifNoneMatchStar?: { value: boolean },
+    ifNoneMatchList?: { value: Array<string> | undefined },
+    wacLdpTaskType?: { value: TaskType },
+    sparqlQuery?: { value: string | undefined },
+    asJsonLd?: { value: boolean },
+    omitBody?: { value: boolean },
+    fullUrl?: { value: URL },
+    preferMinimalContainer?: { value: boolean },
+    requestBody?: { value: Promise<string> },
+    webId?: { value: Promise<URL | undefined> }
+  }
+  hostName: string
+  httpReq: http.IncomingMessage
+  constructor (hostName: string, httpReq: http.IncomingMessage) {
+    this.hostName = hostName
+    this.httpReq = httpReq
+    this.cache = {}
+  }
+  isContainer () {
+    if (!this.cache.isContainer) {
+      this.cache.isContainer = {
+        value: (!!this.httpReq.url && (
+          this.httpReq.url.substr(-1) === '/' || this.httpReq.url.substr(-2) === '/*'))
+      }
+    }
+    return this.cache.isContainer.value
+  }
 
-export interface WacLdpTask {
-  isContainer: boolean
-  omitBody: boolean
-  asJsonLd: boolean
-  origin: string | undefined
-  contentType: string | undefined
-  ifMatch: string | undefined
-  ifNoneMatchStar: boolean
-  ifNoneMatchList: Array<string> | undefined
-  bearerToken: string | undefined
-  wacLdpTaskType: TaskType
-  sparqlQuery: string | undefined
-  fullUrl: URL
-  requestBody: string | undefined
-  preferMinimalContainer: boolean
+  bearerToken (): string | undefined {
+    if (!this.cache.bearerToken) {
+      this.cache.bearerToken = {
+        value: determineBearerToken(this.httpReq.headers)
+      }
+    }
+    return this.cache.bearerToken.value
+  }
+
+  origin (): string | undefined {
+    if (!this.cache.origin) {
+      this.cache.origin = {
+        value: determineOrigin(this.httpReq.headers)
+      }
+    }
+    return this.cache.origin.value
+  }
+
+  contentType (): string | undefined {
+    if (!this.cache.contentType) {
+      this.cache.contentType = {
+        value: determineContentType(this.httpReq.headers)
+      }
+    }
+    return this.cache.contentType.value
+  }
+
+  ifMatch (): string | undefined {
+    if (!this.cache.ifMatch) {
+      this.cache.ifMatch = {
+        value: determineIfMatch(this.httpReq.headers)
+      }
+    }
+    return this.cache.ifMatch.value
+  }
+
+  ifNoneMatchStar (): boolean {
+    if (!this.cache.ifNoneMatchStar) {
+      this.cache.ifNoneMatchStar = {
+        value: determineIfNoneMatchStar(this.httpReq.headers)
+      }
+    }
+    return this.cache.ifNoneMatchStar.value
+  }
+
+  ifNoneMatchList (): Array<string> | undefined {
+    if (!this.cache.ifNoneMatchList) {
+      this.cache.ifNoneMatchList = {
+        value: determineIfNoneMatchList(this.httpReq.headers)
+      }
+    }
+    return this.cache.ifNoneMatchList.value
+  }
+
+  wacLdpTaskType (): TaskType {
+    if (!this.cache.wacLdpTaskType) {
+      this.cache.wacLdpTaskType = {
+        value: determineTaskType(this.httpReq.method, this.httpReq.url)
+      }
+    }
+    return this.cache.wacLdpTaskType.value
+  }
+
+  sparqlQuery (): string | undefined {
+    if (!this.cache.sparqlQuery) {
+      this.cache.sparqlQuery = {
+        value: determineSparqlQuery(this.httpReq.url)
+      }
+    }
+    return this.cache.sparqlQuery.value
+  }
+
+  asJsonLd (): boolean {
+    if (!this.cache.asJsonLd) {
+      this.cache.asJsonLd = {
+        value: determineAsJsonLd(this.httpReq.headers)
+      }
+    }
+    return this.cache.asJsonLd.value
+  }
+
+  omitBody (): boolean {
+    if (!this.cache.omitBody) {
+      this.cache.omitBody = {
+        value: determineOmitBody(this.httpReq.method)
+      }
+    }
+    return this.cache.omitBody.value
+  }
+
+  fullUrl (): URL {
+    if (!this.cache.fullUrl) {
+      this.cache.fullUrl = {
+        value: determineFullUrl(this.hostName, this.httpReq)
+      }
+    }
+    return this.cache.fullUrl.value
+  }
+
+  preferMinimalContainer (): boolean {
+    if (!this.cache.preferMinimalContainer) {
+      this.cache.preferMinimalContainer = {
+        value: determinePreferMinimalContainer(this.httpReq.headers)
+      }
+    }
+    return this.cache.preferMinimalContainer.value
+  }
+
+  requestBody (): Promise<string> {
+    let requestBodyStr: string
+    if (!this.cache.requestBody) {
+      this.cache.requestBody = {
+        value: new Promise(resolve => {
+          requestBodyStr = ''
+          this.httpReq.on('data', chunk => {
+            requestBodyStr += chunk
+          })
+          this.httpReq.on('end', () => {
+            resolve(requestBodyStr)
+          })
+        })
+      }
+    }
+    return this.cache.requestBody.value
+  }
+  // edge case if we can still consider this as lazy request parsing,
+  // but had to move it here because most operation handlers rely on it.
+  webId (aud: string): Promise<URL | undefined> {
+    if (!this.cache.webId) {
+      this.cache.webId = {
+        value: determineWebId(this.bearerToken(), aud)
+      }
+    }
+    return this.cache.webId.value
+  }
+
+  // this one is maybe a bit weird too, open to suggestions
+  // for making this simpler
+  convertToBlobWrite (memberName: string) {
+    if (!this.isContainer()) {
+      throw new Error('only containers can be converted to blob writes')
+    }
+    if (memberName.indexOf('/') !== -1) {
+      throw new Error('memberName cannot contain slashes')
+    }
+    const newUrlStr: string = this.fullUrl().toString() + memberName
+    this.cache.fullUrl = {
+      value: new URL(newUrlStr)
+    }
+    this.cache.wacLdpTaskType = { value: TaskType.blobWrite }
+    this.cache.isContainer = { value: false }
+    debug('converted', this.cache)
+  }
 }
