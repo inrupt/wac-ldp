@@ -34,7 +34,12 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfFetc
   } catch (err) {
     debug('error looping over quads', err)
   }
-  const appNodes: { [indexer: string]: any } = {}
+  interface AppNode {
+    originMatches?: boolean
+    modeMatches?: boolean
+    webIdMatches?: boolean
+  }
+  const appNodes: { [indexer: string]: AppNode } = {}
   function ensure (str: string) {
     if (!appNodes[str]) {
       appNodes[str] = {}
