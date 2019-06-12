@@ -198,7 +198,7 @@ export interface WacLdpTask {
   bearerToken: string | undefined
   wacLdpTaskType: TaskType
   sparqlQuery: string | undefined
-  fullUrl: URL,
+  fullUrl: URL
   requestBody: string | undefined
   preferMinimalContainer: boolean
 }

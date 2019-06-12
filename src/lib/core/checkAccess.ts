@@ -56,11 +56,11 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
 }
 
 export interface AccessCheckTask {
-  url: URL,
-  isContainer: boolean,
-  webId: URL | undefined,
-  origin: string,
-  wacLdpTaskType: TaskType,
+  url: URL
+  isContainer: boolean
+  webId: URL | undefined
+  origin: string
+  wacLdpTaskType: TaskType
   rdfFetcher: RdfFetcher
 }
 

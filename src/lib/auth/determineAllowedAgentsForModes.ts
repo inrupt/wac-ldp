@@ -24,10 +24,10 @@ export const AGENT_CLASS_ANYBODY = FOAF.Agent
 export const AGENT_CLASS_ANYBODY_LOGGED_IN = ACL.AuthenticatedAgent
 
 export interface ModesCheckTask {
-  aclGraph: any,
-  targetUrl: URL,
-  contextUrl: URL,
-  resourceIsTarget: boolean,
+  aclGraph: any
+  targetUrl: URL
+  contextUrl: URL
+  resourceIsTarget: boolean
   rdfFetcher: RdfFetcher
 }
 

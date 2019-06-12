@@ -11,8 +11,8 @@ const OWNER_PROFILES_FETCH_TIMEOUT = 2000
 const ownerProfilesCache: { [webId: string]: any } = {}
 
 export interface OriginCheckTask {
-  origin: string,
-  mode: URL,
+  origin: string
+  mode: URL
   resourceOwners: Array<URL>
 }
 
