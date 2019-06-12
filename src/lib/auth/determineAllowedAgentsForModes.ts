@@ -50,7 +50,7 @@ async function fetchGroupMembers (groupUri: URL, rdfFetcher: RdfFetcher): Promis
   } catch (err) {
     debug('error looping over quads!', err)
   }
-  quads.map((quad: any): void => {
+  quads.forEach((quad: any): void => {
     debug('quad', quad)
     if (quad.predicate.value === VCARD.hasMember.toString()) {
       debug('group member!', quad.subject.value, quad.object.value)

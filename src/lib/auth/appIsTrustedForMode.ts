@@ -41,7 +41,7 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfFetc
     }
   }
   debug('looking for quads:', webId.toString(), origin, mode.toString())
-  quads.map((quad: any): void => {
+  quads.forEach((quad: any): void => {
     debug('considering quad', quad)
     switch (quad.predicate.value) {
       case ACL.mode.toString():
