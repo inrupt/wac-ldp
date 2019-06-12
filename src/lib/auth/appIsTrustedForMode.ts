@@ -21,9 +21,9 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfFetc
   if (!ownerProfilesCache[webId.toString()]) {
     debug('cache miss', webId)
     ownerProfilesCache[webId.toString()] = await rdfFetcher.fetchGraph(webId)
-  }
-  if (!ownerProfilesCache[webId.toString()]) {
-    return Promise.resolve(false)
+    if (!ownerProfilesCache[webId.toString()]) {
+      return Promise.resolve(false)
+    }
   }
   const quads: Array<any> = []
   try {
