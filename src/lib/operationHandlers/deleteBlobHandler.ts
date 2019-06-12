@@ -7,13 +7,13 @@ import { checkAccess, AccessCheckTask } from '../core/checkAccess'
 import Debug from 'debug'
 
 import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
-import { RdfFetcher } from '../rdf/RdfFetcher'
+import { RdfLayer } from '../rdf/RdfLayer'
 import { applyPatch } from '../rdf/applyPatch'
 
 const debug = Debug('delete-blob-handler')
 
-async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher): Promise<Blob> {
-  const blob: Blob = rdfFetcher.getLocalBlob(wacLdpTask.fullUrl())
+async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer): Promise<Blob> {
+  const blob: Blob = rdfLayer.getLocalBlob(wacLdpTask.fullUrl())
   const data = await blob.getData()
   debug(data, wacLdpTask)
   if (data) { // resource exists
@@ -39,7 +39,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
 
 export const deleteBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate),
-  handle: async function (task: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<WacLdpResponse> {
+  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
       await checkAccess({
         url: task.fullUrl(),
@@ -47,10 +47,10 @@ export const deleteBlobHandler = {
         webId: await task.webId(),
         origin: task.origin(),
         wacLdpTaskType: task.wacLdpTaskType(),
-        rdfFetcher
+        rdfLayer
       } as AccessCheckTask) // may throw if access is denied
     }
-    const blob = await getBlobAndCheckETag(task, rdfFetcher)
+    const blob = await getBlobAndCheckETag(task, rdfLayer)
     debug('operation deleteBlob!')
     await blob.delete()
     return {

@@ -5,7 +5,7 @@ import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
-import { RdfFetcher } from '../rdf/RdfFetcher'
+import { RdfLayer } from '../rdf/RdfLayer'
 import { globReadHandler } from '../operationHandlers/globReadHandler'
 import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 import { readContainerHandler } from '../operationHandlers/readContainerHandler'
@@ -27,18 +27,18 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
 }
 interface OperationHandler {
   canHandle: (wacLdpTask: WacLdpTask) => boolean
-  handle: (wacLdpTask: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean) => Promise<WacLdpResponse>
+  handle: (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean) => Promise<WacLdpResponse>
 }
 
 export class WacLdp extends EventEmitter {
   aud: string
-  rdfFetcher: RdfFetcher
+  rdfLayer: RdfLayer
   updatesViaUrl: URL
   skipWac: boolean
   operationHandlers: Array<OperationHandler>
   constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
     super()
-    this.rdfFetcher = new RdfFetcher(aud, storage)
+    this.rdfLayer = new RdfLayer(aud, storage)
     this.aud = aud
     this.updatesViaUrl = updatesViaUrl
     this.skipWac = skipWac
@@ -58,7 +58,7 @@ export class WacLdp extends EventEmitter {
   handleOperation (wacLdpTask: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
       if (this.operationHandlers[i].canHandle(wacLdpTask)) {
-        return this.operationHandlers[i].handle(wacLdpTask, this.aud, this.rdfFetcher, this.skipWac)
+        return this.operationHandlers[i].handle(wacLdpTask, this.aud, this.rdfLayer, this.skipWac)
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)

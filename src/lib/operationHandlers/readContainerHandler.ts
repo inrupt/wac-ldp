@@ -7,14 +7,14 @@ import { checkAccess, AccessCheckTask } from '../core/checkAccess'
 import Debug from 'debug'
 
 import { streamToObject } from '../rdf/ResourceDataUtils'
-import { RdfFetcher } from '../rdf/RdfFetcher'
+import { RdfLayer } from '../rdf/RdfLayer'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
 
 const debug = Debug('read-container-handler')
 
-async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher): Promise<Blob> {
-  const blob: Blob = rdfFetcher.getLocalBlob(wacLdpTask.fullUrl())
+async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer): Promise<Blob> {
+  const blob: Blob = rdfLayer.getLocalBlob(wacLdpTask.fullUrl())
   const data = await blob.getData()
   debug(data, wacLdpTask)
   if (data) { // resource exists
@@ -40,7 +40,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
 
 export const readContainerHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
-  handle: async function (task: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<WacLdpResponse> {
+  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
       await checkAccess({
         url: task.fullUrl(),
@@ -48,13 +48,13 @@ export const readContainerHandler = {
         webId: await task.webId(),
         origin: task.origin(),
         wacLdpTaskType: task.wacLdpTaskType(),
-        rdfFetcher
+        rdfLayer
       } as AccessCheckTask) // may throw if access is denied
     }
     let container: any
-    container = rdfFetcher.getLocalContainer(task.fullUrl())
+    container = rdfLayer.getLocalContainer(task.fullUrl())
     // debug('not a container, getting blob and checking etag')
-    // container = await getBlobAndCheckETag(task, rdfFetcher)
+    // container = await getBlobAndCheckETag(task, rdfLayer)
 
     debug('operation readContainer!')
     debug(container)

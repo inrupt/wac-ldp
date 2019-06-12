@@ -56,7 +56,7 @@ async function getGraphLocal (blob: Blob): Promise<any> {
   return rdf.dataset().import(quadStream)
 }
 
-export class RdfFetcher {
+export class RdfLayer {
   serverHost: string
   storage: BlobTree
   constructor (serverHost: string, storage: BlobTree) {

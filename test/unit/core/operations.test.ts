@@ -6,7 +6,7 @@ import { toChunkStream } from '../helpers/toChunkStream'
 import { makeResourceData, RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
 import { Container } from '../../../src/lib/storage/Container'
 import { readContainerHandler } from '../../../src/lib/operationHandlers/readContainerHandler'
-import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
+import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
 import { BlobTree } from '../../../src/lib/storage/BlobTree'
 import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler'
 import { readBlobHandler } from '../../../src/lib/operationHandlers/readBlobHandler'
@@ -30,8 +30,8 @@ test('delete blob', async () => {
     method: 'DELETE',
     headers: {}
   } as http.IncomingMessage)
-  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await deleteBlobHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await deleteBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -91,8 +91,8 @@ test('delete container', async () => {
     method: 'GET',
     headers: {}
   } as http.IncomingMessage)
-  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await deleteContainerHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await deleteContainerHandler.handle(task, 'https://example.com', rdfLayer, true)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -116,8 +116,8 @@ test('read blob (omit body)', async () => {
     method: 'HEAD'
   } as http.IncomingMessage)
   console.log(task)
-  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
     [],
@@ -149,8 +149,8 @@ test('read blob (with body)', async () => {
     method: 'GET'
   } as http.IncomingMessage)
   console.log(task)
-  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
     [],
@@ -182,8 +182,8 @@ test('read container (omit body)', async () => {
     method: 'HEAD',
     headers: {}
   } as http.IncomingMessage)
-  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfLayer, true)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
@@ -219,8 +219,8 @@ test('read container (with body)', async () => {
     method: 'GET',
     headers: {}
   } as http.IncomingMessage)
-  const rdfFetcher = new RdfFetcher('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfFetcher, true)
+  const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
+  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfLayer, true)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])

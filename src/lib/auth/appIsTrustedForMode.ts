@@ -1,7 +1,7 @@
 
 import Debug from 'debug'
 import { ACL, RDF } from '../rdf/rdf-constants'
-import { RdfFetcher } from '../rdf/RdfFetcher'
+import { RdfLayer } from '../rdf/RdfLayer'
 import { BlobTree } from '../storage/BlobTree'
 
 const debug = Debug('appIsTrustedForMode')
@@ -16,11 +16,11 @@ export interface OriginCheckTask {
   resourceOwners: Array<URL>
 }
 
-async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfFetcher: RdfFetcher): Promise<boolean> {
+async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLayer: RdfLayer): Promise<boolean> {
   // TODO: move this cache into a decorator pattern, see #81
   if (!ownerProfilesCache[webId.toString()]) {
     debug('cache miss', webId)
-    ownerProfilesCache[webId.toString()] = await rdfFetcher.fetchGraph(webId)
+    ownerProfilesCache[webId.toString()] = await rdfLayer.fetchGraph(webId)
     if (!ownerProfilesCache[webId.toString()]) {
       return Promise.resolve(false)
     }
@@ -87,7 +87,7 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfFetc
   return found
 }
 
-export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: RdfFetcher): Promise<boolean> {
+export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: RdfLayer): Promise<boolean> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve(false)

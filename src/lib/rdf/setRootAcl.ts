@@ -1,5 +1,5 @@
 import { makeResourceData, bufferToStream } from './ResourceDataUtils'
-import { ACL_SUFFIX } from '../rdf/RdfFetcher'
+import { ACL_SUFFIX } from './RdfLayer'
 import { BlobTree, urlToPath } from '../storage/BlobTree'
 
 // TODO: this should be a method on a CachingRdfLayer object,

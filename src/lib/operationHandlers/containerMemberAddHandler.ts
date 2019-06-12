@@ -9,12 +9,12 @@ import { checkAccess, AccessCheckTask } from '../core/checkAccess'
 import Debug from 'debug'
 
 import { streamToObject, makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
-import { RdfFetcher } from '../rdf/RdfFetcher'
+import { RdfLayer } from '../rdf/RdfLayer'
 
 const debug = Debug('main-handler')
 
-async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetcher): Promise<Blob> {
-  const blob: Blob = rdfFetcher.getLocalBlob(wacLdpTask.fullUrl())
+async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer): Promise<Blob> {
+  const blob: Blob = rdfLayer.getLocalBlob(wacLdpTask.fullUrl())
   const data = await blob.getData()
   debug(data, wacLdpTask)
   if (data) { // resource exists
@@ -40,7 +40,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfFetcher: RdfFetch
 
 export const containerMemberAddHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
-  handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<WacLdpResponse> {
+  handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
     // but notice that access check for this is append on the container,
     // write access on the Blob is not required!
@@ -52,13 +52,13 @@ export const containerMemberAddHandler = {
         webId: await wacLdpTask.webId(),
         origin: wacLdpTask.origin(),
         wacLdpTaskType: wacLdpTask.wacLdpTaskType(),
-        rdfFetcher
+        rdfLayer
       } as AccessCheckTask) // may throw if access is denied
     }
 
     const childName: string = uuid()
     wacLdpTask.convertToBlobWrite(childName)
-    const blob: any = await getBlobAndCheckETag(wacLdpTask, rdfFetcher)
+    const blob: any = await getBlobAndCheckETag(wacLdpTask, rdfLayer)
     const blobExists: boolean = await blob.exists()
     debug('Writing Blob!', blobExists)
     const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)

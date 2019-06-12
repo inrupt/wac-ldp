@@ -2,7 +2,7 @@ import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
-import { RdfFetcher } from '../rdf/RdfFetcher'
+import { RdfLayer } from '../rdf/RdfLayer'
 import { AccessCheckTask, checkAccess } from '../core/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
@@ -13,7 +13,7 @@ export const globReadHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
   },
-  handle: async function (wacLdpTask: WacLdpTask, aud: string, rdfFetcher: RdfFetcher, skipWac: boolean): Promise<WacLdpResponse> {
+  handle: async function (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
       await checkAccess({
         url: wacLdpTask.fullUrl(),
@@ -21,7 +21,7 @@ export const globReadHandler = {
         webId: await wacLdpTask.webId(),
         origin: wacLdpTask.origin(),
         wacLdpTaskType: wacLdpTask.wacLdpTaskType(),
-        rdfFetcher
+        rdfLayer
       } as AccessCheckTask) // may throw if access is denied
     }
 
@@ -29,7 +29,7 @@ export const globReadHandler = {
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
 
-    const containerMembers = await rdfFetcher.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
+    const containerMembers = await rdfLayer.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
     const webId = await wacLdpTask.webId()
     const rdfSources: { [indexer: string]: ResourceData } = {}
     await Promise.all(containerMembers.map(async (member) => {
@@ -38,7 +38,7 @@ export const globReadHandler = {
         return
       }
       const blobUrl = new URL(member.name, wacLdpTask.fullUrl())
-      const data = await rdfFetcher.getLocalBlob(blobUrl).getData()
+      const data = await rdfLayer.getLocalBlob(blobUrl).getData()
       const resourceData = await streamToObject(data)
       if (['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
         return
@@ -51,7 +51,7 @@ export const globReadHandler = {
             webId,
             origin: wacLdpTask.origin(),
             wacLdpTaskType: TaskType.blobRead,
-            rdfFetcher
+            rdfLayer
           } as AccessCheckTask) // may throw if access is denied
         }
         rdfSources[member.name] = resourceData
