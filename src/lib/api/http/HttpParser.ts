@@ -61,6 +61,7 @@ function determineTaskType (method: string | undefined, url: string | undefined)
 }
 
 function determineOrigin (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('determining origin', headers)
   if (Array.isArray(headers.origin)) {
     return headers.origin[0]
   } else {
@@ -125,25 +126,17 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
   return undefined
 }
 
-function determinePath (urlPath: string | undefined) {
-  let pathToUse = (urlPath ? 'root' + urlPath : 'root/')
-  pathToUse = pathToUse.split('?')[0]
-  if (pathToUse.substr(-2) === '/*') {
-    pathToUse = pathToUse.substring(0, pathToUse.length - 2)
-  } else if (pathToUse.substr(-1) === '/') {
-    pathToUse = pathToUse.substring(0, pathToUse.length - 1)
-  }
-  return new Path((pathToUse).split('/'))
-}
-
 function determineSparqlQuery (urlPath: string | undefined): string | undefined {
   const url = new URL('http://example.com' + urlPath)
   debug('determining sparql query', urlPath, url.searchParams, url.searchParams.get('query'))
   return url.searchParams.get('query') || undefined
 }
 
-function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): string {
-  return hostname + httpReq.url
+function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL {
+  if (httpReq.url && httpReq.url.substr(-1) === '*') {
+    return new URL(hostname + httpReq.url.substring(0, httpReq.url.length - 1))
+  }
+  return new URL(hostname + httpReq.url)
 }
 
 function determinePreferMinimalContainer (headers: http.IncomingHttpHeaders): boolean {
@@ -174,7 +167,6 @@ export async function parseHttpRequest (hostname: string, httpReq: http.Incoming
     wacLdpTaskType: determineTaskType(httpReq.method, httpReq.url),
     bearerToken: determineBearerToken(httpReq.headers),
     requestBody: undefined,
-    path: determinePath(httpReq.url),
     sparqlQuery: determineSparqlQuery(httpReq.url),
     fullUrl: determineFullUrl(hostname, httpReq),
     preferMinimalContainer: determinePreferMinimalContainer(httpReq.headers)
@@ -205,9 +197,8 @@ export interface WacLdpTask {
   ifNoneMatchList: Array<string> | undefined
   bearerToken: string | undefined
   wacLdpTaskType: TaskType
-  path: Path,
   sparqlQuery: string | undefined
-  fullUrl: string,
+  fullUrl: URL
   requestBody: string | undefined
   preferMinimalContainer: boolean
 }

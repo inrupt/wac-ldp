@@ -2,10 +2,10 @@
 @prefix acl: <http://www.w3.org/ns/auth/acl#>.
 @prefix foaf: <http://xmlns.com/foaf/0.1/>.
 
-# The public has read/write permissions
+# The public has read permissions
 <#public>
     a acl:Authorization;
     acl:agentClass foaf:Agent;
-    acl:default <../public>;
-    acl:mode acl:Read;
-    acl:mode acl:Write.
+    acl:accessTo <bar>;
+    acl:mode acl:Read.
+    

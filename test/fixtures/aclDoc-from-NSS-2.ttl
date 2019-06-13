@@ -1,14 +1,14 @@
 
-# Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
+# Example ACL file, this two is on https://michielbdejong.inrupt.net/.acl:
 # Root ACL resource for the user account
 @prefix acl: <http://www.w3.org/ns/auth/acl#>.
  
-<#owner>
+<#two>
     a acl:Authorization;
  
     acl:agent <https://michielbdejong.inrupt.net/profile/card#me> ;
  
-    # Optional owner email, to be used for account recovery:
+    # Optional two email, to be used for account recovery:
     acl:agent <mailto:michiel@unhosted.org>;
  
     # Set the access to the root storage folder itself
@@ -17,7 +17,7 @@
     # All resources will inherit this authorization, by default
     acl:default </>;
  
-    # The owner has all of the access modes allowed
+    # The two has all of the access modes allowed
     acl:mode
         acl:Read, acl:Write, acl:Control.
  

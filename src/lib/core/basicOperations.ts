@@ -1,5 +1,3 @@
-import * as rdflib from 'rdflib'
-
 import Debug from 'debug'
 import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
 
@@ -11,6 +9,7 @@ import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { streamToObject, objectToStream, makeResourceData, ResourceData } from '../rdf/ResourceDataUtils'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { applyQuery } from '../rdf/applyQuery'
+import { applyPatch } from '../rdf/applyPatch'
 
 export type Operation = (wacLdpTask: WacLdpTask, node: Container | Blob, appendOnly: boolean) => Promise<WacLdpResponse>
 
@@ -92,29 +91,7 @@ async function writeBlob (task: WacLdpTask, blob: Blob) {
 async function updateBlob (task: WacLdpTask, blob: Blob, appendOnly: boolean): Promise<WacLdpResponse> {
   debug('operation updateBlob!', { appendOnly })
   const resourceData = await streamToObject(await blob.getData()) as ResourceData
-  const store = rdflib.graph()
-  const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
-  parse(resourceData.body, store, task.fullUrl, resourceData.contentType)
-  debug('before patch', store.toNT())
-
-  const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
-  const patchObject = sparqlUpdateParser(task.requestBody || '', rdflib.graph(), task.fullUrl)
-  debug('patchObject', patchObject)
-  if (appendOnly && typeof patchObject.delete !== 'undefined') {
-    debug('appendOnly and patch contains deletes')
-    throw new ErrorResult(ResultType.AccessDenied)
-  }
-  await new Promise((resolve, reject) => {
-    store.applyPatch(patchObject, store.sym(task.fullUrl), (err: Error) => {
-      if (err) {
-        reject(err)
-      } else {
-        resolve()
-      }
-    })
-  })
-  debug('after patch', store.toNT())
-  const turtleDoc = rdflib.serialize(undefined, store, task.fullUrl, 'text/turtle')
+  const turtleDoc: string = await applyPatch(resourceData, task.requestBody || '', task.fullUrl, appendOnly)
   await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
   return {
     resultType: ResultType.OkayWithoutBody

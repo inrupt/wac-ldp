@@ -16,7 +16,7 @@ describe('BlobTreeInMem', () => {
   })
   it('adds a blob', async function () {
     // non-existing blob
-    const blob = storage.getBlob(new Path(['root', 'foo']))
+    const blob = storage.getBlob(new Path(['v1', 'foo'], false))
     expect(await blob.exists()).toEqual(false)
 
     // put data into it
@@ -29,11 +29,11 @@ describe('BlobTreeInMem', () => {
 
   it('adds a container', async function () {
     // non-existing container
-    const container = storage.getContainer(new Path(['root', 'foo']))
+    const container = storage.getContainer(new Path(['v1', 'foo'], true))
     expect(await container.exists()).toEqual(false)
 
     // add a member
-    const blob = storage.getBlob(new Path(['root', 'foo', 'bar']))
+    const blob = storage.getBlob(new Path(['v1', 'foo', 'bar'], false))
     await blob.setData(bufferToStream(Buffer.from('contents of foo/bar')))
     expect(await container.exists()).toEqual(true)
 
@@ -45,14 +45,14 @@ describe('BlobTreeInMem', () => {
 
   describe('after adding some data', () => {
     beforeEach(async () => {
-      await storage.getBlob(new Path(['root', 'foo', 'bar'])).setData(bufferToStream(Buffer.from('I am foo/bar')))
-      await storage.getBlob(new Path(['root', 'foo', 'baz', '1'])).setData(bufferToStream(Buffer.from('I am foo/baz/1')))
-      await storage.getBlob(new Path(['root', 'foo', 'baz', '2'])).setData(bufferToStream(Buffer.from('I am foo/baz/2')))
+      await storage.getBlob(new Path(['v1', 'foo', 'bar'], false)).setData(bufferToStream(Buffer.from('I am foo/bar')))
+      await storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false)).setData(bufferToStream(Buffer.from('I am foo/baz/1')))
+      await storage.getBlob(new Path(['v1', 'foo', 'baz', '2'], false)).setData(bufferToStream(Buffer.from('I am foo/baz/2')))
     })
 
     it('correctly reports the container member listings', async function () {
-      const containerFoo: Container = storage.getContainer(new Path(['root', 'foo']))
-      const containerBaz: Container = storage.getContainer(new Path(['root', 'foo', 'baz']))
+      const containerFoo: Container = storage.getContainer(new Path(['v1', 'foo'], true))
+      const containerBaz: Container = storage.getContainer(new Path(['v1', 'foo', 'baz'], true))
       const membersFoo = await containerFoo.getMembers()
       expect(membersFoo).toEqual([
         { name: 'bar', isContainer: false },
@@ -66,8 +66,8 @@ describe('BlobTreeInMem', () => {
     })
 
     it('correctly deletes blobs', async function () {
-      const blobFooBar: Blob = storage.getBlob(new Path(['root', 'foo', 'bar']))
-      const blobFooBaz1: Blob = storage.getBlob(new Path(['root', 'foo', 'baz', '1']))
+      const blobFooBar: Blob = storage.getBlob(new Path(['v1', 'foo', 'bar'], false))
+      const blobFooBaz1: Blob = storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false))
 
       // delete foo/bar
       expect(await blobFooBar.exists()).toEqual(true)
@@ -79,8 +79,8 @@ describe('BlobTreeInMem', () => {
       await blobFooBaz1.delete()
       expect(await blobFooBaz1.exists()).toEqual(false)
 
-      const containerFoo: Container = storage.getContainer(new Path(['root', 'foo']))
-      const containerBaz: Container = storage.getContainer(new Path(['root', 'foo', 'baz']))
+      const containerFoo: Container = storage.getContainer(new Path(['v1', 'foo'], true))
+      const containerBaz: Container = storage.getContainer(new Path(['v1', 'foo', 'baz'], true))
       const membersFoo = await containerFoo.getMembers()
       expect(membersFoo).toEqual([
         { name: 'baz', isContainer: true }
@@ -92,14 +92,14 @@ describe('BlobTreeInMem', () => {
     })
 
     it('correctly deletes containers', async function () {
-      const containerFooBaz: Container = storage.getContainer(new Path(['root', 'foo', 'baz']))
+      const containerFooBaz: Container = storage.getContainer(new Path(['v1', 'foo', 'baz'], true))
 
       // delete foo/baz/
       expect(await containerFooBaz.exists()).toEqual(true)
       await containerFooBaz.delete()
       expect(await containerFooBaz.exists()).toEqual(false)
 
-      const containerFoo: Container = storage.getContainer(new Path(['root', 'foo']))
+      const containerFoo: Container = storage.getContainer(new Path(['v1', 'foo'], true))
       const membersFoo = await containerFoo.getMembers()
       expect(membersFoo).toEqual([
         { name: 'bar', isContainer: false }

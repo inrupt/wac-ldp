@@ -2,7 +2,7 @@ import * as http from 'http'
 import Debug from 'debug'
 import { BlobTree } from '../storage/BlobTree'
 import { parseHttpRequest, WacLdpTask } from '../api/http/HttpParser'
-import { sendHttpResponse, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
+import { sendHttpResponse, WacLdpResponse } from '../api/http/HttpResponder'
 import { executeTask } from './executeTask'
 
 const debug = Debug('app')
@@ -29,6 +29,7 @@ export function makeHandler (storage: BlobTree, aud: string, skipWac: boolean) {
   return handle
 }
 
+export { setRootAcl } from '../rdf/setRootAcl'
 export { checkAccess, AccessCheckTask } from './checkAccess'
 export { determineWebId } from '../auth/determineWebId'
 export { BlobTree, Path } from '../storage/BlobTree'

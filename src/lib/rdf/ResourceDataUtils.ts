@@ -17,16 +17,19 @@ export interface ResourceData {
   rdfType: RdfType | undefined
 }
 
-export function makeResourceData (contentType: string, body: string): ResourceData {
+export function determineRdfType (contentType: string | null): RdfType | undefined {
+  if (!contentType) {
+    return
+  }
   let rdfType
   try {
     const mimeType = new MIMEType(contentType)
     switch (mimeType.essence) {
       case 'application/ld+json':
-        rdfType = RdfType.JsonLd
+        return RdfType.JsonLd
         break
       case 'text/turtle':
-        rdfType = RdfType.Turtle
+        return RdfType.Turtle
         break
       default:
         debug('not an RDF content-type', contentType, mimeType.essence)
@@ -34,13 +37,16 @@ export function makeResourceData (contentType: string, body: string): ResourceDa
     debug({ rdfType, contentType, essence: mimeType.essence })
   } catch (e) {
     debug('error determining rdf type', e.message)
-    // leave rdfType as undefined
+    // return rdfType as undefined
   }
+}
+
+export function makeResourceData (contentType: string, body: string): ResourceData {
   return {
     contentType,
     body,
     etag: calculateETag(body),
-    rdfType
+    rdfType: determineRdfType(contentType)
   }
 }
 
