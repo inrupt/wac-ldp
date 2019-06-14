@@ -3,7 +3,7 @@ import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpRespond
 
 import Debug from 'debug'
 import { RdfLayer } from '../rdf/RdfLayer'
-import { AccessCheckTask, checkAccess } from '../core/checkAccess'
+import { AccessCheckTask, checkAccess, determineRequiredAccessModes } from '../core/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
 
@@ -20,7 +20,7 @@ export const globReadHandler = {
         isContainer: wacLdpTask.isContainer(),
         webId: await wacLdpTask.webId(),
         origin: wacLdpTask.origin(),
-        wacLdpTaskType: wacLdpTask.wacLdpTaskType(),
+        requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
         rdfLayer
       } as AccessCheckTask) // may throw if access is denied
     }
@@ -50,7 +50,7 @@ export const globReadHandler = {
             isContainer: false,
             webId,
             origin: wacLdpTask.origin(),
-            wacLdpTaskType: TaskType.blobRead,
+            requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
             rdfLayer
           } as AccessCheckTask) // may throw if access is denied
         }

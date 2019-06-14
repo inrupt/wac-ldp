@@ -11,12 +11,10 @@ import { RdfLayer, ACL_SUFFIX } from '../rdf/RdfLayer'
 
 const debug = Debug('checkAccess')
 
-function determineRequiredAccessModes (wacLdpTaskType: TaskType, resourceIsAclDocument: boolean) {
+// This will be overwritten later if the resource is an ACL doc
+export function determineRequiredAccessModes (wacLdpTaskType: TaskType) {
   if (wacLdpTaskType === TaskType.unknown || wacLdpTaskType === TaskType.getOptions) {
     return []
-  }
-  if (resourceIsAclDocument) {
-    return [ ACL.Control ]
   }
   if ([TaskType.blobRead, TaskType.containerRead, TaskType.globRead].indexOf(wacLdpTaskType) !== -1) {
     return [ ACL.Read ]
@@ -57,10 +55,9 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
 
 export interface AccessCheckTask {
   url: URL
-  isContainer: boolean
   webId: URL | undefined
   origin: string
-  wacLdpTaskType: TaskType
+  requiredAccessModes: Array<URL>
   rdfLayer: RdfLayer
 }
 
@@ -106,7 +103,12 @@ export async function checkAccess (task: AccessCheckTask) {
     contextUrl
   } as ModesCheckTask)
   debug('allowedAgentsForModes', allowedAgentsForModes)
-  const requiredAccessModes = determineRequiredAccessModes(task.wacLdpTaskType, resourceIsAclDocument)
+  let requiredAccessModes
+  if (resourceIsAclDocument) {
+    requiredAccessModes = [ ACL.Control ]
+  } else {
+    requiredAccessModes = task.requiredAccessModes
+  }
   let appendOnly = false
 
   // throw if agent or origin does not have access

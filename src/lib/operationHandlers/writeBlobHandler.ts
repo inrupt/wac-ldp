@@ -2,7 +2,7 @@ import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask } from '../core/checkAccess'
+import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../core/checkAccess'
 
 import Debug from 'debug'
 
@@ -48,7 +48,7 @@ export const writeBlobHandler = {
         isContainer: task.isContainer(),
         webId: await task.webId(),
         origin: task.origin(),
-        wacLdpTaskType: task.wacLdpTaskType(),
+        requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
         rdfLayer
       } as AccessCheckTask) // may throw if access is denied
     }

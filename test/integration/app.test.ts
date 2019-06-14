@@ -109,7 +109,7 @@ test('sets bearerToken in Updates-Via', async () => {
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/?bearerToken=some-bearer-token'
+        'Updates-Via': 'wss://localhost:8080/?bearer_token=some-bearer-token'
       }
     ]
   ])

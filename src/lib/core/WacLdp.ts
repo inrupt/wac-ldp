@@ -15,6 +15,7 @@ import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
 import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
+import { checkAccess } from './checkAccess'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -97,7 +98,13 @@ export class WacLdp extends EventEmitter {
     }
   }
   hasAccess (webId: URL, origin: string, url: URL, mode: URL) {
-    return false
+    return checkAccess({
+      url,
+      webId,
+      origin,
+      requiredAccessModes: [ mode ],
+      rdfLayer: undefined as any as RdfLayer
+    })
   }
 }
 

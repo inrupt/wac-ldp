@@ -4,7 +4,7 @@ import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask } from '../core/checkAccess'
+import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../core/checkAccess'
 
 import Debug from 'debug'
 
@@ -51,7 +51,7 @@ export const containerMemberAddHandler = {
         isContainer: wacLdpTask.isContainer(),
         webId: await wacLdpTask.webId(),
         origin: wacLdpTask.origin(),
-        wacLdpTaskType: wacLdpTask.wacLdpTaskType(),
+        requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
         rdfLayer
       } as AccessCheckTask) // may throw if access is denied
     }

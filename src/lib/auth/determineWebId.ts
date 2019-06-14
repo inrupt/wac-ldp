@@ -60,6 +60,7 @@ async function getIssuerPubKey (domain: string, kid: string): Promise<string | u
 }
 
 export async function determineWebId (bearerToken: string | undefined, audience: string): Promise<URL | undefined> {
+  debug('determineWebId', { bearerToken, audience })
   if (!bearerToken) {
     return undefined
   }
@@ -84,7 +85,8 @@ export async function determineWebId (bearerToken: string | undefined, audience:
       debug('verification failed', error.message)
       return
     }
-    debug('payload.id_token after decoding and verifying', completeIdToken)
+    debug('payload.id_token after decoding and verifying:', completeIdToken)
+    debug('returning', completeIdToken.payload.sub)
     return new URL(completeIdToken.payload.sub)
   } catch (error) {
     debug(error)

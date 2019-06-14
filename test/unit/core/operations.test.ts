@@ -36,6 +36,7 @@ test('delete blob', async () => {
     []
   ])
   expect(result).toEqual({
+    resourcesChanged: [ new URL('https://example.com/foo') ],
     resultType: ResultType.OkayWithoutBody
   })
 })
@@ -97,6 +98,7 @@ test('delete container', async () => {
     []
   ])
   expect(result).toEqual({
+    resourcesChanged: [ new URL('https://example.com/foo/') ],
     resultType: ResultType.OkayWithoutBody
   })
 })
