@@ -7,8 +7,9 @@ import convert from 'buffer-to-stream'
 
 import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, makeResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
+import { ResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
+import { setRootAcl } from './setRootAcl'
 
 const debug = Debug('getGraph')
 
@@ -62,6 +63,9 @@ export class RdfLayer {
   constructor (serverHost: string, storage: BlobTree) {
     this.serverHost = serverHost
     this.storage = storage
+  }
+  setRootAcl (owner: URL) {
+    return setRootAcl(this.storage, owner.toString(), new URL(this.serverHost))
   }
   getLocalBlob (url: URL): Blob {
     const path: Path = urlToPath(url)

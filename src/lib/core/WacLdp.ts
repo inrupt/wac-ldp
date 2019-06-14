@@ -55,6 +55,9 @@ export class WacLdp extends EventEmitter {
       unknownOperationCatchAll
     ]
   }
+  setRootAcl (owner: URL) {
+    return this.rdfLayer.setRootAcl(owner)
+  }
   handleOperation (wacLdpTask: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
       if (this.operationHandlers[i].canHandle(wacLdpTask)) {
