@@ -44,7 +44,10 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
     return false
   }
   debug('agent check passed!')
-
+  if (!origin) {
+    debug('no origin header, so origin allowed')
+    return true
+  }
   // then check origin:
   return appIsTrustedForMode({
     origin,
@@ -80,7 +83,7 @@ function removeUrlSuffix (url: URL, suffix: string): URL {
 function urlEquals (one: URL, two: URL) {
   return one.toString() === two.toString()
 }
-export async function checkAccess (task: AccessCheckTask) {
+export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
   debug('AccessCheckTask', task)
   let baseResourceUrl: URL
   let resourceIsAclDocument
@@ -94,7 +97,7 @@ export async function checkAccess (task: AccessCheckTask) {
   }
   const { aclGraph, targetUrl, contextUrl } = await task.rdfLayer.readAcl(baseResourceUrl)
   const resourceIsTarget = urlEquals(baseResourceUrl, targetUrl)
-  debug('aclGraph', aclGraph, targetUrl, contextUrl, resourceIsTarget)
+  debug('calling allowedAgentsForModes', 'aclGraph', resourceIsTarget, targetUrl, contextUrl)
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
     aclGraph,

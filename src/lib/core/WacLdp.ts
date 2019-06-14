@@ -97,14 +97,28 @@ export class WacLdp extends EventEmitter {
       debug('errored while responding', error)
     }
   }
-  hasAccess (webId: URL, origin: string, url: URL, mode: URL) {
-    return checkAccess({
+  async hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean> {
+    debug('hasAccess calls checkAccess', {
       url,
       webId,
       origin,
       requiredAccessModes: [ mode ],
-      rdfLayer: undefined as any as RdfLayer
+      rdfLayer: 'this.rdfLayer'
     })
+    try {
+      const appendOnly = await checkAccess({
+        url,
+        webId,
+        origin,
+        requiredAccessModes: [ mode ],
+        rdfLayer: this.rdfLayer
+      })
+      debug({ appendOnly })
+      return !appendOnly
+    } catch (e) {
+      debug('access check error was thrown, so returning no to hasAccess question')
+      return false
+    }
   }
 }
 

@@ -116,6 +116,7 @@ export class RdfLayer {
   // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
   // from storage
   async readAcl (resourceUrl: URL): Promise<{ aclGraph: any, targetUrl: URL, contextUrl: URL }> {
+    debug('readAcl', resourceUrl.toString())
     const resourcePath = urlToPath(resourceUrl)
     let currentGuessPath = resourcePath
     let currentIsContainer = resourcePath.isContainer

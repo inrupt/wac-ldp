@@ -43,10 +43,11 @@ export const readBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead),
   handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
+      const webId = await task.webId()
+      debug('webId in readBlobHandler is', webId)
       await checkAccess({
         url: task.fullUrl(),
-        isContainer: task.isContainer(),
-        webId: await task.webId(),
+        webId,
         origin: task.origin(),
         requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
         rdfLayer
