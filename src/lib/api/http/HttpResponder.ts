@@ -26,9 +26,10 @@ export class ErrorResult extends Error {
   }
 }
 export interface WacLdpResponse {
+  resourcesChanged?: Array<URL>
   resultType: ResultType
-  resourceData: ResourceData | undefined
-  createdLocation: string | undefined
+  resourceData?: ResourceData
+  createdLocation?: string
   isContainer: boolean
 }
 

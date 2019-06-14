@@ -60,7 +60,8 @@ export const deleteContainerHandler = {
     debug(container)
     await container.delete()
     return {
-      resultType: ResultType.OkayWithoutBody
+      resultType: ResultType.OkayWithoutBody,
+      resourcesChanged: [ task.fullUrl() ]
     } as WacLdpResponse
   }
 }

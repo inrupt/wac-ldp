@@ -59,9 +59,11 @@ export const writeBlobHandler = {
     const contentType: string | undefined = task.contentType()
     const resourceData = makeResourceData(contentType ? contentType : '', await task.requestBody())
     await blob.setData(objectToStream(resourceData))
+    debug('write blob handler changed a resource', task.fullUrl())
     return {
       resultType,
-      createdLocation: (blobExists ? undefined : task.fullUrl())
+      createdLocation: (blobExists ? undefined : task.fullUrl()),
+      resourcesChanged: [ task.fullUrl() ]
     } as WacLdpResponse
   }
 }

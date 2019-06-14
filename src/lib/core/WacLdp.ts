@@ -16,12 +16,14 @@ import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
 
+export const BEARER_PARAM_NAME = 'bearer_token'
+
 const debug = Debug('app')
 
 function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
   const ret = new URL(baseUrl.toString())
   if (bearerToken) {
-    ret.searchParams.set('bearerToken', bearerToken)
+    ret.searchParams.set(BEARER_PARAM_NAME, bearerToken)
   }
   return ret
 }
@@ -76,6 +78,13 @@ export class WacLdp extends EventEmitter {
       const wacLdpTask: WacLdpTask = new WacLdpTask(this.aud, httpReq)
       bearerToken = wacLdpTask.bearerToken()
       response = await this.handleOperation(wacLdpTask)
+      debug('resourcesChanged', response.resourceData)
+      if (response.resourcesChanged) {
+        response.resourcesChanged.forEach((url: URL) => {
+          debug('emitting change event', url)
+          this.emit('change', { url })
+        })
+      }
     } catch (error) {
       debug('errored', error)
       response = error as WacLdpResponse

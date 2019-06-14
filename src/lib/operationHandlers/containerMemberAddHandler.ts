@@ -75,7 +75,8 @@ export const containerMemberAddHandler = {
     await blob.setData(objectToStream(resourceData))
     return {
       resultType,
-      createdLocation: (blobExists ? undefined : wacLdpTask.fullUrl())
+      createdLocation: (blobExists ? undefined : wacLdpTask.fullUrl()),
+      resourcesChanged: [ wacLdpTask.fullUrl() ]
     } as WacLdpResponse
   }
 }

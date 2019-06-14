@@ -54,7 +54,8 @@ export const deleteBlobHandler = {
     debug('operation deleteBlob!')
     await blob.delete()
     return {
-      resultType: ResultType.OkayWithoutBody
+      resultType: ResultType.OkayWithoutBody,
+      resourcesChanged: [ task.fullUrl() ]
     } as WacLdpResponse
   }
 }

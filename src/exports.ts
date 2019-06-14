@@ -1,4 +1,4 @@
-export { WacLdp } from './lib/core/WacLdp'
+export { WacLdp, BEARER_PARAM_NAME } from './lib/core/WacLdp'
 // export { setRootAcl } from './lib/rdf/setRootAcl'
 // export { checkAccess, AccessCheckTask } from './lib/core/checkAccess'
 export { determineWebId } from './lib/auth/determineWebId'

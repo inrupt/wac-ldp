@@ -57,7 +57,8 @@ export const updateBlobHandler = {
     const turtleDoc: string = await applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
     await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
     return {
-      resultType: ResultType.OkayWithoutBody
+      resultType: ResultType.OkayWithoutBody,
+      resourcesChanged: [ task.fullUrl() ]
     } as WacLdpResponse
   }
 }
