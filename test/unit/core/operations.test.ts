@@ -117,7 +117,6 @@ test('read blob (omit body)', async () => {
     url: '/foo',
     method: 'HEAD'
   } as http.IncomingMessage)
-  console.log(task)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
   const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
   // FIXME: Why does it call getData twice?
@@ -150,7 +149,6 @@ test('read blob (with body)', async () => {
     url: '/foo',
     method: 'GET'
   } as http.IncomingMessage)
-  console.log(task)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
   const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
   // FIXME: Why does it call getData twice?

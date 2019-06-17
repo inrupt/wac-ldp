@@ -4,8 +4,7 @@ import { closeServer } from '../../src/server'
 
 test('server', () => {
   (makeHandler as any).mockImplementation(() => {
-    console.log('called!')
-    //
+    // console.log('called!')
   })
   closeServer()
 })
