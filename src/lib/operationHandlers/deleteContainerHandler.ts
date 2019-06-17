@@ -10,6 +10,7 @@ import { streamToObject } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('delete-container-handler')
 
@@ -38,7 +39,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer):
   return blob
 }
 
-export const deleteContainerHandler = {
+export const deleteContainerHandler: OperationHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerDelete),
   handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {

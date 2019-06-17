@@ -3,19 +3,20 @@ import Debug from 'debug'
 import { BlobTree } from '../storage/BlobTree'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 import { RdfLayer } from '../rdf/RdfLayer'
-import { globReadHandler } from '../operationHandlers/globReadHandler'
-import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
-import { readContainerHandler } from '../operationHandlers/readContainerHandler'
-import { deleteContainerHandler } from '../operationHandlers/deleteContainerHandler'
-import { readBlobHandler } from '../operationHandlers/readBlobHandler'
-import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
-import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
-import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
-import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
+import { OptionsHandler } from '../operationHandlers/OptionsHandler'
+import { GlobReadHandler } from '../operationHandlers/GlobReadHandler'
+import { ContainerMemberAddHandler } from '../operationHandlers/ContainerMemberAddHandler'
+import { ReadContainerHandler } from '../operationHandlers/ReadContainerHandler'
+import { DeleteContainerHandler } from '../operationHandlers/DeleteContainerHandler'
+import { ReadBlobHandler } from '../operationHandlers/ReadBlobHandler'
+import { WriteBlobHandler } from '../operationHandlers/WriteBlobHandler'
+import { UpdateBlobHandler } from '../operationHandlers/UpdateBlobHandler'
+import { DeleteBlobHandler } from '../operationHandlers/DeleteBlobHandler'
+import { UnknownOperationCatchAll } from '../operationHandlers/UnknownOperationCatchAll'
 import { checkAccess } from './checkAccess'
+import { OperationHandler } from '../operationHandlers/OperationHandler'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -28,17 +29,12 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
   }
   return ret
 }
-interface OperationHandler {
-  canHandle: (wacLdpTask: WacLdpTask) => boolean
-  handle: (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean) => Promise<WacLdpResponse>
-}
-
 export class WacLdp extends EventEmitter {
   aud: string
   rdfLayer: RdfLayer
   updatesViaUrl: URL
   skipWac: boolean
-  operationHandlers: Array<OperationHandler>
+  operationHandlers: Array<{ new(): OperationHandler }>
   constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
     super()
     this.rdfLayer = new RdfLayer(aud, storage)
@@ -46,16 +42,16 @@ export class WacLdp extends EventEmitter {
     this.updatesViaUrl = updatesViaUrl
     this.skipWac = skipWac
     this.operationHandlers = [
-      optionsHandler,
-      globReadHandler,
-      containerMemberAddHandler,
-      readContainerHandler,
-      deleteContainerHandler,
-      readBlobHandler,
-      writeBlobHandler,
-      updateBlobHandler,
-      deleteBlobHandler,
-      unknownOperationCatchAll
+      OptionsHandler,
+      GlobReadHandler,
+      ContainerMemberAddHandler,
+      ReadContainerHandler,
+      DeleteContainerHandler,
+      ReadBlobHandler,
+      WriteBlobHandler,
+      UpdateBlobHandler,
+      DeleteBlobHandler,
+      UnknownOperationCatchAll
     ]
   }
   setRootAcl (owner: URL) {

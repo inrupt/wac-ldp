@@ -11,6 +11,7 @@ import { RdfLayer } from '../rdf/RdfLayer'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { applyQuery } from '../rdf/applyQuery'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('write-blob-handler')
 
@@ -39,9 +40,12 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer):
   return blob
 }
 
-export const writeBlobHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobWrite),
-  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
+export class WriteBlobHandler extends OperationHandler {
+  canHandle (wacLdpTask: WacLdpTask) {
+    return (wacLdpTask.wacLdpTaskType() === TaskType.blobWrite)
+  
+  }
+  async handle (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
       await checkAccess({
         url: task.fullUrl(),

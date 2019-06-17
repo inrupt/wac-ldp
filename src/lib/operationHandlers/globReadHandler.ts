@@ -6,14 +6,15 @@ import { RdfLayer } from '../rdf/RdfLayer'
 import { AccessCheckTask, checkAccess, determineRequiredAccessModes } from '../core/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('glob-read-handler')
 
-export const globReadHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => {
+export class GlobReadHandler extends OperationHandler {
+  canHandle (wacLdpTask: WacLdpTask) {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
-  },
-  handle: async function (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
+  }
+  async handle (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
       await checkAccess({
         url: wacLdpTask.fullUrl(),

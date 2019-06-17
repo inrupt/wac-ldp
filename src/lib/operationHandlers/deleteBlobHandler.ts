@@ -9,6 +9,7 @@ import Debug from 'debug'
 import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
 import { applyPatch } from '../rdf/applyPatch'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('delete-blob-handler')
 
@@ -37,7 +38,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer):
   return blob
 }
 
-export const deleteBlobHandler = {
+export const deleteBlobHandler: OperationHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate),
   handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {

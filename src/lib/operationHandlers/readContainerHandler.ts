@@ -10,6 +10,7 @@ import { streamToObject } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('read-container-handler')
 
@@ -38,9 +39,11 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer):
   return blob
 }
 
-export const readContainerHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
-  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
+export class ReadContainerHandler extends OperationHandler {
+  canHandle(wacLdpTask: WacLdpTask) {
+    return (wacLdpTask.wacLdpTaskType() === TaskType.containerRead)
+  }
+  async handle (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {
       await checkAccess({
         url: task.fullUrl(),

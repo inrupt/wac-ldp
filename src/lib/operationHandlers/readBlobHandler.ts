@@ -11,6 +11,7 @@ import { RdfLayer } from '../rdf/RdfLayer'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { applyQuery } from '../rdf/applyQuery'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('read-blob-handler')
 
@@ -39,7 +40,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer):
   return blob
 }
 
-export const readBlobHandler = {
+export const readBlobHandler: OperationHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead),
   handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     if (!skipWac) {

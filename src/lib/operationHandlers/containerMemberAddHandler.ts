@@ -10,6 +10,7 @@ import Debug from 'debug'
 
 import { streamToObject, makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('main-handler')
 
@@ -38,7 +39,7 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer):
   return blob
 }
 
-export const containerMemberAddHandler = {
+export const containerMemberAddHandler: OperationHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
   handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child

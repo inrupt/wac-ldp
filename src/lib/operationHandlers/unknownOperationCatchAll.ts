@@ -3,12 +3,15 @@ import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpRespond
 
 import Debug from 'debug'
 import { RdfLayer } from '../rdf/RdfLayer'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('unknown-operation-catch-all')
 
-export const unknownOperationCatchAll = {
-  canHandle: (wacLdpTask: WacLdpTask) => true,
-  handle: function (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
+export class UnknownOperationCatchAll extends OperationHandler {
+  canHandle(wacLdpTask: WacLdpTask) {
+    return true
+  }
+  handle(wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     debug('operation unknownOperation!')
     throw new ErrorResult(ResultType.MethodNotAllowed)
   }

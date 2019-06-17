@@ -9,6 +9,7 @@ import Debug from 'debug'
 import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
 import { applyPatch } from '../rdf/applyPatch'
+import { OperationHandler } from './OperationHandler';
 
 const debug = Debug('update-blob-handler')
 
@@ -37,9 +38,11 @@ async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer):
   return blob
 }
 
-export const updateBlobHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate),
-  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
+export class UpdateBlobHandler extends OperationHandler {
+  canHandle (wacLdpTask: WacLdpTask) {
+    return (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate)
+  }
+  async handle (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
     let appendOnly = false
     if (!skipWac) {
       appendOnly = await checkAccess({
