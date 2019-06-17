@@ -59,7 +59,11 @@ async function getIssuerPubKey (domain: string, kid: string): Promise<string | u
   return publicPem
 }
 
-export async function determineWebId (bearerToken: string, audience: string): Promise<URL | undefined> {
+export async function determineWebId (bearerToken: string | undefined, audience: string): Promise<URL | undefined> {
+  debug('determineWebId', { bearerToken, audience })
+  if (!bearerToken) {
+    return undefined
+  }
   try {
     debug('bearerToken before decoding', bearerToken)
     const payload: any = jwt.decode(bearerToken) // decode only the payload
@@ -81,7 +85,8 @@ export async function determineWebId (bearerToken: string, audience: string): Pr
       debug('verification failed', error.message)
       return
     }
-    debug('payload.id_token after decoding and verifying', completeIdToken)
+    debug('payload.id_token after decoding and verifying:', completeIdToken)
+    debug('returning', completeIdToken.payload.sub)
     return new URL(completeIdToken.payload.sub)
   } catch (error) {
     debug(error)

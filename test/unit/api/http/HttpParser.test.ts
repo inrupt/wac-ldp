@@ -1,5 +1,5 @@
 import * as http from 'http'
-import { parseHttpRequest, WacLdpTask, TaskType } from '../../../../src/lib/api/http/HttpParser'
+import { WacLdpTask, TaskType } from '../../../../src/lib/api/http/HttpParser'
 import { Path } from '../../../../src/lib/storage/BlobTree'
 import { bufferToStream } from '../../../../src/lib/rdf/ResourceDataUtils'
 import { toChunkStream } from '../../helpers/toChunkStream'
@@ -15,23 +15,21 @@ test('should parse a http request with Bearer token', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest('http://localhost:8080', request)
-  expect(parsed).toEqual({
-    asJsonLd: false,
-    bearerToken: 'the-bearer-token',
-    contentType: undefined,
-    ifMatch: undefined,
-    ifNoneMatchList: undefined,
-    ifNoneMatchStar: false,
-    isContainer: false,
-    omitBody: false,
-    origin: undefined,
-    fullUrl: new URL('http://localhost:8080/foo/bar'),
-    preferMinimalContainer: false,
-    sparqlQuery: undefined,
-    requestBody: '',
-    wacLdpTaskType: TaskType.blobDelete
-  } as WacLdpTask)
+  const parsed = new WacLdpTask('http://localhost:8080', request)
+  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.bearerToken()).toEqual('the-bearer-token')
+  expect(parsed.contentType()).toEqual(undefined)
+  expect(parsed.ifMatch()).toEqual(undefined)
+  expect(parsed.ifNoneMatchList()).toEqual(undefined)
+  expect(parsed.ifNoneMatchStar()).toEqual(false)
+  expect(parsed.isContainer()).toEqual(false)
+  expect(parsed.omitBody()).toEqual(false)
+  expect(parsed.origin()).toEqual(undefined)
+  expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
+  expect(parsed.preferMinimalContainer()).toEqual(false)
+  expect(parsed.sparqlQuery()).toEqual(undefined)
+  expect(await parsed.requestBody()).toEqual('')
+  expect(parsed.wacLdpTaskType()).toEqual(TaskType.blobDelete)
 })
 
 test('should parse a http request with If-None-Match: * header', async () => {
@@ -45,23 +43,21 @@ test('should parse a http request with If-None-Match: * header', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest('http://localhost:8080', request)
-  expect(parsed).toEqual({
-    asJsonLd: false,
-    bearerToken: undefined,
-    contentType: undefined,
-    ifMatch: undefined,
-    ifNoneMatchList: undefined,
-    ifNoneMatchStar: true,
-    isContainer: false,
-    omitBody: false,
-    origin: undefined,
-    fullUrl: new URL('http://localhost:8080/foo/bar'),
-    preferMinimalContainer: false,
-    sparqlQuery: undefined,
-    requestBody: '',
-    wacLdpTaskType: TaskType.blobDelete
-  } as WacLdpTask)
+  const parsed = new WacLdpTask('http://localhost:8080', request)
+  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.bearerToken()).toEqual(undefined)
+  expect(parsed.contentType()).toEqual(undefined)
+  expect(parsed.ifMatch()).toEqual(undefined)
+  expect(parsed.ifNoneMatchList()).toEqual(undefined)
+  expect(parsed.ifNoneMatchStar()).toEqual(true)
+  expect(parsed.isContainer()).toEqual(false)
+  expect(parsed.omitBody()).toEqual(false)
+  expect(parsed.origin()).toEqual(undefined)
+  expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
+  expect(parsed.preferMinimalContainer()).toEqual(false)
+  expect(parsed.sparqlQuery()).toEqual(undefined)
+  expect(await parsed.requestBody()).toEqual('')
+  expect(parsed.wacLdpTaskType()).toEqual(TaskType.blobDelete)
 })
 
 test('should parse a http request with If-None-Match: [list] header', async () => {
@@ -75,23 +71,21 @@ test('should parse a http request with If-None-Match: [list] header', async () =
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest('http://localhost:8080', request)
-  expect(parsed).toEqual({
-    asJsonLd: false,
-    bearerToken: undefined,
-    contentType: undefined,
-    ifMatch: undefined,
-    ifNoneMatchList: ['etag-1', 'etag-2'],
-    ifNoneMatchStar: false,
-    isContainer: false,
-    omitBody: false,
-    origin: undefined,
-    fullUrl: new URL('http://localhost:8080/foo/bar'),
-    preferMinimalContainer: false,
-    sparqlQuery: undefined,
-    requestBody: '',
-    wacLdpTaskType: TaskType.blobDelete
-  } as WacLdpTask)
+  const parsed = new WacLdpTask('http://localhost:8080', request)
+  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.bearerToken()).toEqual(undefined)
+  expect(parsed.contentType()).toEqual(undefined)
+  expect(parsed.ifMatch()).toEqual(undefined)
+  expect(parsed.ifNoneMatchList()).toEqual(['etag-1', 'etag-2'])
+  expect(parsed.ifNoneMatchStar()).toEqual(false)
+  expect(parsed.isContainer()).toEqual(false)
+  expect(parsed.omitBody()).toEqual(false)
+  expect(parsed.origin()).toEqual(undefined)
+  expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
+  expect(parsed.preferMinimalContainer()).toEqual(false)
+  expect(parsed.sparqlQuery()).toEqual(undefined)
+  expect(await parsed.requestBody()).toEqual('')
+  expect(parsed.wacLdpTaskType()).toEqual(TaskType.blobDelete)
 })
 
 test('should parse a http request with If-Match header', async () => {
@@ -105,21 +99,19 @@ test('should parse a http request with If-Match header', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = await parseHttpRequest('http://localhost:8080', request)
-  expect(parsed).toEqual({
-    asJsonLd: false,
-    bearerToken: undefined,
-    contentType: undefined,
-    ifMatch: 'if-match-etag',
-    ifNoneMatchList: undefined,
-    ifNoneMatchStar: false,
-    isContainer: false,
-    omitBody: false,
-    origin: undefined,
-    fullUrl: new URL('http://localhost:8080/foo/bar'),
-    preferMinimalContainer: false,
-    sparqlQuery: undefined,
-    requestBody: '',
-    wacLdpTaskType: TaskType.blobDelete
-  } as WacLdpTask)
+  const parsed = new WacLdpTask('http://localhost:8080', request)
+  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.bearerToken()).toEqual(undefined)
+  expect(parsed.contentType()).toEqual(undefined)
+  expect(parsed.ifMatch()).toEqual('if-match-etag')
+  expect(parsed.ifNoneMatchList()).toEqual(undefined)
+  expect(parsed.ifNoneMatchStar()).toEqual(false)
+  expect(parsed.isContainer()).toEqual(false)
+  expect(parsed.omitBody()).toEqual(false)
+  expect(parsed.origin()).toEqual(undefined)
+  expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
+  expect(parsed.preferMinimalContainer()).toEqual(false)
+  expect(parsed.sparqlQuery()).toEqual(undefined)
+  expect(await parsed.requestBody()).toEqual('')
+  expect(parsed.wacLdpTaskType()).toEqual(TaskType.blobDelete)
 })

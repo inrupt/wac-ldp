@@ -57,7 +57,11 @@ export class Path {
   }
   toUrl (): URL {
     const host: string = this.segments[1]
-    const pathnameWithoutLeadingSlash = this.segments.slice(2).join('/') + (this.isContainer ? '/' : '')
+    let pathnameWithoutLeadingSlash = this.segments.slice(2).join('/') + (this.isContainer ? '/' : '')
+    if (pathnameWithoutLeadingSlash === '/') { // site root
+      pathnameWithoutLeadingSlash = ''
+    }
+    debug('Path#toUrl', this.segments, host, pathnameWithoutLeadingSlash)
     return new URL(`https://${host}/${pathnameWithoutLeadingSlash}`)
   }
   toChild (segment: string, childIsContainer: boolean): Path {

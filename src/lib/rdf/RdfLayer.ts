@@ -7,7 +7,9 @@ import convert from 'buffer-to-stream'
 
 import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, makeResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
+import { ResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
+import { Container } from '../storage/Container'
+import { setRootAcl } from './setRootAcl'
 
 const debug = Debug('getGraph')
 
@@ -55,17 +57,27 @@ async function getGraphLocal (blob: Blob): Promise<any> {
   return rdf.dataset().import(quadStream)
 }
 
-export class RdfFetcher {
+export class RdfLayer {
   serverHost: string
   storage: BlobTree
   constructor (serverHost: string, storage: BlobTree) {
     this.serverHost = serverHost
     this.storage = storage
   }
+  setRootAcl (owner: URL) {
+    return setRootAcl(this.storage, owner.toString(), new URL(this.serverHost))
+  }
+  getLocalBlob (url: URL): Blob {
+    const path: Path = urlToPath(url)
+    return this.storage.getBlob(path)
+  }
+  getLocalContainer (url: URL): Container {
+    const path: Path = urlToPath(url)
+    return this.storage.getContainer(path)
+  }
   async fetchGraph (url: URL) {
     if (url.host === this.serverHost) {
-      const path: Path = urlToPath(url)
-      const blob: Blob = this.storage.getBlob(path)
+      const blob: Blob = this.getLocalBlob(url)
       debug('fetching graph locally')
       return getGraphLocal(blob)
     } else {
@@ -104,6 +116,7 @@ export class RdfFetcher {
   // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
   // from storage
   async readAcl (resourceUrl: URL): Promise<{ aclGraph: any, targetUrl: URL, contextUrl: URL }> {
+    debug('readAcl', resourceUrl.toString())
     const resourcePath = urlToPath(resourceUrl)
     let currentGuessPath = resourcePath
     let currentIsContainer = resourcePath.isContainer

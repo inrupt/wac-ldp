@@ -17,7 +17,7 @@ process.env.DEBUG = '*'
 import * as http from 'http'
 import Debug from 'debug'
 import { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
-import { makeHandler } from './lib/core/app'
+import { makeHandler } from './lib/core/WacLdp'
 import { BlobTree, Path } from './lib/storage/BlobTree'
 
 const debug = Debug('server')
@@ -29,7 +29,7 @@ class Server {
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
     this.storage = new BlobTreeInMem() // singleton in-memory storage
-    const handler = makeHandler(this.storage, aud, skipWac)
+    const handler = makeHandler(this.storage, aud, new URL('wss://localhost:8443'), skipWac)
     this.server = http.createServer(handler)
   }
   listen () {

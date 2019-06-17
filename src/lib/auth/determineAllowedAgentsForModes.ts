@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { ACL, FOAF, RDF, VCARD } from '../rdf/rdf-constants'
-import { RdfFetcher } from '../rdf/RdfFetcher'
+import { RdfLayer } from '../rdf/RdfLayer'
 
 const debug = Debug('DetermineAllowedAgentsForModes')
 
@@ -28,7 +28,7 @@ export interface ModesCheckTask {
   targetUrl: URL
   contextUrl: URL
   resourceIsTarget: boolean
-  rdfFetcher: RdfFetcher
+  rdfLayer: RdfLayer
 }
 
 export interface AccessModes {
@@ -38,9 +38,9 @@ export interface AccessModes {
   'http://www.w3.org/ns/auth/acl#Control': Array<URL>
 }
 
-async function fetchGroupMembers (groupUri: URL, rdfFetcher: RdfFetcher): Promise<Array<URL>> {
-  debug('fetchGroupMembers', groupUri, rdfFetcher)
-  const vcardsGraph: any = await rdfFetcher.fetchGraph(groupUri)
+async function fetchGroupMembers (groupUri: URL, rdfLayer: RdfLayer): Promise<Array<URL>> {
+  debug('fetchGroupMembers', groupUri, rdfLayer)
+  const vcardsGraph: any = await rdfLayer.fetchGraph(groupUri)
   const members: { [indexer: string]: URL } = {}
   const quads: Array<any> = []
   try {
@@ -129,7 +129,7 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
         debug('using quad for agentGroup', quad.subject.value, quad.predicate.value, quad.object.value)
         let groupMembers: Array<URL> = []
         try {
-          groupMembers = await fetchGroupMembers(new URL(quad.object.value, task.contextUrl), task.rdfFetcher)
+          groupMembers = await fetchGroupMembers(new URL(quad.object.value, task.contextUrl), task.rdfLayer)
         } catch (err) {
           debug('could not fetch group members', err)
         }

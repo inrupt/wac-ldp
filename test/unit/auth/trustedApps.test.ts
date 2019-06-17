@@ -2,7 +2,7 @@ import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
 import { appIsTrustedForMode, OriginCheckTask } from '../../../src/lib/auth/appIsTrustedForMode'
-import { RdfFetcher } from '../../../src/lib/rdf/RdfFetcher'
+import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
 
 function readFixture (filename: string): Promise<any> {
@@ -21,11 +21,11 @@ test('finds acl:trustedApps nodes and their modes for a given owners list', asyn
     resourceOwners: [ new URL('https://michielbdejong.com/profile/card#me')]
   } as OriginCheckTask
 
-  const rdfFetcher: unknown = {
+  const rdfLayer: unknown = {
     fetchGraph: jest.fn(() => {
       return readFixture('test/fixtures/owner-profile.ttl')
     })
   }
-  const result = await appIsTrustedForMode(task, rdfFetcher as RdfFetcher)
+  const result = await appIsTrustedForMode(task, rdfLayer as RdfLayer)
   expect(result).toEqual(true)
 })
