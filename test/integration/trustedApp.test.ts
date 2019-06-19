@@ -5,25 +5,32 @@ import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
 import { objectToStream, makeResourceData, streamToObject } from '../../src/lib/rdf/ResourceDataUtils'
 import { urlToPath, BlobTree } from '../../src/lib/storage/BlobTree'
+import { getBearerToken } from '../fixtures/bearerToken'
+import MockDate from 'mockdate'
 
 let storage: BlobTree
 let handler: any
 beforeEach(() => {
   storage = new BlobTreeInMem()
-  handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080/'), false)
-
+  handler = makeHandler(storage, 'https://jackson.solid.community', new URL('wss://jackson.solid.community/'), false)
+  MockDate.set(1434319925275)
+})
+afterEach(() => {
+  MockDate.reset()
 })
 
-test.skip('handles a PUT request by a trusted app', async () => {
+test('handles a PUT request by a trusted app', async () => {
   const aclDoc = fs.readFileSync('test/fixtures/aclDoc-readwrite-owner.ttl')
   const publicContainerAclDocData = await objectToStream(makeResourceData('text/turtle', aclDoc.toString()))
-  await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/.acl'))).setData(publicContainerAclDocData)
+  await storage.getBlob(urlToPath(new URL('https://jackson.solid.community/foo/.acl'))).setData(publicContainerAclDocData)
 
   let streamed = false
   let endCallback: () => void
   let httpReq: any = toChunkStream('asdf')
+  const { bearerToken } = getBearerToken(true)
   httpReq.headers = {
-    'content-type': 'text/plain'
+    'content-type': 'text/plain',
+    'authorization': 'Bearer ' + bearerToken
   } as http.IncomingHttpHeaders
   httpReq.url = '/foo/bar' as string
   httpReq.method = 'PUT'
@@ -45,15 +52,15 @@ test.skip('handles a PUT request by a trusted app', async () => {
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Location': 'http://localhost:8080/foo/bar',
-        'Updates-Via': 'wss://localhost:8080/'
+        'Location': 'https://jackson.solid.community/foo/bar',
+        'Updates-Via': 'wss://jackson.solid.community/?bearer_token=' + bearerToken
       }
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
     [ 'Created' ]
   ])
-  const result = await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/bar'))).getData()
+  const result = await storage.getBlob(urlToPath(new URL('https://jackson.solid.community/foo/bar'))).getData()
   expect(await streamToObject(result)).toEqual(makeResourceData('text/plain', 'asdf'))
 })
 

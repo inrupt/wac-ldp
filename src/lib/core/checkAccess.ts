@@ -2,10 +2,8 @@
 import { OriginCheckTask, appIsTrustedForMode } from '../auth/appIsTrustedForMode'
 import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from '../auth/determineAllowedAgentsForModes'
 import { ACL } from '../rdf/rdf-constants'
-import { determineWebIdAndOrigin } from '../auth/determineWebIdAndOrigin'
-import { Path, BlobTree } from '../storage/BlobTree'
 import Debug from 'debug'
-import { WacLdpTask, TaskType } from '../api/http/HttpParser'
+import { TaskType } from '../api/http/HttpParser'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { RdfLayer, ACL_SUFFIX } from '../rdf/RdfLayer'
 
@@ -34,9 +32,9 @@ export function determineRequiredAccessModes (wacLdpTaskType: TaskType) {
 
 async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: RdfLayer): Promise<boolean> {
   // first check agent:
-  const agents = (allowedAgentsForModes as any)[mode.toString()].map((url: URL) => url.toString())
+  const agents = (allowedAgentsForModes as any)[mode.toString()]
   const webIdAsString: string | undefined = (webId ? webId.toString() : undefined)
-  debug(mode, agents, webId)
+  debug(mode.toString(), agents, webId ? webId.toString() : undefined)
   if ((agents.indexOf(AGENT_CLASS_ANYBODY.toString()) === -1) &&
       (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN.toString()) === -1) &&
       (!webIdAsString || agents.indexOf(webIdAsString) === -1)) {
@@ -81,7 +79,8 @@ function urlEquals (one: URL, two: URL) {
   return one.toString() === two.toString()
 }
 export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
-  debug('AccessCheckTask', task)
+  debug('AccessCheckTask', task.url.toString(), task.webId ? task.webId.toString() : undefined, task.origin)
+  debug(task.requiredAccessModes.map(url => url.toString()))
   let baseResourceUrl: URL
   let resourceIsAclDocument
   if (urlHasSuffix(task.url, ACL_SUFFIX)) {
@@ -94,7 +93,7 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
   }
   const { aclGraph, targetUrl, contextUrl } = await task.rdfLayer.readAcl(baseResourceUrl)
   const resourceIsTarget = urlEquals(baseResourceUrl, targetUrl)
-  debug('calling allowedAgentsForModes', 'aclGraph', resourceIsTarget, targetUrl, contextUrl)
+  debug('calling allowedAgentsForModes', 'aclGraph', resourceIsTarget, targetUrl.toString(), contextUrl.toString())
 
   const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
     aclGraph,
@@ -102,7 +101,7 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
     targetUrl,
     contextUrl
   } as ModesCheckTask)
-  debug('allowedAgentsForModes', allowedAgentsForModes)
+  debug('allowedAgentsForModes')
   let requiredAccessModes
   if (resourceIsAclDocument) {
     requiredAccessModes = [ ACL.Control ]
@@ -113,19 +112,19 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
 
   // throw if agent or origin does not have access
   await Promise.all(requiredAccessModes.map(async (mode: URL) => {
-    debug('required mode', mode)
+    debug('required mode', mode.toString())
     if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.rdfLayer)) {
       debug(mode, 'is allowed!')
       return
     }
-    debug(`mode ${mode} is not allowed, but checking for appendOnly now`)
+    debug(`mode ${mode.toString()} is not allowed, but checking for appendOnly now`)
     // SPECIAL CASE: append-only
     if (mode === ACL.Write && await modeAllowed(ACL.Append, allowedAgentsForModes, task.webId, task.origin, task.rdfLayer)) {
       appendOnly = true
       debug('write was requested and is not allowed but append is; setting appendOnly to true')
       return
     }
-    debug(`Access denied! ${mode} access is required for this task, webid is "${task.webId}"`)
+    debug(`Access denied! ${mode.toString()} access is required for this task, webid is "${task.webId ? task.webId.toString() : undefined}"`)
     throw new ErrorResult(ResultType.AccessDenied)
   }))
   // webId may be reused to check individual ACLs on individual member resources for Glob

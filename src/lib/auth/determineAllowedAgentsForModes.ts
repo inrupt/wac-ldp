@@ -32,10 +32,10 @@ export interface ModesCheckTask {
 }
 
 export interface AccessModes {
-  'http://www.w3.org/ns/auth/acl#Read': Array<URL>
-  'http://www.w3.org/ns/auth/acl#Write': Array<URL>
-  'http://www.w3.org/ns/auth/acl#Append': Array<URL>
-  'http://www.w3.org/ns/auth/acl#Control': Array<URL>
+  'http://www.w3.org/ns/auth/acl#Read': Array<string>
+  'http://www.w3.org/ns/auth/acl#Write': Array<string>
+  'http://www.w3.org/ns/auth/acl#Append': Array<string>
+  'http://www.w3.org/ns/auth/acl#Control': Array<string>
 }
 
 async function fetchGroupMembers (groupUri: URL, rdfLayer: RdfLayer): Promise<Array<URL>> {
@@ -175,7 +175,7 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
 
   debug(isAuthorization, aboutAgents, aboutThisResource, aboutMode)
   // pass 2, find the subjects for which all boxes are checked, and add up modes from them
-  function determineModeAgents (mode: URL): Array<URL> {
+  function determineModeAgentStrings (mode: URL): Array<string> {
     debug('determineModeAgents A', mode.toString())
     let anybody = false
     let anybodyLoggedIn = false
@@ -191,33 +191,33 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
           }
           debug('determineModeAgents E', mode.toString(), subject)
           if (agentIdStr === AGENT_CLASS_ANYBODY.toString()) {
-            debug(mode, 'considering agentId', agentIdStr, 'case 1')
+            debug(mode.toString(), 'considering agentId', agentIdStr, 'case 1')
             anybody = true
           } else if (agentIdStr === AGENT_CLASS_ANYBODY_LOGGED_IN.toString()) {
-            debug(mode, 'considering agentId', agentIdStr, 'case 2')
+            debug(mode.toString(), 'considering agentId', agentIdStr, 'case 2')
             anybodyLoggedIn = true
           } else {
-            debug(mode, 'considering agentId', agentIdStr, 'case 3')
+            debug(mode.toString(), 'considering agentId', agentIdStr, 'case 3')
             agentsMap[agentIdStr] = true
           }
         })
       }
     }
     if (anybody) {
-      debug(mode, 'anybody')
-      return [ AGENT_CLASS_ANYBODY ]
+      debug(mode.toString(), 'anybody')
+      return [ AGENT_CLASS_ANYBODY.toString() ]
     }
     if (anybodyLoggedIn) {
-      debug(mode, 'anybody logged in')
-      return [ AGENT_CLASS_ANYBODY_LOGGED_IN ]
+      debug(mode.toString(), 'anybody logged in')
+      return [ AGENT_CLASS_ANYBODY_LOGGED_IN.toString() ]
     }
-    debug(mode, 'specific webIds', Object.keys(agentsMap))
-    return Object.keys(agentsMap).map(str => new URL(str))
+    debug(mode.toString(), 'specific webIds', Object.keys(agentsMap))
+    return Object.keys(agentsMap)
   }
   return {
-    'http://www.w3.org/ns/auth/acl#Read': determineModeAgents(ACL.Read),
-    'http://www.w3.org/ns/auth/acl#Write': determineModeAgents(ACL.Write),
-    'http://www.w3.org/ns/auth/acl#Append': determineModeAgents(ACL.Append),
-    'http://www.w3.org/ns/auth/acl#Control': determineModeAgents(ACL.Control)
+    'http://www.w3.org/ns/auth/acl#Read': determineModeAgentStrings(ACL.Read),
+    'http://www.w3.org/ns/auth/acl#Write': determineModeAgentStrings(ACL.Write),
+    'http://www.w3.org/ns/auth/acl#Append': determineModeAgentStrings(ACL.Append),
+    'http://www.w3.org/ns/auth/acl#Control': determineModeAgentStrings(ACL.Control)
   }
 }

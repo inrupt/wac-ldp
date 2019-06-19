@@ -13,13 +13,14 @@ const ownerProfilesCache: { [webId: string]: any } = {}
 export interface OriginCheckTask {
   origin: string
   mode: URL
-  resourceOwners: Array<URL>
+  resourceOwners: Array<string>
 }
 
 async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLayer: RdfLayer): Promise<boolean> {
   // TODO: move this cache into a decorator pattern, see #81
+  debug('checkOwnerProfile', webId.toString(), origin, mode.toString())
   if (!ownerProfilesCache[webId.toString()]) {
-    debug('cache miss', webId)
+    debug('cache miss', webId.toString())
     ownerProfilesCache[webId.toString()] = await rdfLayer.fetchGraph(webId)
     if (!ownerProfilesCache[webId.toString()]) {
       return Promise.resolve(false)
@@ -92,8 +93,8 @@ export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: 
     setTimeout(() => {
       resolve(false)
     }, OWNER_PROFILES_FETCH_TIMEOUT)
-    const done = Promise.all(task.resourceOwners.map(async (webId: URL) => {
-      if (await checkOwnerProfile(webId, task.origin, task.mode, graphFetcher)) {
+    const done = Promise.all(task.resourceOwners.map(async (webIdStr: string) => {
+      if (await checkOwnerProfile(new URL(webIdStr), task.origin, task.mode, graphFetcher)) {
         resolve(true)
       }
     }))

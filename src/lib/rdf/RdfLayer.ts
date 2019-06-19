@@ -11,7 +11,7 @@ import { ResourceData, streamToObject, determineRdfType, RdfType } from './Resou
 import { Container } from '../storage/Container'
 import { setRootAcl } from './setRootAcl'
 
-const debug = Debug('getGraph')
+const debug = Debug('RdfLayer')
 
 export const ACL_SUFFIX = '.acl'
 
@@ -36,7 +36,7 @@ function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
       })
       break
   }
-  debug('importing bodystream', bodyStream)
+  debug('importing bodystream')
   return parser.import(bodyStream)
 }
 
@@ -86,7 +86,7 @@ export class RdfLayer {
       const rdfType = determineRdfType(response.headers.get('content-type'))
       const quadStream = readRdf(rdfType, response as unknown as ReadableStream)
       const dataset = await rdf.dataset().import(quadStream)
-      debug('got dataset', dataset)
+      debug('got dataset')
       return dataset
     }
   }

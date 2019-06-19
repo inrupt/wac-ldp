@@ -205,7 +205,7 @@ export class WacLdpTask {
   origin (): Promise<string | undefined> {
     if (!this.cache.webIdAndOrigin) {
       this.cache.webIdAndOrigin = {
-        value: determineWebIdAndOrigin(this.bearerToken(), this.hostName, determineOriginFromHeaders(this.httpReq.headers))
+        value: determineWebIdAndOrigin(this.bearerToken(), determineOriginFromHeaders(this.httpReq.headers))
       }
     }
     return this.cache.webIdAndOrigin.value.then(obj => obj.origin)
@@ -323,7 +323,7 @@ export class WacLdpTask {
   webId (): Promise<URL | undefined> {
     if (!this.cache.webIdAndOrigin) {
       this.cache.webIdAndOrigin = {
-        value: determineWebIdAndOrigin(this.bearerToken(), this.hostName, determineOriginFromHeaders(this.httpReq.headers))
+        value: determineWebIdAndOrigin(this.bearerToken(), determineOriginFromHeaders(this.httpReq.headers))
       }
     }
     return this.cache.webIdAndOrigin.value.then(obj => obj.webId)

@@ -61,7 +61,7 @@ export function objectToStream (obj: any): any {
 }
 
 export async function streamToBuffer (stream: any): Promise<Buffer> {
-  debug(stream)
+  // debug(stream)
   // debug(stream._readableState.buffer.head.data.toString())
   const bufs: Array<Buffer> = []
   return new Promise(resolve => {

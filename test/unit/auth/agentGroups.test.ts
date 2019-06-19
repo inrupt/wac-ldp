@@ -32,9 +32,9 @@ test('finds acl:accessTo modes for local agent group', async () => {
     'http://www.w3.org/ns/auth/acl#Read': [],
     'http://www.w3.org/ns/auth/acl#Write': [],
     'http://www.w3.org/ns/auth/acl#Append': [
-      new URL('https://bob.example.com/profile/card#me'),
-      new URL('https://candice.example.com/profile/card#me'),
-      new URL('https://deb.example.com/profile/card#me')
+      'https://bob.example.com/profile/card#me',
+      'https://candice.example.com/profile/card#me',
+      'https://deb.example.com/profile/card#me'
     ],
     'http://www.w3.org/ns/auth/acl#Control': []
   })

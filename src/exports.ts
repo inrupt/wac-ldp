@@ -1,5 +1,5 @@
 export { WacLdp, BEARER_PARAM_NAME } from './lib/core/WacLdp'
-export { determineWebIdAndOrigin as determineWebId } from './lib/auth/determineWebIdAndOrigin'
+export { determineWebIdAndOrigin } from './lib/auth/determineWebIdAndOrigin'
 export { BlobTree, Path } from './lib/storage/BlobTree'
 export { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
 export { ACL } from './lib/rdf/rdf-constants'

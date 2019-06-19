@@ -11,18 +11,12 @@ afterEach(() => {
 
 test('correctly reads webId from bearer token', async () => {
   const { bearerToken, expectedWebId, aud } = getBearerToken(true)
-  const { webId } = await determineWebIdAndOrigin(bearerToken, aud, undefined)
+  const { webId } = await determineWebIdAndOrigin(bearerToken, undefined)
   expect(webId).toEqual(expectedWebId)
 })
 
 test('returns undefined if bearer token is truncated', async () => {
   const { bearerToken, expectedWebId, aud } = getBearerToken(true)
-  const { webId } = await determineWebIdAndOrigin(bearerToken.substring(0, 100), aud, undefined)
+  const { webId } = await determineWebIdAndOrigin(bearerToken.substring(0, 100), undefined)
   expect(webId).toEqual(undefined)
-})
-
-test('returns undefined if aud is wrong', async () => {
-  const { bearerToken, expectedWebId } = getBearerToken(true)
-  const { webId } = await determineWebIdAndOrigin(bearerToken, 'https://not-the-right-aud.com', undefined)
-  expect(webId).toEqual(undefined)
-})
+})  
