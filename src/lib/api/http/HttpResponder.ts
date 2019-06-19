@@ -96,12 +96,16 @@ export async function sendHttpResponse (task: WacLdpResponse, updatesVia: URL, h
     'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Accept-Patch': 'application/sparql-update',
     'Accept-Post': 'application/sparql-update',
+    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Credentials': 'true',
+    'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
     'Updates-Via': updatesVia.toString()
   } as any
   if (task.resourceData) {
     responseHeaders['Content-Type'] = task.resourceData.contentType
   } else {
     responseHeaders['Content-Type'] = 'text/plain'
+    responseHeaders['Transfer-Encoding'] = 'chunked' // see https://github.com/solid/test-suite/issues/24
   }
   if (task.createdLocation) {
     responseHeaders['Location'] = task.createdLocation
