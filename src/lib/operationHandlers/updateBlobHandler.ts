@@ -46,7 +46,7 @@ export const updateBlobHandler = {
         url: task.fullUrl(),
         isContainer: task.isContainer(),
         webId: await task.webId(),
-        origin: task.origin(),
+        origin: await task.origin(),
         requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
         rdfLayer
       } as AccessCheckTask) // may throw if access is denied

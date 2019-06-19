@@ -50,7 +50,7 @@ export const containerMemberAddHandler = {
         url: wacLdpTask.fullUrl(),
         isContainer: wacLdpTask.isContainer(),
         webId: await wacLdpTask.webId(),
-        origin: wacLdpTask.origin(),
+        origin: await wacLdpTask.origin(),
         requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
         rdfLayer
       } as AccessCheckTask) // may throw if access is denied

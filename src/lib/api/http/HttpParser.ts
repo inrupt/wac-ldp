@@ -1,7 +1,7 @@
 import * as http from 'http'
 import { URL } from 'url'
 import Debug from 'debug'
-import { determineWebId } from '../../auth/determineWebId'
+import { determineWebIdAndOrigin } from '../../auth/determineWebIdAndOrigin'
 
 const debug = Debug('HttpParser')
 
@@ -69,6 +69,7 @@ function determineOrigin (headers: http.IncomingHttpHeaders): string | undefined
 }
 
 function determineContentType (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('content-type', headers)
   return headers['content-type']
 }
 
@@ -125,6 +126,15 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
   return undefined
 }
 
+function determineOriginFromHeaders (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('determining origin', headers)
+  if (Array.isArray(headers.origin)) {
+    return headers.origin[0]
+  } else {
+    return headers.origin
+  }
+}
+
 function determineSparqlQuery (urlPath: string | undefined): string | undefined {
   const url = new URL('http://example.com' + urlPath)
   debug('determining sparql query', urlPath, url.searchParams, url.searchParams.get('query'))
@@ -153,7 +163,6 @@ export class WacLdpTask {
   cache: {
     bearerToken?: { value: string | undefined },
     isContainer?: { value: boolean },
-    origin?: { value: string | undefined },
     contentType?: { value: string | undefined },
     ifMatch?: { value: string | undefined },
     ifNoneMatchStar?: { value: boolean },
@@ -165,7 +174,7 @@ export class WacLdpTask {
     fullUrl?: { value: URL },
     preferMinimalContainer?: { value: boolean },
     requestBody?: { value: Promise<string> },
-    webId?: { value: Promise<URL | undefined> }
+    webIdAndOrigin?: { value: Promise<{ webId: URL | undefined, origin: string | undefined }> }
   }
   hostName: string
   httpReq: http.IncomingMessage
@@ -193,13 +202,13 @@ export class WacLdpTask {
     return this.cache.bearerToken.value
   }
 
-  origin (): string | undefined {
-    if (!this.cache.origin) {
-      this.cache.origin = {
-        value: determineOrigin(this.httpReq.headers)
+  origin (): Promise<string | undefined> {
+    if (!this.cache.webIdAndOrigin) {
+      this.cache.webIdAndOrigin = {
+        value: determineWebIdAndOrigin(this.bearerToken(), this.hostName, determineOriginFromHeaders(this.httpReq.headers))
       }
     }
-    return this.cache.origin.value
+    return this.cache.webIdAndOrigin.value.then(obj => obj.origin)
   }
 
   contentType (): string | undefined {
@@ -312,12 +321,12 @@ export class WacLdpTask {
   // edge case if we can still consider this as lazy request parsing,
   // but had to move it here because most operation handlers rely on it.
   webId (): Promise<URL | undefined> {
-    if (!this.cache.webId) {
-      this.cache.webId = {
-        value: determineWebId(this.bearerToken(), this.hostName)
+    if (!this.cache.webIdAndOrigin) {
+      this.cache.webIdAndOrigin = {
+        value: determineWebIdAndOrigin(this.bearerToken(), this.hostName, determineOriginFromHeaders(this.httpReq.headers))
       }
     }
-    return this.cache.webId.value
+    return this.cache.webIdAndOrigin.value.then(obj => obj.webId)
   }
 
   // this one is maybe a bit weird too, open to suggestions

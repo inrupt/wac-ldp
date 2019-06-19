@@ -48,7 +48,7 @@ export const readBlobHandler = {
       await checkAccess({
         url: task.fullUrl(),
         webId,
-        origin: task.origin(),
+        origin: await task.origin(),
         requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
         rdfLayer
       } as AccessCheckTask) // may throw if access is denied

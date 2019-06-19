@@ -2,7 +2,7 @@
 import { OriginCheckTask, appIsTrustedForMode } from '../auth/appIsTrustedForMode'
 import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from '../auth/determineAllowedAgentsForModes'
 import { ACL } from '../rdf/rdf-constants'
-import { determineWebId } from '../auth/determineWebId'
+import { determineWebIdAndOrigin } from '../auth/determineWebIdAndOrigin'
 import { Path, BlobTree } from '../storage/BlobTree'
 import Debug from 'debug'
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
@@ -44,10 +44,7 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
     return false
   }
   debug('agent check passed!')
-  if (!origin) {
-    debug('no origin header, so origin allowed')
-    return true
-  }
+
   // then check origin:
   return appIsTrustedForMode({
     origin,

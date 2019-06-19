@@ -29,7 +29,7 @@ export interface WacLdpResponse {
   resourcesChanged?: Array<URL>
   resultType: ResultType
   resourceData?: ResourceData
-  createdLocation?: string
+  createdLocation?: URL
   isContainer: boolean
 }
 
@@ -108,7 +108,7 @@ export async function sendHttpResponse (task: WacLdpResponse, updatesVia: URL, h
     // responseHeaders['Transfer-Encoding'] = 'chunked' // see https://github.com/solid/test-suite/issues/24
   }
   if (task.createdLocation) {
-    responseHeaders['Location'] = task.createdLocation
+    responseHeaders['Location'] = task.createdLocation.toString()
   }
   if (task.resourceData) {
     debug('setting ETag')

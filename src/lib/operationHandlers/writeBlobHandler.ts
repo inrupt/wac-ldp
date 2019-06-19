@@ -47,7 +47,7 @@ export const writeBlobHandler = {
         url: task.fullUrl(),
         isContainer: task.isContainer(),
         webId: await task.webId(),
-        origin: task.origin(),
+        origin: await task.origin(),
         requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
         rdfLayer
       } as AccessCheckTask) // may throw if access is denied
@@ -57,6 +57,7 @@ export const writeBlobHandler = {
     debug('operation writeBlob!', blobExists)
     const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)
     const contentType: string | undefined = task.contentType()
+    debug('contentType', contentType)
     const resourceData = makeResourceData(contentType ? contentType : '', await task.requestBody())
     await blob.setData(objectToStream(resourceData))
     debug('write blob handler changed a resource', task.fullUrl())
