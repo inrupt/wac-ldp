@@ -39,6 +39,9 @@ test('handles a GET request for a public resource', async () => {
       {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
@@ -72,6 +75,9 @@ test('handles a GET request for a private resource', async () => {
       {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
@@ -106,6 +112,9 @@ test('sets bearerToken in Updates-Via', async () => {
       {
         'Accept-Patch': 'application/sparql-update',
         'Accept-Post': 'application/sparql-update',
+        'Access-Control-Allow-Credentials': 'true',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
         'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',

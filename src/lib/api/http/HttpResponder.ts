@@ -105,7 +105,7 @@ export async function sendHttpResponse (task: WacLdpResponse, updatesVia: URL, h
     responseHeaders['Content-Type'] = task.resourceData.contentType
   } else {
     responseHeaders['Content-Type'] = 'text/plain'
-    responseHeaders['Transfer-Encoding'] = 'chunked' // see https://github.com/solid/test-suite/issues/24
+    // responseHeaders['Transfer-Encoding'] = 'chunked' // see https://github.com/solid/test-suite/issues/24
   }
   if (task.createdLocation) {
     responseHeaders['Location'] = task.createdLocation
