@@ -10,33 +10,9 @@ import Debug from 'debug'
 
 import { streamToObject, makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
+import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 
 const debug = Debug('main-handler')
-
-async function getBlobAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer): Promise<Blob> {
-  const blob: Blob = rdfLayer.getLocalBlob(wacLdpTask.fullUrl())
-  const data = await blob.getData()
-  debug(data, wacLdpTask)
-  if (data) { // resource exists
-    if (wacLdpTask.ifNoneMatchStar()) { // If-None-Match: * -> resource should not exist
-      throw new ErrorResult(ResultType.PreconditionFailed)
-    }
-    const resourceData = await streamToObject(data)
-    const ifMatch = wacLdpTask.ifMatch()
-    if (ifMatch && resourceData.etag !== ifMatch) { // If-Match -> ETag should match
-      throw new ErrorResult(ResultType.PreconditionFailed)
-    }
-    const ifNoneMatchList: Array<string> | undefined = wacLdpTask.ifNoneMatchList()
-    if (ifNoneMatchList && ifNoneMatchList.indexOf(resourceData.etag) !== -1) { // ETag in blacklist
-      throw new ErrorResult(ResultType.PreconditionFailed)
-    }
-  } else { // resource does not exist
-    if (wacLdpTask.ifMatch()) { // If-Match -> ETag should match so resource should first exist
-      throw new ErrorResult(ResultType.PreconditionFailed)
-    }
-  }
-  return blob
-}
 
 export const containerMemberAddHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
@@ -58,8 +34,8 @@ export const containerMemberAddHandler = {
 
     const childName: string = uuid()
     wacLdpTask.convertToBlobWrite(childName)
-    const blob: any = await getBlobAndCheckETag(wacLdpTask, rdfLayer)
-    const blobExists: boolean = await blob.exists()
+    const resourceDataBefore = await getResourceDataAndCheckETag(wacLdpTask, rdfLayer)
+    const blobExists: boolean = !!resourceDataBefore
     debug('Writing Blob!', blobExists)
     const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)
     const contentType: string | undefined = wacLdpTask.contentType()
@@ -72,7 +48,7 @@ export const containerMemberAddHandler = {
     // then the body will be the one from the memento that existed when the resource
     // reference was first retrieved.
     // But see also https://github.com/inrupt/wac-ldp/issues/46
-    await blob.setData(objectToStream(resourceData))
+    await rdfLayer.setData(wacLdpTask.fullUrl(), objectToStream(resourceData))
     return {
       resultType,
       createdLocation: (blobExists ? undefined : wacLdpTask.fullUrl()),

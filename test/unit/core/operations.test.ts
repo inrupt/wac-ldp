@@ -121,7 +121,6 @@ test('read blob (omit body)', async () => {
   const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
-    [],
     []
   ])
   expect(result).toEqual({
@@ -153,7 +152,6 @@ test('read blob (with body)', async () => {
   const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
-    [],
     []
   ])
   expect(result).toEqual({

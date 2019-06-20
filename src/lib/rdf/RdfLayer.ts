@@ -10,6 +10,8 @@ import { Blob } from '../storage/Blob'
 import { ResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
 import { setRootAcl } from './setRootAcl'
+import { WacLdpTask } from '../api/http/HttpParser'
+import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 
 const debug = Debug('RdfLayer')
 
@@ -89,6 +91,18 @@ export class RdfLayer {
       debug('got dataset')
       return dataset
     }
+  }
+  async getResourceData (url: URL): Promise<ResourceData | undefined> {
+    debug('getResourceData!', url.toString())
+    const blob: Blob = this.getLocalBlob(url)
+    const data = await blob.getData()
+    if (data) {
+      return streamToObject(data)
+    }
+  }
+  setData (url: URL, stream: ReadableStream) {
+    const blob: Blob = this.getLocalBlob(url)
+    return blob.setData(stream)
   }
 
   //  cases:

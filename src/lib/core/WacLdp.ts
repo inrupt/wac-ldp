@@ -6,6 +6,7 @@ import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../ap
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 import { RdfLayer } from '../rdf/RdfLayer'
+import { CachingRdfLayer } from '../rdf/CachingRdfLayer'
 import { globReadHandler } from '../operationHandlers/globReadHandler'
 import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 import { readContainerHandler } from '../operationHandlers/readContainerHandler'
@@ -41,7 +42,7 @@ export class WacLdp extends EventEmitter {
   operationHandlers: Array<OperationHandler>
   constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
     super()
-    this.rdfLayer = new RdfLayer(aud, storage)
+    this.rdfLayer = new CachingRdfLayer(aud, storage)
     this.aud = aud
     this.updatesViaUrl = updatesViaUrl
     this.skipWac = skipWac
