@@ -47,7 +47,7 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
   return appIsTrustedForMode({
     origin,
     mode,
-    resourceOwners: allowedAgentsForModes['http://www.w3.org/ns/auth/acl#Control']
+    resourceOwners: allowedAgentsForModes['http://www.w3.org/ns/auth/acl#Control'].map(str => new URL(str))
   } as OriginCheckTask, graphFetcher)
 }
 
