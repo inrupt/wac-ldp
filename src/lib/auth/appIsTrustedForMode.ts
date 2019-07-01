@@ -13,7 +13,7 @@ const ownerProfilesCache: { [webId: string]: any } = {}
 export interface OriginCheckTask {
   origin: string
   mode: URL
-  resourceOwners: Array<string>
+  resourceOwners: Array<URL>
 }
 
 async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLayer: RdfLayer): Promise<boolean> {
@@ -93,8 +93,8 @@ export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: 
     setTimeout(() => {
       resolve(false)
     }, OWNER_PROFILES_FETCH_TIMEOUT)
-    const done = Promise.all(task.resourceOwners.map(async (webIdStr: string) => {
-      if (await checkOwnerProfile(new URL(webIdStr), task.origin, task.mode, graphFetcher)) {
+    const done = Promise.all(task.resourceOwners.map(async (webId: URL) => {
+      if (await checkOwnerProfile(webId, task.origin, task.mode, graphFetcher)) {
         resolve(true)
       }
     }))
