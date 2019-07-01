@@ -8,7 +8,6 @@ import Debug from 'debug'
 
 import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
-import { applyPatch } from '../rdf/applyPatch'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 
 const debug = Debug('delete-blob-handler')

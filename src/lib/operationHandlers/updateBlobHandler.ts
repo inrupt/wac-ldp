@@ -8,7 +8,6 @@ import Debug from 'debug'
 
 import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
-import { applyPatch } from '../rdf/applyPatch'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 
 const debug = Debug('update-blob-handler')
@@ -32,9 +31,10 @@ export const updateBlobHandler = {
       throw new ErrorResult(ResultType.NotFound)
     }
     debug('operation updateBlob!', { appendOnly })
-    const turtleDoc: string = await applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
+    const turtleDoc: string = await rdfLayer.applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
     const blob = rdfLayer.getLocalBlob(task.fullUrl())
     await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
+    rdfLayer.flushCache(task.fullUrl())
     return {
       resultType: ResultType.OkayWithoutBody,
       resourcesChanged: [ task.fullUrl() ]
