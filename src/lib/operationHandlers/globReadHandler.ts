@@ -67,7 +67,7 @@ export const globReadHandler = {
 
     return {
       resultType: (wacLdpTask.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
-      resourceData: await mergeRdfSources(rdfSources, wacLdpTask.asJsonLd()),
+      resourceData: await mergeRdfSources(rdfSources, wacLdpTask.rdfType()),
       createdLocation: undefined,
       isContainer: true
     } as WacLdpResponse

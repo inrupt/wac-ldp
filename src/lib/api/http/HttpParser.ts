@@ -1,8 +1,9 @@
 import * as http from 'http'
 import { URL } from 'url'
 import Debug from 'debug'
+import MIMEType from 'whatwg-mimetype'
 import { determineWebIdAndOrigin } from '../../auth/determineWebIdAndOrigin'
-
+import { RdfType } from '../../rdf/ResourceDataUtils'
 const debug = Debug('HttpParser')
 
 export enum TaskType {
@@ -18,15 +19,16 @@ export enum TaskType {
   unknown
 }
 
-function determineTaskType (method: string | undefined, url: string | undefined): TaskType {
-  if (!method || !url) {
+function determineTaskType (method: string | undefined, urlStr: string | undefined): TaskType {
+  if (!method || !urlStr) {
+    debug('no method or no url! task type unknown', method, urlStr)
     return TaskType.unknown
   }
   // if the URL end with a / then the path indicates a container
   // if the URL end with /* then the path indicates a glob
   // in all other cases, the path indicates a blob
 
-  let lastUrlChar = url.substr(-1)
+  let lastUrlChar = urlStr.substr(-1)
   if (['/', '*'].indexOf(lastUrlChar) === -1) {
     lastUrlChar = '(other)'
   }
@@ -107,13 +109,19 @@ function determineOmitBody (method: string | undefined): boolean {
   return (['OPTIONS', 'HEAD'].indexOf(method) !== -1)
 }
 
-function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
-  // TODO: use RdfType enum here and 'whatwg-mimetype' package from ResourceDataUtils
-  try {
-    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/ld+json')
-  } catch (e) {
-    return false
+function toRdfType (str: string | undefined) {
+  if (!str) {
+    return RdfType.NoPref
   }
+  const mimeType = new MIMEType(str)
+  if (mimeType.essence === 'text/turtle') {
+    return RdfType.Turtle
+  }
+  return RdfType.Unknown
+}
+
+function determineRdfType (headers: http.IncomingHttpHeaders): RdfType {
+  return toRdfType(headers ? headers['content-type'] : undefined)
 }
 
 function determineBearerToken (headers: http.IncomingHttpHeaders): string | undefined {
@@ -169,7 +177,7 @@ export class WacLdpTask {
     ifNoneMatchList?: { value: Array<string> | undefined },
     wacLdpTaskType?: { value: TaskType },
     sparqlQuery?: { value: string | undefined },
-    asJsonLd?: { value: boolean },
+    rdfType?: { value: RdfType },
     omitBody?: { value: boolean },
     fullUrl?: { value: URL },
     preferMinimalContainer?: { value: boolean },
@@ -265,13 +273,18 @@ export class WacLdpTask {
     return this.cache.sparqlQuery.value
   }
 
-  asJsonLd (): boolean {
-    if (!this.cache.asJsonLd) {
-      this.cache.asJsonLd = {
-        value: determineAsJsonLd(this.httpReq.headers)
+  rdfType (): RdfType {
+    if (!this.cache.rdfType) {
+      this.cache.rdfType = {
+        value: determineRdfType(this.httpReq.headers)
       }
     }
-    return this.cache.asJsonLd.value
+    return this.cache.rdfType.value
+  }
+
+  rdfTypeMatches (target: string): boolean {
+    const taskRdfType = this.rdfType()
+    return ((taskRdfType === RdfType.NoPref) || (toRdfType(target) === taskRdfType))
   }
 
   omitBody (): boolean {

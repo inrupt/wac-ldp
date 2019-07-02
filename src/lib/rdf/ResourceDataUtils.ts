@@ -7,7 +7,9 @@ const debug = Debug('ResourceDataUtils')
 
 export enum RdfType {
   JsonLd,
-  Turtle
+  Turtle,
+  Unknown,
+  NoPref
 }
 
 export interface ResourceData {

@@ -30,7 +30,7 @@ export const readBlobHandler = {
       } as AccessCheckTask) // may throw if access is denied
     }
     const resourceData = await getResourceDataAndCheckETag(task, rdfLayer)
-    debug('operation readBlob!', task.asJsonLd())
+    debug('operation readBlob!', task.rdfType())
     let result = {
     } as any
     const exists = !!resourceData
@@ -39,10 +39,10 @@ export const readBlobHandler = {
       return result
     }
     result.resourceData = resourceData
-    // TODO: use RdfType enum here
-    if (task.asJsonLd()) {
+    // only convert if requested rdf type is not the one that was stored
+    if (!task.rdfTypeMatches(result.resourceData.contentType)) {
       const rdf = await resourceDataToRdf(result.resourceData)
-      result.resourceData = await rdfToResourceData(rdf, true)
+      result.resourceData = await rdfToResourceData(rdf, task.rdfType())
     }
     const sparqlQuery: string | undefined = task.sparqlQuery()
     if (sparqlQuery) {

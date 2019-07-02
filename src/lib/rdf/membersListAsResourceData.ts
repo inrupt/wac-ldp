@@ -2,7 +2,7 @@ import Debug from 'debug'
 import rdf from 'rdf-ext'
 import { Member } from '../storage/Container'
 import { rdfToResourceData } from './rdfToResourceData'
-import { ResourceData } from './ResourceDataUtils'
+import { ResourceData, RdfType } from './ResourceDataUtils'
 import { LDP, RDF } from './rdf-constants'
 
 const debug = Debug('membersListAsResourceData')
@@ -35,8 +35,8 @@ function toRdf (containerUrl: URL, membersList: Array<Member>): ReadableStream {
   return dataset.toStream()
 }
 
-export async function membersListAsResourceData (containerUrl: URL, membersList: Array<Member>, asJsonLd: boolean): Promise<ResourceData> {
-  debug('membersListAsResourceData', containerUrl, membersList, asJsonLd)
+export async function membersListAsResourceData (containerUrl: URL, membersList: Array<Member>, rdfType: RdfType): Promise<ResourceData> {
+  debug('membersListAsResourceData', containerUrl, membersList, rdfType)
   const dataset = toRdf(containerUrl, membersList)
-  return rdfToResourceData(dataset, asJsonLd)
+  return rdfToResourceData(dataset, rdfType)
 }

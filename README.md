@@ -100,7 +100,7 @@ In src/lib/api/http/ are two important classes, one for parsing an incoming http
 interface WacLdpTask {
   isContainer: boolean
   omitBody: boolean
-  parsedContentType: ParsedContentType | undefined // was: asJsonLd
+  parsedContentType: ParsedContentType | undefined
   origin: string | undefined
   contentType: string | undefined
   ifMatch: string | undefined

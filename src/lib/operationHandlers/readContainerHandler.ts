@@ -38,7 +38,7 @@ export const readContainerHandler = {
       membersList = await container.getMembers()
     }
     debug(membersList)
-    const resourceData = await membersListAsResourceData(task.fullUrl(), membersList, task.asJsonLd())
+    const resourceData = await membersListAsResourceData(task.fullUrl(), membersList, task.rdfType())
     debug(resourceData)
     return {
       resultType: (task.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
