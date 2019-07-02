@@ -32,6 +32,7 @@ function toFormat (input: ReadableStream, rdfType: RdfType): Promise<{ body: str
 }
 
 export async function rdfToResourceData (dataset: ReadableStream, rdfType: RdfType): Promise<ResourceData> {
+  debug('serializing dataset to', rdfType)
   const { body, contentType } = await toFormat(dataset, rdfType)
   return makeResourceData(contentType, body)
 }

@@ -1,5 +1,5 @@
 
-import { streamToObject, objectToStream, ResourceData, makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
+import { streamToObject, objectToStream, ResourceData, makeResourceData, RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
 
 test('toStream -> fromStream', async () => {
   const obj = { foo: 'bar' }
@@ -13,6 +13,7 @@ test('makeResourceData', async () => {
   expect(resourceData).toEqual({
     contentType: 'foo',
     body: 'bar',
-    etag: 'N7UdGUp1E+RbVvZSTy1R8g=='
+    etag: 'N7UdGUp1E+RbVvZSTy1R8g==',
+    rdfType: RdfType.Unknown
   })
 })

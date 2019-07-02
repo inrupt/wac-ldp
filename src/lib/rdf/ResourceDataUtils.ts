@@ -19,9 +19,9 @@ export interface ResourceData {
   rdfType: RdfType | undefined
 }
 
-export function determineRdfType (contentType: string | null): RdfType | undefined {
+export function determineRdfType (contentType: string | undefined): RdfType {
   if (!contentType) {
-    return
+    return RdfType.NoPref
   }
   let rdfType
   try {
@@ -35,11 +35,12 @@ export function determineRdfType (contentType: string | null): RdfType | undefin
         break
       default:
         debug('not an RDF content-type', contentType, mimeType.essence)
+        return RdfType.Unknown
     }
     debug({ rdfType, contentType, essence: mimeType.essence })
   } catch (e) {
     debug('error determining rdf type', e.message)
-    // return rdfType as undefined
+    return RdfType.Unknown
   }
 }
 

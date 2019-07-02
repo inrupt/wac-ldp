@@ -128,7 +128,7 @@ test('read blob (omit body)', async () => {
       body: 'bla',
       contentType: 'text/plain',
       etag: 'Eo7PVCo1rFJwqH3HQJGEBA==',
-      rdfType: undefined
+      rdfType: RdfType.Unknown
     },
     resultType: ResultType.OkayWithoutBody
   })
@@ -159,7 +159,7 @@ test('read blob (with body)', async () => {
       body: 'bla',
       contentType: 'text/plain',
       etag: 'Eo7PVCo1rFJwqH3HQJGEBA==',
-      rdfType: undefined
+      rdfType: RdfType.Unknown
     },
     resultType: ResultType.OkayWithBody
   })

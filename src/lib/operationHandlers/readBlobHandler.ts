@@ -35,15 +35,20 @@ export const readBlobHandler = {
     } as any
     const exists = !!resourceData
     if (!exists) {
+      debug('resource does not exist')
       result.resultType = ResultType.NotFound
       return result
     }
     result.resourceData = resourceData
     // only convert if requested rdf type is not the one that was stored
+    debug('checking for RDF type match')
     if (!task.rdfTypeMatches(result.resourceData.contentType)) {
+      debug('rdf type needs conversion!', { stored: result.resourceData.contentType, required: task.rdfType() })
       const rdf = await resourceDataToRdf(result.resourceData)
       result.resourceData = await rdfToResourceData(rdf, task.rdfType())
     }
+    debug('RDF type matching taken care of')
+
     const sparqlQuery: string | undefined = task.sparqlQuery()
     if (sparqlQuery) {
       debug('reading blob as rdf', result.resourceData)

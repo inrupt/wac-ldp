@@ -3,7 +3,7 @@ import { URL } from 'url'
 import Debug from 'debug'
 import MIMEType from 'whatwg-mimetype'
 import { determineWebIdAndOrigin } from '../../auth/determineWebIdAndOrigin'
-import { RdfType } from '../../rdf/ResourceDataUtils'
+import { RdfType, determineRdfType } from '../../rdf/ResourceDataUtils'
 const debug = Debug('HttpParser')
 
 export enum TaskType {
@@ -109,19 +109,8 @@ function determineOmitBody (method: string | undefined): boolean {
   return (['OPTIONS', 'HEAD'].indexOf(method) !== -1)
 }
 
-function toRdfType (str: string | undefined) {
-  if (!str) {
-    return RdfType.NoPref
-  }
-  const mimeType = new MIMEType(str)
-  if (mimeType.essence === 'text/turtle') {
-    return RdfType.Turtle
-  }
-  return RdfType.Unknown
-}
-
-function determineRdfType (headers: http.IncomingHttpHeaders): RdfType {
-  return toRdfType(headers ? headers['content-type'] : undefined)
+function determineRdfTypeFromHeaders (headers: http.IncomingHttpHeaders): RdfType {
+  return determineRdfType(headers ? headers['content-type'] : undefined)
 }
 
 function determineBearerToken (headers: http.IncomingHttpHeaders): string | undefined {
@@ -276,7 +265,7 @@ export class WacLdpTask {
   rdfType (): RdfType {
     if (!this.cache.rdfType) {
       this.cache.rdfType = {
-        value: determineRdfType(this.httpReq.headers)
+        value: determineRdfTypeFromHeaders(this.httpReq.headers)
       }
     }
     return this.cache.rdfType.value
@@ -284,7 +273,7 @@ export class WacLdpTask {
 
   rdfTypeMatches (target: string): boolean {
     const taskRdfType = this.rdfType()
-    return ((taskRdfType === RdfType.NoPref) || (toRdfType(target) === taskRdfType))
+    return ((taskRdfType === RdfType.NoPref) || (determineRdfType(target) === taskRdfType))
   }
 
   omitBody (): boolean {
