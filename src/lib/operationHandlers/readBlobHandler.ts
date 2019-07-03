@@ -17,18 +17,7 @@ const debug = Debug('read-blob-handler')
 
 export const readBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead),
-  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
-    if (!skipWac) {
-      const webId = await task.webId()
-      debug('webId in readBlobHandler is', webId)
-      await checkAccess({
-        url: task.fullUrl(),
-        webId,
-        origin: await task.origin(),
-        requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
-        rdfLayer
-      } as AccessCheckTask) // may throw if access is denied
-    }
+  handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, rdfLayer)
     debug('operation readBlob!', task.rdfType())
     let result = {

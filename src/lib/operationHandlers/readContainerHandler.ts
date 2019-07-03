@@ -15,17 +15,7 @@ const debug = Debug('read-container-handler')
 
 export const readContainerHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
-  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
-    if (!skipWac) {
-      await checkAccess({
-        url: task.fullUrl(),
-        isContainer: task.isContainer(),
-        webId: await task.webId(),
-        origin: await task.origin(),
-        requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
-        rdfLayer
-      } as AccessCheckTask) // may throw if access is denied
-    }
+  handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     let container: any
     container = rdfLayer.getLocalContainer(task.fullUrl())
 

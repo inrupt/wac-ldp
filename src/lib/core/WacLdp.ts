@@ -16,7 +16,7 @@ import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
 import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
-import { checkAccess } from './checkAccess'
+import { checkAccess, determineRequiredAccessModes, AccessCheckTask } from './checkAccess'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -31,7 +31,7 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
 }
 interface OperationHandler {
   canHandle: (wacLdpTask: WacLdpTask) => boolean
-  handle: (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean) => Promise<WacLdpResponse>
+  handle: (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
 }
 
 export class WacLdp extends EventEmitter {
@@ -62,10 +62,22 @@ export class WacLdp extends EventEmitter {
   setRootAcl (owner: URL) {
     return this.rdfLayer.setRootAcl(owner)
   }
-  handleOperation (wacLdpTask: WacLdpTask): Promise<WacLdpResponse> {
+  async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
-      if (this.operationHandlers[i].canHandle(wacLdpTask)) {
-        return this.operationHandlers[i].handle(wacLdpTask, this.aud, this.rdfLayer, this.skipWac)
+      if (this.operationHandlers[i].canHandle(task)) {
+        let appendOnly = false
+        if (!this.skipWac) {
+          appendOnly = await checkAccess({
+            url: task.fullUrl(),
+            isContainer: task.isContainer(),
+            webId: await task.webId(),
+            origin: await task.origin(),
+            requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
+            rdfLayer: this.rdfLayer
+          } as AccessCheckTask) // may throw if access is denied
+        }
+        debug('calling operation handler', i, task, this.rdfLayer, this.aud, this.skipWac, appendOnly)
+        return this.operationHandlers[i].handle(task, this.rdfLayer, this.aud, this.skipWac, appendOnly)
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)

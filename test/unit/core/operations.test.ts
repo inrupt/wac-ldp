@@ -31,7 +31,7 @@ test('delete blob', async () => {
     headers: {}
   } as http.IncomingMessage)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await deleteBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
+  const result: WacLdpResponse = await deleteBlobHandler.handle(task, rdfLayer, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -93,7 +93,7 @@ test('delete container', async () => {
     headers: {}
   } as http.IncomingMessage)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await deleteContainerHandler.handle(task, 'https://example.com', rdfLayer, true)
+  const result: WacLdpResponse = await deleteContainerHandler.handle(task, rdfLayer, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -118,7 +118,7 @@ test('read blob (omit body)', async () => {
     method: 'HEAD'
   } as http.IncomingMessage)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
+  const result: WacLdpResponse = await readBlobHandler.handle(task, rdfLayer, 'https://example.com', false, false)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
     []
@@ -149,7 +149,7 @@ test('read blob (with body)', async () => {
     method: 'GET'
   } as http.IncomingMessage)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readBlobHandler.handle(task, 'https://example.com', rdfLayer, true)
+  const result: WacLdpResponse = await readBlobHandler.handle(task, rdfLayer, 'https://example.com', false, false)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
     []
@@ -181,7 +181,7 @@ test('read container (omit body)', async () => {
     headers: {}
   } as http.IncomingMessage)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfLayer, true)
+  const result: WacLdpResponse = await readContainerHandler.handle(task, rdfLayer, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
@@ -218,7 +218,7 @@ test('read container (with body)', async () => {
     headers: {}
   } as http.IncomingMessage)
   const rdfLayer = new RdfLayer('https://example.com', storage as BlobTree)
-  const result: WacLdpResponse = await readContainerHandler.handle(task, 'https://example.com', rdfLayer, true)
+  const result: WacLdpResponse = await readContainerHandler.handle(task, rdfLayer, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])

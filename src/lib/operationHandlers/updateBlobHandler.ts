@@ -14,18 +14,7 @@ const debug = Debug('update-blob-handler')
 
 export const updateBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate),
-  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
-    let appendOnly = false
-    if (!skipWac) {
-      appendOnly = await checkAccess({
-        url: task.fullUrl(),
-        isContainer: task.isContainer(),
-        webId: await task.webId(),
-        origin: await task.origin(),
-        requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
-        rdfLayer
-      } as AccessCheckTask) // may throw if access is denied
-    }
+  handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, rdfLayer)
     if (!resourceData) {
       throw new ErrorResult(ResultType.NotFound)

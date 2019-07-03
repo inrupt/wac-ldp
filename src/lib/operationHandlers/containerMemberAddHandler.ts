@@ -16,21 +16,11 @@ const debug = Debug('main-handler')
 
 export const containerMemberAddHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
-  handle: async function executeTask (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
+  handle: async function executeTask (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
     // but notice that access check for this is append on the container,
     // write access on the Blob is not required!
     // See https://github.com/solid/web-access-control-spec#aclappend
-    if (!skipWac) {
-      await checkAccess({
-        url: wacLdpTask.fullUrl(),
-        isContainer: wacLdpTask.isContainer(),
-        webId: await wacLdpTask.webId(),
-        origin: await wacLdpTask.origin(),
-        requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
-        rdfLayer
-      } as AccessCheckTask) // may throw if access is denied
-    }
 
     const childName: string = uuid()
     wacLdpTask.convertToBlobWrite(childName)

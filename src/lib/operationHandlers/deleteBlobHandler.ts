@@ -14,16 +14,7 @@ const debug = Debug('delete-blob-handler')
 
 export const deleteBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobDelete),
-  handle: async function (task: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
-    if (!skipWac) {
-      await checkAccess({
-        url: task.fullUrl(),
-        webId: await task.webId(),
-        origin: await task.origin(),
-        requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
-        rdfLayer
-      } as AccessCheckTask) // may throw if access is denied
-    }
+  handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceDataBefore = await getResourceDataAndCheckETag(task, rdfLayer)
     debug('operation deleteBlob!')
     const blob = rdfLayer.getLocalBlob(task.fullUrl())
