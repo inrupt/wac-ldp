@@ -148,9 +148,9 @@ function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL
 function determineStorageHost (headers: http.IncomingHttpHeaders): string | undefined {
   debug('determining storageHost', headers)
   if (Array.isArray(headers.host)) {
-    return headers.host[0]
+    return 'https://' + headers.host[0]
   } else {
-    return headers.host
+    return 'https://' + headers.host
   }
 }
 
