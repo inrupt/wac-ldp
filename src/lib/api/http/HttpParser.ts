@@ -145,12 +145,14 @@ function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL
   return new URL(hostname + httpReq.url)
 }
 
-function determineStorageHost (headers: http.IncomingHttpHeaders): string | undefined {
-  debug('determining storageHost', headers)
-  if (Array.isArray(headers.host)) {
-    return 'https://' + headers.host[0]
-  } else {
-    return 'https://' + headers.host
+function determineStorageOrigin (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('determining storage origin', headers)
+  if (headers && headers.host) {
+    if (Array.isArray(headers.host)) {
+      return 'https://' + headers.host[0]
+    } else {
+      return 'https://' + headers.host
+    }
   }
 }
 
@@ -178,15 +180,15 @@ export class WacLdpTask {
     rdfType?: { value: RdfType },
     omitBody?: { value: boolean },
     fullUrl?: { value: URL },
-    storageHost?: { value: string | undefined },
+    storageHost?: { value: string },
     preferMinimalContainer?: { value: boolean },
     requestBody?: { value: Promise<string> },
     webIdAndOrigin?: { value: Promise<{ webId: URL | undefined, origin: string | undefined }> }
   }
-  hostName: string
+  defaultHost: string
   httpReq: http.IncomingMessage
-  constructor (hostName: string, httpReq: http.IncomingMessage) {
-    this.hostName = hostName
+  constructor (defaultHost: string, httpReq: http.IncomingMessage) {
+    this.defaultHost = defaultHost
     this.httpReq = httpReq
     this.cache = {}
   }
@@ -298,16 +300,16 @@ export class WacLdpTask {
   fullUrl (): URL {
     if (!this.cache.fullUrl) {
       this.cache.fullUrl = {
-        value: determineFullUrl(this.hostName, this.httpReq)
+        value: determineFullUrl(this.storageOrigin(), this.httpReq)
       }
     }
     return this.cache.fullUrl.value
   }
 
-  storageHost (): string | undefined {
+  storageOrigin (): string {
     if (!this.cache.storageHost) {
       this.cache.storageHost = {
-        value: determineStorageHost(this.httpReq.headers)
+        value: determineStorageOrigin(this.httpReq.headers) || this.defaultHost
       }
     }
     return this.cache.storageHost.value

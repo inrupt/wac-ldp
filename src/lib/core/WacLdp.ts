@@ -92,11 +92,11 @@ export class WacLdp extends EventEmitter {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
     let response: WacLdpResponse
-    let storageHost: string | undefined
+    let storageOrigin: string | undefined
     let bearerToken: string | undefined
     try {
       const wacLdpTask: WacLdpTask = new WacLdpTask(this.aud, httpReq)
-      storageHost = wacLdpTask.storageHost()
+      storageOrigin = wacLdpTask.storageOrigin()
       bearerToken = wacLdpTask.bearerToken()
       response = await this.handleOperation(wacLdpTask)
       debug('resourcesChanged', response.resourceData)
@@ -114,7 +114,7 @@ export class WacLdp extends EventEmitter {
       debug('response is', response)
       return sendHttpResponse(response, {
         updatesVia: addBearerToken(this.updatesViaUrl, bearerToken),
-        storageHost,
+        storageOrigin,
         idpHost: this.idpHost
       }, httpRes)
     } catch (error) {

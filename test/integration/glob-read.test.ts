@@ -73,7 +73,7 @@ test('handles a GET /* request (glob read)', async () => {
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/turtle',
         'ETag': '"TmBqjXO24ygE+uQdtQuiOA=="',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"',
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <http://localhost:8080/.well-known/solid>; rel="service"',
         'Updates-Via': 'wss://localhost:8080/'
       }
     ]

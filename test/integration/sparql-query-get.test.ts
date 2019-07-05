@@ -69,7 +69,7 @@ test('handles a SPARQL query in the GET query parameter', async () => {
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'application/sparql+json',
         'ETag': '"fTeBCZUGRxPpeUUf4DpHFg=="',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"',
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <http://localhost:8080/.well-known/solid>; rel="service"',
         'Updates-Via': 'wss://localhost:8080/'
       }
     ]
