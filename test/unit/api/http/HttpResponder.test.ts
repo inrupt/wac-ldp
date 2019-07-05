@@ -2,7 +2,6 @@ import * as http from 'http'
 import { sendHttpResponse, WacLdpResponse, ResultType } from '../../../../src/lib/api/http/HttpResponder'
 import { makeResourceData } from '../../../../src/lib/rdf/ResourceDataUtils'
 import { expectedResponseHeaders } from '../../../fixtures/expectedResponseHeaders'
-import { identifier } from '@babel/types';
 
 test('should produce a http response', async () => {
   let responseTask: WacLdpResponse = {

@@ -1,4 +1,3 @@
-import uuid from 'uuid/v4'
 import { BlobTree, Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 
@@ -22,8 +21,7 @@ export const containerMemberAddHandler = {
     // write access on the Blob is not required!
     // See https://github.com/solid/web-access-control-spec#aclappend
 
-    const childName: string = uuid()
-    wacLdpTask.convertToBlobWrite(childName)
+    wacLdpTask.convertToBlobWrite(wacLdpTask.childNameToCreate())
     const resourceDataBefore = await getResourceDataAndCheckETag(wacLdpTask, rdfLayer)
     const blobExists: boolean = !!resourceDataBefore
     debug('Writing Blob!', blobExists)

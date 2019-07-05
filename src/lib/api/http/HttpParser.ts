@@ -1,5 +1,6 @@
 import * as http from 'http'
 import { URL } from 'url'
+import uuid from 'uuid/v4'
 import Debug from 'debug'
 import MIMEType from 'whatwg-mimetype'
 import { determineWebIdAndOrigin } from '../../auth/determineWebIdAndOrigin'
@@ -131,6 +132,17 @@ function determineOriginFromHeaders (headers: http.IncomingHttpHeaders): string 
     return headers.origin
   }
 }
+function determineChildNameToCreate (headers: http.IncomingHttpHeaders): string {
+  debug('determining child name to create', headers)
+  if (headers) {
+    if (Array.isArray(headers.slug)) {
+      return headers.slug[0]
+    } else if (headers.slug) {
+      return headers.slug
+    }
+  }
+  return uuid()
+}
 
 function determineSparqlQuery (urlPath: string | undefined): string | undefined {
   const url = new URL('http://example.com' + urlPath)
@@ -182,6 +194,7 @@ export class WacLdpTask {
     fullUrl?: { value: URL },
     storageHost?: { value: string },
     preferMinimalContainer?: { value: boolean },
+    childNameToCreate?: { value: string },
     requestBody?: { value: Promise<string> },
     webIdAndOrigin?: { value: Promise<{ webId: URL | undefined, origin: string | undefined }> }
   }
@@ -220,6 +233,14 @@ export class WacLdpTask {
     return this.cache.webIdAndOrigin.value.then(obj => obj.origin)
   }
 
+  childNameToCreate (): string {
+    if (!this.cache.childNameToCreate) {
+      this.cache.childNameToCreate = {
+        value: determineChildNameToCreate(this.httpReq.headers)
+      }
+    }
+    return this.cache.childNameToCreate.value
+  }
   contentType (): string | undefined {
     if (!this.cache.contentType) {
       this.cache.contentType = {
