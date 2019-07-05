@@ -78,6 +78,10 @@ export class RdfLayer {
     const path: Path = urlToPath(url)
     return this.storage.getContainer(path)
   }
+  localContainerExists (url: URL): Promise<boolean> {
+    const path: Path = urlToPath(url)
+    return this.storage.getContainer(path).exists()
+  }
   async fetchGraph (url: URL) {
     if (url.host === this.serverHost) {
       const blob: Blob = this.getLocalBlob(url)

@@ -84,6 +84,9 @@ export class WacLdp extends EventEmitter {
     }
     throw new ErrorResult(ResultType.InternalServerError)
   }
+  async containerExists (url: URL): Promise<boolean> {
+    return this.rdfLayer.localContainerExists(url)
+  }
 
   async handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
