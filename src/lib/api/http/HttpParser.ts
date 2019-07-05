@@ -145,6 +145,15 @@ function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL
   return new URL(hostname + httpReq.url)
 }
 
+function determineStorageHost (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('determining storageHost', headers)
+  if (Array.isArray(headers.host)) {
+    return headers.host[0]
+  } else {
+    return headers.host
+  }
+}
+
 function determinePreferMinimalContainer (headers: http.IncomingHttpHeaders): boolean {
   // FIXME: this implementation is just a placeholder, should find a proper prefer-header parsing lib for this:
   if (headers['prefer'] && headers['prefer'] === 'return=representation; include="http://www.w3.org/ns/ldp#PreferMinimalContainer"') {
@@ -169,6 +178,7 @@ export class WacLdpTask {
     rdfType?: { value: RdfType },
     omitBody?: { value: boolean },
     fullUrl?: { value: URL },
+    storageHost?: { value: string | undefined },
     preferMinimalContainer?: { value: boolean },
     requestBody?: { value: Promise<string> },
     webIdAndOrigin?: { value: Promise<{ webId: URL | undefined, origin: string | undefined }> }
@@ -292,6 +302,15 @@ export class WacLdpTask {
       }
     }
     return this.cache.fullUrl.value
+  }
+
+  storageHost (): string | undefined {
+    if (!this.cache.storageHost) {
+      this.cache.storageHost = {
+        value: determineStorageHost(this.httpReq.headers)
+      }
+    }
+    return this.cache.storageHost.value
   }
 
   preferMinimalContainer (): boolean {

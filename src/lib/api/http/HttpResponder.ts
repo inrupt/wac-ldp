@@ -78,7 +78,7 @@ const responses: Responses = {
   }
 } as unknown as Responses
 
-export async function sendHttpResponse (task: WacLdpResponse, updatesVia: URL, httpRes: http.ServerResponse) {
+export async function sendHttpResponse (task: WacLdpResponse, options: { updatesVia: URL, storageHost: string | undefined, idpHost: string }, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!', task)
 
   debug(responses[task.resultType])
@@ -91,15 +91,19 @@ export async function sendHttpResponse (task: WacLdpResponse, updatesVia: URL, h
   if (task.isContainer) {
     types.push(`<${LDP.BasicContainer}>; rel="type"`)
   }
+  let links = `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join(', ')}; <https://${options.idpHost}>; rel="http://openid.net/specs/connect/1.0/issuer"`
+  if (options.storageHost) {
+    links += `; <https://${options.storageHost}/.well-known/solid>; rel="service"`
+  }
   const responseHeaders = {
-    'Link': `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join(', ')}`,
+    'Link':  links,
     'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Accept-Patch': 'application/sparql-update',
     'Accept-Post': 'application/sparql-update',
     'Access-Control-Allow-Origin': '*',
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
-    'Updates-Via': updatesVia.toString()
+    'Updates-Via': options.updatesVia.toString()
   } as any
   if (task.resourceData) {
     responseHeaders['Content-Type'] = task.resourceData.contentType

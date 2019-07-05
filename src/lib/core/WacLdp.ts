@@ -40,12 +40,14 @@ export class WacLdp extends EventEmitter {
   updatesViaUrl: URL
   skipWac: boolean
   operationHandlers: Array<OperationHandler>
-  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
+  idpHost: string
+  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string) {
     super()
     this.rdfLayer = new CachingRdfLayer(aud, storage)
     this.aud = aud
     this.updatesViaUrl = updatesViaUrl
     this.skipWac = skipWac
+    this.idpHost = idpHost
     this.operationHandlers = [
       optionsHandler,
       globReadHandler,
@@ -87,9 +89,11 @@ export class WacLdp extends EventEmitter {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
     let response: WacLdpResponse
+    let storageHost: string | undefined
     let bearerToken: string | undefined
     try {
       const wacLdpTask: WacLdpTask = new WacLdpTask(this.aud, httpReq)
+      storageHost = wacLdpTask.storageHost()
       bearerToken = wacLdpTask.bearerToken()
       response = await this.handleOperation(wacLdpTask)
       debug('resourcesChanged', response.resourceData)
@@ -105,7 +109,11 @@ export class WacLdp extends EventEmitter {
     }
     try {
       debug('response is', response)
-      return sendHttpResponse(response, addBearerToken(this.updatesViaUrl, bearerToken), httpRes)
+      return sendHttpResponse(response, {
+        updatesVia: addBearerToken(this.updatesViaUrl, bearerToken),
+        storageHost,
+        idpHost: this.idpHost
+      }, httpRes)
     } catch (error) {
       debug('errored while responding', error)
     }
@@ -135,7 +143,7 @@ export class WacLdp extends EventEmitter {
   }
 }
 
-export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
-  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac)
+export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string) {
+  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac, idpHost)
   return wacLdp.handler.bind(wacLdp)
 }

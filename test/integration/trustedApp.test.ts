@@ -12,7 +12,7 @@ let storage: BlobTree
 let handler: any
 beforeEach(() => {
   storage = new BlobTreeInMem()
-  handler = makeHandler(storage, 'https://jackson.solid.community', new URL('wss://jackson.solid.community/'), false)
+  handler = makeHandler(storage, 'https://jackson.solid.community', new URL('wss://jackson.solid.community/'), false, 'localhost:8443')
   MockDate.set(1434319925275)
 })
 afterEach(() => {
@@ -51,7 +51,7 @@ test('handles a PUT request by a trusted app', async () => {
         'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"',
         'Location': 'https://jackson.solid.community/foo/bar',
         'Updates-Via': 'wss://jackson.solid.community/?bearer_token=' + bearerToken
       }
@@ -94,7 +94,7 @@ test.skip('rejects a PUT request by an untrusted app', async () => {
         'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
         'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
         'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
+        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"',
         'Location': 'http://localhost:8080/foo/bar',
         'Updates-Via': 'wss://localhost:8080/'
       }
