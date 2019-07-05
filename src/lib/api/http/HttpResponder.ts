@@ -78,7 +78,7 @@ const responses: Responses = {
   }
 } as unknown as Responses
 
-export async function sendHttpResponse (task: WacLdpResponse, options: { updatesVia: URL, storageOrigin: string | undefined, idpHost: string }, httpRes: http.ServerResponse) {
+export async function sendHttpResponse (task: WacLdpResponse, options: { updatesVia: URL, storageOrigin: string | undefined, idpHost: string, originToAllow: string }, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!', task)
 
   debug(responses[task.resultType])
@@ -91,20 +91,21 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
   if (task.isContainer) {
     types.push(`<${LDP.BasicContainer}>; rel="type"`)
   }
-  let links = `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join(', ')}; <https://${options.idpHost}>; rel="http://openid.net/specs/connect/1.0/issuer"`
+  let links = `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join('; ')}; <https://${options.idpHost}>; rel="http://openid.net/specs/connect/1.0/issuer"`
   if (options.storageOrigin) {
     links += `; <${options.storageOrigin}/.well-known/solid>; rel="service"`
   }
   const responseHeaders = {
     'Link':  links,
-    // 'X-Powered-By': 'inrupt pod-server (alpha)',
-    // 'Vary': 'Accept, Authorization, Origin',
+    'X-Powered-By': 'inrupt pod-server (alpha)',
+    'Vary': 'Accept, Authorization, Origin',
     'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Accept-Patch': 'application/sparql-update',
     'Accept-Post': 'application/sparql-update',
-    'Access-Control-Allow-Origin': '*',
+    'Access-Control-Allow-Origin': options.originToAllow,
+    'Access-Control-Allow-Headers': 'Authorization, Accept, Content-Type, Origin, Referer, X-Requested-With',
     'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
+    'Access-Control-Expose-Headers': 'User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
     'Updates-Via': options.updatesVia.toString()
   } as any
   if (task.resourceData) {

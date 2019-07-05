@@ -5,6 +5,7 @@ import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
 import { objectToStream, makeResourceData, streamToObject } from '../../src/lib/rdf/ResourceDataUtils'
 import { urlToPath } from '../../src/lib/storage/BlobTree'
+import { expectedResponseHeaders } from '../fixtures/expectedResponseHeaders'
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
@@ -38,17 +39,14 @@ test.skip('handles an append-only PATCH request with Write permissions', async (
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       204,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <http://localhost:8080/.well-known/solid>; rel="service"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -81,17 +79,14 @@ test.skip('handles an append-only PATCH request with Append permissions', async 
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       204,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <http://localhost:8080/.well-known/solid>; rel="service"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -120,16 +115,14 @@ test.skip('handles a destructive PATCH request (allowed)', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       204,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <http://localhost:8080/.well-known/solid>; rel="service"'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -162,17 +155,14 @@ test.skip('handles a destructive PATCH request (not allowed but append is allowe
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       401,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <http://localhost:8080/.well-known/solid>; rel="service"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([

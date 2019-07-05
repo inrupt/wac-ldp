@@ -7,6 +7,7 @@ import { objectToStream, makeResourceData, streamToObject } from '../../src/lib/
 import { urlToPath, BlobTree } from '../../src/lib/storage/BlobTree'
 import { getBearerToken } from '../fixtures/bearerToken'
 import MockDate from 'mockdate'
+import { expectedResponseHeaders } from '../fixtures/expectedResponseHeaders'
 
 let storage: BlobTree
 let handler: any
@@ -43,18 +44,15 @@ test('handles a PUT request by a trusted app', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       201,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <https://jackson.solid.community/.well-known/solid>; rel="service"',
-        'Location': 'https://jackson.solid.community/foo/bar',
-        'Updates-Via': 'wss://jackson.solid.community/?bearer_token=' + bearerToken
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/plain',
+        isContainer: false,
+        serviceOrigin: 'https://jackson.solid.community',
+        location: 'https://jackson.solid.community/foo/bar',
+        updatesVia: 'wss://jackson.solid.community/?bearer_token=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BoZXl2YWVyLmdpdGh1Yi5pbyIsImF1ZCI6Imh0dHBzOi8vamFja3Nvbi5zb2xpZC5jb21tdW5pdHkiLCJleHAiOjE1NjA3NzM4OTcsImlhdCI6MTU2MDc3MDI5NywiaWRfdG9rZW4iOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0k2SWtwWFZDSXNJbXRwWkNJNkluaGxUMnBsY3psMU0wRmpWVFJNUW5wallXNUZUVGR3V2t4M1UyeDRZVTQzVlRZeVducFBRa1JSZFhjaWZRLmV5SnpkV0lpT2lKb2RIUndjem92TDJwaFkydHpiMjR1YzI5c2FXUXVZMjl0YlhWdWFYUjVMM0J5YjJacGJHVXZZMkZ5WkNOdFpTSXNJbTV2Ym1ObElqb2lXSHB4YVVkVGFqRldTM1p0WWxCblNtbFdOMEZRYUcxYU5VaHlaVk5wWDJOUGJFMUNNbTVwTjJ0MldTSXNJbk5wWkNJNkltRmxPVGszTkRNMUxUSXlZMlF0TkRKbU5DMWhaRFkzTFRaaVl6WTBaRFV5TXpSa1lTSXNJbUYwWDJoaGMyZ2lPaUprUjBKWFF6VnVkRk5RY21aaGR6TXdTV1YwWVc5Uklpd2ljMTlvWVhOb0lqb2llRFJYUlV3eVkzZzFhMGxOZDB0RWRXVnFkRE56ZHlJc0ltTnVaaUk2ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbVVpT2lKQlVVRkNJaXdpWlhoMElqcDBjblZsTENKclpYbGZiM0J6SWpwYkluWmxjbWxtZVNKZExDSnJkSGtpT2lKU1UwRWlMQ0p1SWpvaWVEaERObWRMY0Uxd01saDVOWFJGVmtRNU4yUk9YMGd3VG5KWFZUWldORzlLWmpOellrVnBWRUp3YVc5b1oxVnhTbDkzY1dKNVR6UTRlbVpEZVhOTE5ITTVaVm8zTW1SMWJUWkxNWEJpYkVSRlkxaE1kMTgzUjIxQ2IyZFRWbUp0YUdVNFlsQnBNa1oxU2pOclIwSnZkV05ITkRWcldrdzFNVEJYV0VkcGNsQkpibUl4VUhWSVF6TlJXakpxVkhaQmIwUTVaRWx1T1d0RU16ZzBVR2d4ZDJselJuSk1UVzB4UW1kMmJUTlNaek01VGxCTlNtMVdSR1pmY1drd2IwYzFSRFJEY0dSaVV6QlBkVkUxWm01NVVXdGpSSFpPYlc1R1VVZ3dNRll5TkRSTWNXUnZWakZ0UW00eFZYWnhOaTFJUkVvemIyRmFUMWg1TTBabVFuUm5SWFZ3VkhCSGEzQnRUbVpKY1dWbGJrOUtVekJzWHpnMVJFNTFUSGRTUm1ndFVsbDRRbDlsUWswNU1VbDZkRnAwY1dwTFR6WnJUVzFVZFZadVJucEVNbTFPZEVSelJIVjZNVTVMU0hsSE1rbHpkVzF3UlVGUkluMHNJbUYxWkNJNkltaDBkSEJ6T2k4dmNHaGxlWFpoWlhJdVoybDBhSFZpTG1sdklpd2laWGh3SWpveE5UWXdOemN6T0RreUxDSnBZWFFpT2pFMU5qQTNOekF5T1RJc0ltbHpjeUk2SW1oMGRIQnpPaTh2Ykc5allXeG9iM04wT2pnME5ETWlmUS5ZWFM0MlhlbWFzajZEUk5lNEd5LVp3MDBoLXpFU29YRnE1YVNUR3MwckpiMExTMkdhd2RPa19iSEd0ZVZrMHNLdUtfZFhobHlnUl9DeDNqOHE2QmVSWDFTTHdPSkpyLTc4dkZZMFV1R2ZvRjZMSXJjM1dSaXpCMmtoZEt2WVBhNThXSDk2Um00YlBaNVVZTzUzYnFMYnE0ejRWWFU0b19tLVFvUzdUUEtmQ0tRVWd4ZG9HUkJUWXlnZUxzYmx3dFQzeXRwYXhjYjFBVjFYc19zWFhuelpqMnNCcURoaUs3T0ZjdmNPbi0waUxfTUVNS01VVFhfMHNnSTBsc0ZIbU5wdmtwU3hCT2NOZVVfWDlhWVF4YXp3VXpjdWNJM3lxQ1FYam9Oa0ktYXdsMzJ4VkRfd25IN2FYd19RSTVUOU1JckhGOG9XWXBhRVp6LXE3SG1kRVFVa0EiLCJ0b2tlbl90eXBlIjoicG9wIn0.iLAwGcEi-LmibDum3rMxGpVGz9lXHqeLR9uXImCM097Mm29EeIcZX8Pgb0W3T2jQSKlL0HuiSGO1bkl5sEQqLq4FswXrSARnOjnEQt_uQZRj3Hzm7BWH_MpHKeTzvMXQayeJyqyV6w_gvpAeSYC5Lz4ybESajc8bWtBZ_2O4SQG5L3wFUv_GkYFUL8gTPOWI8F9bpSTz_Q99EftjD0DvJQeEMJTqX5XHECFZvx5PfV36syA82xlLEF_yrLuQqozBnlrAKPDGuPsgxKwjwlipXgO1ToZ_rdL0rwSNcoyRoRHv9_POhdYsAqWhTiGVxHq0xiHqqeJMtdQcl-ZtGx1XRQ'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -86,18 +84,14 @@ test.skip('rejects a PUT request by an untrusted app', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       401,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Access-Control-Allow-Credentials': 'true',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Expose-Headers': 'Authorization, User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; <https://localhost:8443>; rel="http://openid.net/specs/connect/1.0/issuer"; <http://localhost:8080/.well-known/solid>; rel="service"',
-        'Location': 'http://localhost:8080/foo/bar',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/plain',
+        etag: 'fTeBCZUGRxPpeUUf4DpHFg==',
+        isContainer: false,
+        updatesVia: 'wss://jackson.solid.community/?bearer_token=eyJhbGciOiJSUzI1NiJ9.eyJpc3MiOiJodHRwczovL3BoZXl2YWVyLmdpdGh1Yi5pbyIsImF1ZCI6Imh0dHBzOi8vamFja3Nvbi5zb2xpZC5jb21tdW5pdHkiLCJleHAiOjE1NjA3NzM4OTcsImlhdCI6MTU2MDc3MDI5NywiaWRfdG9rZW4iOiJleUpoYkdjaU9pSlNVekkxTmlJc0luUjVjQ0k2SWtwWFZDSXNJbXRwWkNJNkluaGxUMnBsY3psMU0wRmpWVFJNUW5wallXNUZUVGR3V2t4M1UyeDRZVTQzVlRZeVducFBRa1JSZFhjaWZRLmV5SnpkV0lpT2lKb2RIUndjem92TDJwaFkydHpiMjR1YzI5c2FXUXVZMjl0YlhWdWFYUjVMM0J5YjJacGJHVXZZMkZ5WkNOdFpTSXNJbTV2Ym1ObElqb2lXSHB4YVVkVGFqRldTM1p0WWxCblNtbFdOMEZRYUcxYU5VaHlaVk5wWDJOUGJFMUNNbTVwTjJ0MldTSXNJbk5wWkNJNkltRmxPVGszTkRNMUxUSXlZMlF0TkRKbU5DMWhaRFkzTFRaaVl6WTBaRFV5TXpSa1lTSXNJbUYwWDJoaGMyZ2lPaUprUjBKWFF6VnVkRk5RY21aaGR6TXdTV1YwWVc5Uklpd2ljMTlvWVhOb0lqb2llRFJYUlV3eVkzZzFhMGxOZDB0RWRXVnFkRE56ZHlJc0ltTnVaaUk2ZXlKaGJHY2lPaUpTVXpJMU5pSXNJbVVpT2lKQlVVRkNJaXdpWlhoMElqcDBjblZsTENKclpYbGZiM0J6SWpwYkluWmxjbWxtZVNKZExDSnJkSGtpT2lKU1UwRWlMQ0p1SWpvaWVEaERObWRMY0Uxd01saDVOWFJGVmtRNU4yUk9YMGd3VG5KWFZUWldORzlLWmpOellrVnBWRUp3YVc5b1oxVnhTbDkzY1dKNVR6UTRlbVpEZVhOTE5ITTVaVm8zTW1SMWJUWkxNWEJpYkVSRlkxaE1kMTgzUjIxQ2IyZFRWbUp0YUdVNFlsQnBNa1oxU2pOclIwSnZkV05ITkRWcldrdzFNVEJYV0VkcGNsQkpibUl4VUhWSVF6TlJXakpxVkhaQmIwUTVaRWx1T1d0RU16ZzBVR2d4ZDJselJuSk1UVzB4UW1kMmJUTlNaek01VGxCTlNtMVdSR1pmY1drd2IwYzFSRFJEY0dSaVV6QlBkVkUxWm01NVVXdGpSSFpPYlc1R1VVZ3dNRll5TkRSTWNXUnZWakZ0UW00eFZYWnhOaTFJUkVvemIyRmFUMWg1TTBabVFuUm5SWFZ3VkhCSGEzQnRUbVpKY1dWbGJrOUtVekJzWHpnMVJFNTFUSGRTUm1ndFVsbDRRbDlsUWswNU1VbDZkRnAwY1dwTFR6WnJUVzFVZFZadVJucEVNbTFPZEVSelJIVjZNVTVMU0hsSE1rbHpkVzF3UlVGUkluMHNJbUYxWkNJNkltaDBkSEJ6T2k4dmNHaGxlWFpoWlhJdVoybDBhSFZpTG1sdklpd2laWGh3SWpveE5UWXdOemN6T0RreUxDSnBZWFFpT2pFMU5qQTNOekF5T1RJc0ltbHpjeUk2SW1oMGRIQnpPaTh2Ykc5allXeG9iM04wT2pnME5ETWlmUS5ZWFM0MlhlbWFzajZEUk5lNEd5LVp3MDBoLXpFU29YRnE1YVNUR3MwckpiMExTMkdhd2RPa19iSEd0ZVZrMHNLdUtfZFhobHlnUl9DeDNqOHE2QmVSWDFTTHdPSkpyLTc4dkZZMFV1R2ZvRjZMSXJjM1dSaXpCMmtoZEt2WVBhNThXSDk2Um00YlBaNVVZTzUzYnFMYnE0ejRWWFU0b19tLVFvUzdUUEtmQ0tRVWd4ZG9HUkJUWXlnZUxzYmx3dFQzeXRwYXhjYjFBVjFYc19zWFhuelpqMnNCcURoaUs3T0ZjdmNPbi0waUxfTUVNS01VVFhfMHNnSTBsc0ZIbU5wdmtwU3hCT2NOZVVfWDlhWVF4YXp3VXpjdWNJM3lxQ1FYam9Oa0ktYXdsMzJ4VkRfd25IN2FYd19RSTVUOU1JckhGOG9XWXBhRVp6LXE3SG1kRVFVa0EiLCJ0b2tlbl90eXBlIjoicG9wIn0.iLAwGcEi-LmibDum3rMxGpVGz9lXHqeLR9uXImCM097Mm29EeIcZX8Pgb0W3T2jQSKlL0HuiSGO1bkl5sEQqLq4FswXrSARnOjnEQt_uQZRj3Hzm7BWH_MpHKeTzvMXQayeJyqyV6w_gvpAeSYC5Lz4ybESajc8bWtBZ_2O4SQG5L3wFUv_GkYFUL8gTPOWI8F9bpSTz_Q99EftjD0DvJQeEMJTqX5XHECFZvx5PfV36syA82xlLEF_yrLuQqozBnlrAKPDGuPsgxKwjwlipXgO1ToZ_rdL0rwSNcoyRoRHv9_POhdYsAqWhTiGVxHq0xiHqqeJMtdQcl-ZtGx1XRQ'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
