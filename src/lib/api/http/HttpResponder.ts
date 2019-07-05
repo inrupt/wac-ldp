@@ -97,6 +97,8 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
   }
   const responseHeaders = {
     'Link':  links,
+    // 'X-Powered-By': 'inrupt pod-server (alpha)',
+    // 'Vary': 'Accept, Authorization, Origin',
     'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Accept-Patch': 'application/sparql-update',
     'Accept-Post': 'application/sparql-update',
