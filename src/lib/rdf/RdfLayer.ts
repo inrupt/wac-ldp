@@ -67,8 +67,8 @@ export class RdfLayer {
     this.serverHost = serverHost
     this.storage = storage
   }
-  setRootAcl (owner: URL) {
-    return setRootAcl(this.storage, owner.toString(), new URL(this.serverHost))
+  setRootAcl (storageOrigin: URL, owner: URL) {
+    return setRootAcl(this.storage, owner, storageOrigin)
   }
   getLocalBlob (url: URL): Blob {
     const path: Path = urlToPath(url)

@@ -7,8 +7,8 @@ import { BlobTree, urlToPath } from '../storage/BlobTree'
 // requiring that as an extra parameter. And it should also
 // use the CachingRdfLayer object's knowledge of how to map
 // URLs to storage paths
-export async function setRootAcl (storage: BlobTree, owner: string, host: URL) {
-  let hostString = host.toString()
+export async function setRootAcl (storage: BlobTree, owner: URL, storageOrigin: URL) {
+  let hostString = storageOrigin.toString()
   if (hostString.substr(-1) !== '/') {
     hostString += '/'
   }
@@ -18,7 +18,7 @@ export async function setRootAcl (storage: BlobTree, owner: string, host: URL) {
     `@prefix acl: <http://www.w3.org/ns/auth/acl#>.`,
     `<#owner>`,
     `  a acl:Authorization;`,
-    `  acl:agent <${owner}>;`,
+    `  acl:agent <${owner.toString()}>;`,
     `  acl:accessTo </>;`,
     `  acl:default </>;`,
     `  acl:mode`,
