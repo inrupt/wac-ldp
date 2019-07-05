@@ -103,7 +103,7 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
     'Accept-Patch': 'application/sparql-update',
     'Accept-Post': 'application/sparql-update',
     'Access-Control-Allow-Origin': options.originToAllow,
-    'Access-Control-Allow-Headers': 'Authorization, Accept, Content-Type, Origin, Referer, X-Requested-With, Link',
+    'Access-Control-Allow-Headers': 'Authorization, Accept, Content-Type, Origin, Referer, X-Requested-With, Link, Slug',
     'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Access-Control-Allow-Credentials': 'true',
     'Access-Control-Expose-Headers': 'User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',

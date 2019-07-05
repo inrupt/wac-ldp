@@ -3,7 +3,7 @@ export function expectedResponseHeaders (options: any) {
     'Accept-Patch': 'application/sparql-update',
     'Accept-Post': 'application/sparql-update',
     'Access-Control-Allow-Credentials': 'true',
-    'Access-Control-Allow-Headers': 'Authorization, Accept, Content-Type, Origin, Referer, X-Requested-With, Link',
+    'Access-Control-Allow-Headers': 'Authorization, Accept, Content-Type, Origin, Referer, X-Requested-With, Link, Slug',
     'Access-Control-Allow-Origin': options.originToAllow || '*',
     'Access-Control-Expose-Headers': 'User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
     'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, DELETE, PATCH',
