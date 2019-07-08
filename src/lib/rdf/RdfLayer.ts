@@ -10,7 +10,7 @@ import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
-import { setRootAcl, setInboxAcl } from './setRootAcl'
+import { setRootAcl, setPublicAcl } from './setRootAcl'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 
 const debug = Debug('RdfLayer')
@@ -69,8 +69,8 @@ export class RdfLayer {
   setRootAcl (storageOrigin: URL, owner: URL) {
     return setRootAcl(this.storage, owner, storageOrigin)
   }
-  setInboxAcl (inboxUrl: URL, owner: URL) {
-    return setInboxAcl(this.storage, owner, inboxUrl)
+  setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
+    return setPublicAcl(this.storage, owner, inboxUrl, modeName)
   }
   getLocalBlob (url: URL): Blob {
     const path: Path = urlToPath(url)

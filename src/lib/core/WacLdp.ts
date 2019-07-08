@@ -17,7 +17,6 @@ import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
 import { checkAccess, determineRequiredAccessModes, AccessCheckTask } from './checkAccess'
-import { makeResourceData } from '../rdf/ResourceDataUtils';
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -65,10 +64,10 @@ export class WacLdp extends EventEmitter {
   setRootAcl (storageOrigin: URL, owner: URL) {
     return this.rdfLayer.setRootAcl(storageOrigin, owner)
   }
-  setInboxAcl (inboxUrl: URL, owner: URL) {
-    return this.rdfLayer.setInboxAcl(inboxUrl, owner)
+  setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
+    return this.rdfLayer.setPublicAcl(inboxUrl, owner, modeName)
   }
-  createLocalDocument(url: URL, contentType: string, body: string) {
+  createLocalDocument (url: URL, contentType: string, body: string) {
     return this.rdfLayer.createLocalDocument(url, contentType, body)
   }
   async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {

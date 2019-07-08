@@ -36,7 +36,7 @@ export async function setRootAcl (storage: BlobTree, owner: URL, storageOrigin: 
 // where this layer needs to know that an inbox is public-append
 // so that also feels like (part of) this function should be at
 // a higher level
-export async function setInboxAcl (storage: BlobTree, owner: URL, inboxUrl: URL) {
+export async function setPublicAcl (storage: BlobTree, owner: URL, inboxUrl: URL, modeName: string) {
   let inboxUrlStr = inboxUrl.toString()
   if (inboxUrlStr.substr(-1) !== '/') {
     inboxUrlStr += '/'
@@ -58,7 +58,7 @@ export async function setInboxAcl (storage: BlobTree, owner: URL, inboxUrl: URL)
     `  acl:agent foaf:Agent;`,
     `  acl:accessTo </>;`,
     `  acl:mode`,
-    `    acl:Append.`
+    `    acl:${modeName}.`
   ].join('\n'))
   const buffer = Buffer.from(JSON.stringify(obj))
   const blob = storage.getBlob(urlToPath(inboxAclUrl))
