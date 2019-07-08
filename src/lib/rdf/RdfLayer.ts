@@ -8,10 +8,9 @@ import * as rdflib from 'rdflib'
 
 import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
+import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
-import { setRootAcl } from './setRootAcl'
-import { WacLdpTask } from '../api/http/HttpParser'
+import { setRootAcl, setInboxAcl } from './setRootAcl'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 
 const debug = Debug('RdfLayer')
@@ -70,6 +69,9 @@ export class RdfLayer {
   setRootAcl (storageOrigin: URL, owner: URL) {
     return setRootAcl(this.storage, owner, storageOrigin)
   }
+  setInboxAcl (inboxUrl: URL, owner: URL) {
+    return setInboxAcl(this.storage, owner, inboxUrl)
+  }
   getLocalBlob (url: URL): Blob {
     const path: Path = urlToPath(url)
     return this.storage.getBlob(path)
@@ -108,6 +110,9 @@ export class RdfLayer {
   setData (url: URL, stream: ReadableStream) {
     const blob: Blob = this.getLocalBlob(url)
     return blob.setData(stream)
+  }
+  async createLocalDocument (url: URL, contentType: string, body: string) {
+    return this.setData(url, objectToStream(makeResourceData(contentType, body)))
   }
 
   //  cases:
