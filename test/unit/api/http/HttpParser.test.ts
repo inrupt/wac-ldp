@@ -1,7 +1,7 @@
 import * as http from 'http'
 import { WacLdpTask, TaskType } from '../../../../src/lib/api/http/HttpParser'
 import { Path } from '../../../../src/lib/storage/BlobTree'
-import { bufferToStream } from '../../../../src/lib/rdf/ResourceDataUtils'
+import { bufferToStream, RdfType } from '../../../../src/lib/rdf/ResourceDataUtils'
 import { toChunkStream } from '../../helpers/toChunkStream'
 
 test('should parse a http request with Bearer token', async () => {
@@ -16,7 +16,7 @@ test('should parse a http request with Bearer token', async () => {
   request = request as http.IncomingMessage
 
   const parsed = new WacLdpTask('http://localhost:8080', request)
-  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual('the-bearer-token')
   expect(parsed.contentType()).toEqual(undefined)
   expect(parsed.ifMatch()).toEqual(undefined)
@@ -24,7 +24,7 @@ test('should parse a http request with Bearer token', async () => {
   expect(parsed.ifNoneMatchStar()).toEqual(false)
   expect(parsed.isContainer()).toEqual(false)
   expect(parsed.omitBody()).toEqual(false)
-  expect(parsed.origin()).toEqual(undefined)
+  expect(await parsed.origin()).toEqual(undefined)
   expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
   expect(parsed.preferMinimalContainer()).toEqual(false)
   expect(parsed.sparqlQuery()).toEqual(undefined)
@@ -44,7 +44,7 @@ test('should parse a http request with If-None-Match: * header', async () => {
   request = request as http.IncomingMessage
 
   const parsed = new WacLdpTask('http://localhost:8080', request)
-  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual(undefined)
   expect(parsed.contentType()).toEqual(undefined)
   expect(parsed.ifMatch()).toEqual(undefined)
@@ -52,7 +52,7 @@ test('should parse a http request with If-None-Match: * header', async () => {
   expect(parsed.ifNoneMatchStar()).toEqual(true)
   expect(parsed.isContainer()).toEqual(false)
   expect(parsed.omitBody()).toEqual(false)
-  expect(parsed.origin()).toEqual(undefined)
+  expect(await parsed.origin()).toEqual(undefined)
   expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
   expect(parsed.preferMinimalContainer()).toEqual(false)
   expect(parsed.sparqlQuery()).toEqual(undefined)
@@ -72,7 +72,7 @@ test('should parse a http request with If-None-Match: [list] header', async () =
   request = request as http.IncomingMessage
 
   const parsed = new WacLdpTask('http://localhost:8080', request)
-  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual(undefined)
   expect(parsed.contentType()).toEqual(undefined)
   expect(parsed.ifMatch()).toEqual(undefined)
@@ -80,7 +80,7 @@ test('should parse a http request with If-None-Match: [list] header', async () =
   expect(parsed.ifNoneMatchStar()).toEqual(false)
   expect(parsed.isContainer()).toEqual(false)
   expect(parsed.omitBody()).toEqual(false)
-  expect(parsed.origin()).toEqual(undefined)
+  expect(await parsed.origin()).toEqual(undefined)
   expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
   expect(parsed.preferMinimalContainer()).toEqual(false)
   expect(parsed.sparqlQuery()).toEqual(undefined)
@@ -100,7 +100,7 @@ test('should parse a http request with If-Match header', async () => {
   request = request as http.IncomingMessage
 
   const parsed = new WacLdpTask('http://localhost:8080', request)
-  expect(parsed.asJsonLd()).toEqual(false)
+  expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual(undefined)
   expect(parsed.contentType()).toEqual(undefined)
   expect(parsed.ifMatch()).toEqual('if-match-etag')
@@ -108,7 +108,7 @@ test('should parse a http request with If-Match header', async () => {
   expect(parsed.ifNoneMatchStar()).toEqual(false)
   expect(parsed.isContainer()).toEqual(false)
   expect(parsed.omitBody()).toEqual(false)
-  expect(parsed.origin()).toEqual(undefined)
+  expect(await parsed.origin()).toEqual(undefined)
   expect(parsed.fullUrl()).toEqual(new URL('http://localhost:8080/foo/bar'))
   expect(parsed.preferMinimalContainer()).toEqual(false)
   expect(parsed.sparqlQuery()).toEqual(undefined)

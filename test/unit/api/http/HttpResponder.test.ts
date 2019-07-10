@@ -1,6 +1,7 @@
 import * as http from 'http'
 import { sendHttpResponse, WacLdpResponse, ResultType } from '../../../../src/lib/api/http/HttpResponder'
 import { makeResourceData } from '../../../../src/lib/rdf/ResourceDataUtils'
+import { expectedResponseHeaders } from '../../../fixtures/expectedResponseHeaders'
 
 test('should produce a http response', async () => {
   let responseTask: WacLdpResponse = {
@@ -13,19 +14,15 @@ test('should produce a http response', async () => {
     writeHead: jest.fn(() => { }), // tslint:disable-line: no-empty
     end: jest.fn(() => { }) // tslint:disable-line: no-empty
   }
-  await sendHttpResponse(responseTask, new URL('wss://localhost:8080/'), res as unknown as http.ServerResponse)
+  await sendHttpResponse(responseTask, { updatesVia: new URL('wss://localhost:8080/'), storageOrigin: 'http://localhost:8080', idpHost: 'localhost:8080', originToAllow: '*' }, res as unknown as http.ServerResponse)
   expect(res.writeHead.mock.calls).toEqual([
     [
       200,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'content/type',
-        'ETag': '"rxrYx2/aLkjqmu0pN+ly6g=="',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        etag: 'rxrYx2/aLkjqmu0pN+ly6g==',
+        idp: 'https://localhost:8080',
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(res.end.mock.calls).toEqual([

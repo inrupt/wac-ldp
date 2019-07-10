@@ -6,6 +6,7 @@ import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../ap
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 import { RdfLayer } from '../rdf/RdfLayer'
+import { CachingRdfLayer } from '../rdf/CachingRdfLayer'
 import { globReadHandler } from '../operationHandlers/globReadHandler'
 import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 import { readContainerHandler } from '../operationHandlers/readContainerHandler'
@@ -15,7 +16,7 @@ import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
 import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
-import { checkAccess } from './checkAccess'
+import { checkAccess, determineRequiredAccessModes, AccessCheckTask } from './checkAccess'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -30,7 +31,7 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
 }
 interface OperationHandler {
   canHandle: (wacLdpTask: WacLdpTask) => boolean
-  handle: (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean) => Promise<WacLdpResponse>
+  handle: (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
 }
 
 export class WacLdp extends EventEmitter {
@@ -39,12 +40,16 @@ export class WacLdp extends EventEmitter {
   updatesViaUrl: URL
   skipWac: boolean
   operationHandlers: Array<OperationHandler>
-  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
+  idpHost: string
+  usesHttps: boolean
+  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
     super()
-    this.rdfLayer = new RdfLayer(aud, storage)
+    this.rdfLayer = new CachingRdfLayer(aud, storage)
     this.aud = aud
     this.updatesViaUrl = updatesViaUrl
     this.skipWac = skipWac
+    this.idpHost = idpHost
+    this.usesHttps = usesHttps
     this.operationHandlers = [
       optionsHandler,
       globReadHandler,
@@ -58,25 +63,50 @@ export class WacLdp extends EventEmitter {
       unknownOperationCatchAll
     ]
   }
-  setRootAcl (owner: URL) {
-    return this.rdfLayer.setRootAcl(owner)
+  setRootAcl (storageOrigin: URL, owner: URL) {
+    return this.rdfLayer.setRootAcl(storageOrigin, owner)
   }
-  handleOperation (wacLdpTask: WacLdpTask): Promise<WacLdpResponse> {
+  setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
+    return this.rdfLayer.setPublicAcl(inboxUrl, owner, modeName)
+  }
+  createLocalDocument (url: URL, contentType: string, body: string) {
+    return this.rdfLayer.createLocalDocument(url, contentType, body)
+  }
+  async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
-      if (this.operationHandlers[i].canHandle(wacLdpTask)) {
-        return this.operationHandlers[i].handle(wacLdpTask, this.aud, this.rdfLayer, this.skipWac)
+      if (this.operationHandlers[i].canHandle(task)) {
+        let appendOnly = false
+        if (!this.skipWac) {
+          appendOnly = await checkAccess({
+            url: task.fullUrl(),
+            isContainer: task.isContainer(),
+            webId: await task.webId(),
+            origin: await task.origin(),
+            requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
+            rdfLayer: this.rdfLayer
+          } as AccessCheckTask) // may throw if access is denied
+        }
+        debug('calling operation handler', i, task, this.rdfLayer, this.aud, this.skipWac, appendOnly)
+        return this.operationHandlers[i].handle(task, this.rdfLayer, this.aud, this.skipWac, appendOnly)
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)
+  }
+  async containerExists (url: URL): Promise<boolean> {
+    return this.rdfLayer.localContainerExists(url)
   }
 
   async handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
     let response: WacLdpResponse
+    let storageOrigin: string | undefined
+    let requestOrigin: string | undefined
     let bearerToken: string | undefined
     try {
-      const wacLdpTask: WacLdpTask = new WacLdpTask(this.aud, httpReq)
+      const wacLdpTask: WacLdpTask = new WacLdpTask(this.aud, httpReq, this.usesHttps)
+      storageOrigin = wacLdpTask.storageOrigin()
+      requestOrigin = await wacLdpTask.origin()
       bearerToken = wacLdpTask.bearerToken()
       response = await this.handleOperation(wacLdpTask)
       debug('resourcesChanged', response.resourceData)
@@ -88,11 +118,22 @@ export class WacLdp extends EventEmitter {
       }
     } catch (error) {
       debug('errored', error)
-      response = error as WacLdpResponse
+      if (error.resultType) {
+        debug('error has a responseStatus', error.resultType)
+        response = error as WacLdpResponse
+      } else {
+        debug('error has no resultType', error.message, error)
+        response = new ErrorResult(ResultType.InternalServerError) as unknown as WacLdpResponse
+      }
     }
     try {
       debug('response is', response)
-      return sendHttpResponse(response, addBearerToken(this.updatesViaUrl, bearerToken), httpRes)
+      return sendHttpResponse(response, {
+        updatesVia: addBearerToken(this.updatesViaUrl, bearerToken),
+        storageOrigin,
+        idpHost: this.idpHost,
+        originToAllow: requestOrigin || '*'
+      }, httpRes)
     } catch (error) {
       debug('errored while responding', error)
     }
@@ -122,7 +163,7 @@ export class WacLdp extends EventEmitter {
   }
 }
 
-export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean) {
-  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac)
+export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
+  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac, idpHost, usesHttps)
   return wacLdp.handler.bind(wacLdp)
 }

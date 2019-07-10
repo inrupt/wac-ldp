@@ -5,6 +5,7 @@ import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
 import { objectToStream, makeResourceData } from '../../src/lib/rdf/ResourceDataUtils'
 import { urlToPath } from '../../src/lib/storage/BlobTree'
+import { expectedResponseHeaders } from '../fixtures/expectedResponseHeaders'
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
@@ -16,7 +17,7 @@ beforeEach(async () => {
   // Which says origin https://pheyvaer.github.io is trusted by owner https://michielbdejong.com/profile/card#me
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false)
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false, 'localhost:8443')
 
 test('handles a GET request for a public resource', async () => {
   let streamed = false
@@ -36,14 +37,12 @@ test('handles a GET request for a public resource', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       404,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        contentType: 'text/plain',
+        updatesVia: 'wss://localhost:8080/',
+        idp: 'https://localhost:8443'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -69,14 +68,12 @@ test('handles a GET request for a private resource', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       401,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        contentType: 'text/plain',
+        updatesVia: 'wss://localhost:8080/',
+        idp: 'https://localhost:8443'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -103,14 +100,12 @@ test('sets bearerToken in Updates-Via', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       404,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/?bearer_token=some-bearer-token'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        contentType: 'text/plain',
+        updatesVia: 'wss://localhost:8080/?bearer_token=some-bearer-token',
+        idp: 'https://localhost:8443'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([

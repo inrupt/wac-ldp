@@ -5,6 +5,7 @@ import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
 import { objectToStream, makeResourceData, streamToObject } from '../../src/lib/rdf/ResourceDataUtils'
 import { urlToPath } from '../../src/lib/storage/BlobTree'
+import { expectedResponseHeaders } from '../fixtures/expectedResponseHeaders'
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
@@ -17,7 +18,7 @@ beforeEach(async () => {
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/public/ldp-rs1.ttl'))).setData(ldpRs1Data)
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080/'), false)
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080/'), false, 'localhost:8443')
 
 test.skip('handles an append-only PATCH request with Write permissions', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge-alt.ttl').toString()
@@ -38,14 +39,14 @@ test.skip('handles an append-only PATCH request with Write permissions', async (
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       204,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -78,14 +79,14 @@ test.skip('handles an append-only PATCH request with Append permissions', async 
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       204,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -114,13 +115,14 @@ test.skip('handles a destructive PATCH request (allowed)', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       204,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([
@@ -153,14 +155,14 @@ test.skip('handles a destructive PATCH request (not allowed but append is allowe
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       401,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/plain',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
   expect(httpRes.end.mock.calls).toEqual([

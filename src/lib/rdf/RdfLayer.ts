@@ -4,14 +4,16 @@ import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import JsonLdParser from 'rdf-parser-jsonld'
 import convert from 'buffer-to-stream'
+import * as rdflib from 'rdflib'
 
 import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, streamToObject, determineRdfType, RdfType } from './ResourceDataUtils'
+import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
-import { setRootAcl } from './setRootAcl'
+import { setRootAcl, setPublicAcl } from './setRootAcl'
+import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 
-const debug = Debug('getGraph')
+const debug = Debug('RdfLayer')
 
 export const ACL_SUFFIX = '.acl'
 
@@ -36,7 +38,7 @@ function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
       })
       break
   }
-  debug('importing bodystream', bodyStream)
+  debug('importing bodystream')
   return parser.import(bodyStream)
 }
 
@@ -64,8 +66,11 @@ export class RdfLayer {
     this.serverHost = serverHost
     this.storage = storage
   }
-  setRootAcl (owner: URL) {
-    return setRootAcl(this.storage, owner.toString(), new URL(this.serverHost))
+  setRootAcl (storageOrigin: URL, owner: URL) {
+    return setRootAcl(this.storage, owner, storageOrigin)
+  }
+  setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
+    return setPublicAcl(this.storage, owner, inboxUrl, modeName)
   }
   getLocalBlob (url: URL): Blob {
     const path: Path = urlToPath(url)
@@ -74,6 +79,10 @@ export class RdfLayer {
   getLocalContainer (url: URL): Container {
     const path: Path = urlToPath(url)
     return this.storage.getContainer(path)
+  }
+  localContainerExists (url: URL): Promise<boolean> {
+    const path: Path = urlToPath(url)
+    return this.storage.getContainer(path).exists()
   }
   async fetchGraph (url: URL) {
     if (url.host === this.serverHost) {
@@ -86,9 +95,24 @@ export class RdfLayer {
       const rdfType = determineRdfType(response.headers.get('content-type'))
       const quadStream = readRdf(rdfType, response as unknown as ReadableStream)
       const dataset = await rdf.dataset().import(quadStream)
-      debug('got dataset', dataset)
+      debug('got dataset')
       return dataset
     }
+  }
+  async getResourceData (url: URL): Promise<ResourceData | undefined> {
+    debug('getResourceData!', url.toString())
+    const blob: Blob = this.getLocalBlob(url)
+    const data = await blob.getData()
+    if (data) {
+      return streamToObject(data)
+    }
+  }
+  setData (url: URL, stream: ReadableStream) {
+    const blob: Blob = this.getLocalBlob(url)
+    return blob.setData(stream)
+  }
+  async createLocalDocument (url: URL, contentType: string, body: string) {
+    return this.setData(url, objectToStream(makeResourceData(contentType, body)))
   }
 
   //  cases:
@@ -144,6 +168,35 @@ export class RdfLayer {
       targetUrl: currentGuessPath.toUrl(),
       contextUrl: aclDocPath.toUrl()
     }
+  }
+
+  async applyPatch (resourceData: ResourceData, sparqlQuery: string, fullUrl: URL, appendOnly: boolean) {
+    const store = rdflib.graph()
+    const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
+    parse(resourceData.body, store, fullUrl.toString(), resourceData.contentType)
+    debug('before patch', store.toNT())
+
+    const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
+    const patchObject = sparqlUpdateParser(sparqlQuery, rdflib.graph(), fullUrl.toString())
+    debug('patchObject', patchObject)
+    if (appendOnly && typeof patchObject.delete !== 'undefined') {
+      debug('appendOnly and patch contains deletes')
+      throw new ErrorResult(ResultType.AccessDenied)
+    }
+    await new Promise((resolve, reject) => {
+      store.applyPatch(patchObject, store.sym(fullUrl), (err: Error) => {
+        if (err) {
+          reject(err)
+        } else {
+          resolve()
+        }
+      })
+    })
+    debug('after patch', store.toNT())
+    return rdflib.serialize(undefined, store, fullUrl, 'text/turtle')
+  }
+  flushCache (url: URL) {
+    // no caching here
   }
 }
 

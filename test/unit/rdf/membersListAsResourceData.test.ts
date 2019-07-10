@@ -9,7 +9,7 @@ const membersList: Array<Member> = [
 ]
 
 test('asTurtle', async () => {
-  const resourceData: ResourceData = await membersListAsResourceData(new URL('https://example.com/foo/'), membersList, false)
+  const resourceData: ResourceData = await membersListAsResourceData(new URL('https://example.com/foo/'), membersList, RdfType.Turtle)
   expect(resourceData).toEqual({
     contentType: 'text/turtle',
     body: [
@@ -24,8 +24,8 @@ test('asTurtle', async () => {
   })
 })
 
-test('asJsonLd', async () => {
-  const resourceData: ResourceData = await membersListAsResourceData(new URL('https://example.com/foo/'), membersList, true)
+test('As JSON-LD', async () => {
+  const resourceData: ResourceData = await membersListAsResourceData(new URL('https://example.com/foo/'), membersList, RdfType.JsonLd)
   expect(resourceData).toEqual({
     contentType: 'application/ld+json',
     body: JSON.stringify([

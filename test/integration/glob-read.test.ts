@@ -5,6 +5,7 @@ import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
 import { objectToStream, makeResourceData } from '../../src/lib/rdf/ResourceDataUtils'
 import { urlToPath } from '../../src/lib/storage/BlobTree'
+import { expectedResponseHeaders } from '../fixtures/expectedResponseHeaders'
 
 const storage = new BlobTreeInMem()
 beforeEach(async () => {
@@ -24,7 +25,7 @@ beforeEach(async () => {
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/ldp-rs2.ttl'))).setData(ldpRs2Data)
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false)
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false, 'localhost:8443')
 
 test('handles a GET /* request (glob read)', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge.ttl').toString()
@@ -64,15 +65,14 @@ test('handles a GET /* request (glob read)', async () => {
   expect(httpRes.writeHead.mock.calls).toEqual([
     [
       200,
-      {
-        'Accept-Patch': 'application/sparql-update',
-        'Accept-Post': 'application/sparql-update',
-        'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
-        'Content-Type': 'text/turtle',
-        'ETag': '"TmBqjXO24ygE+uQdtQuiOA=="',
-        'Link': '<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type", <http://www.w3.org/ns/ldp#BasicContainer>; rel="type"',
-        'Updates-Via': 'wss://localhost:8080/'
-      }
+      expectedResponseHeaders({
+        originToAllow: 'https://pheyvaer.github.io',
+        idp: 'https://localhost:8443',
+        contentType: 'text/turtle',
+        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
+        isContainer: true,
+        updatesVia: 'wss://localhost:8080/'
+      })
     ]
   ])
 })

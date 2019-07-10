@@ -21,6 +21,7 @@ async function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): P
       parser = new N3Parser({ factory: rdf })
     }
     if (!parser) {
+      debug('no parser found for', rdfSources[i].rdfType)
       continue
     }
     const bodyStream = convert(Buffer.from(rdfSources[i].body))
@@ -33,9 +34,9 @@ async function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): P
   return dataset
 }
 
-export async function mergeRdfSources (rdfSources: { [indexer: string]: ResourceData }, asJsonLd: boolean) {
+export async function mergeRdfSources (rdfSources: { [indexer: string]: ResourceData }, rdfType: RdfType) {
   const datasetStream = (await readAndMerge(rdfSources)).toStream()
-  return rdfToResourceData(datasetStream, asJsonLd)
+  return rdfToResourceData(datasetStream, rdfType)
 }
 
 export function resourceDataToRdf (resourceData: ResourceData): Promise<any> {

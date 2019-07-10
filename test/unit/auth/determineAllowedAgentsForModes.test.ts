@@ -22,10 +22,10 @@ test('finds acl:accessTo modes', async () => {
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
-    [ACL.Read.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
-    [ACL.Write.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
+    [ACL.Read.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    [ACL.Write.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
     [ACL.Append.toString()]: [],
-    [ACL.Control.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')]
+    [ACL.Control.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org']
   })
 })
 
@@ -45,10 +45,10 @@ test('finds acl:default modes', async () => {
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
-    [ACL.Read.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
-    [ACL.Write.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')],
+    [ACL.Read.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
+    [ACL.Write.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
     [ACL.Append.toString()]: [],
-    [ACL.Control.toString()]: [new URL('https://michielbdejong.inrupt.net/profile/card#me'), new URL('mailto:michiel@unhosted.org')]
+    [ACL.Control.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org']
   })
 })
 
@@ -72,7 +72,7 @@ function testUrlFormat (format: string, target: string, resourceIsTarget: boolea
     }
     const result = await determineAllowedAgentsForModes(task)
     expect(result).toEqual({
-      [ACL.Read.toString()]: [new URL('http://xmlns.com/foaf/0.1/Agent')],
+      [ACL.Read.toString()]: ['http://xmlns.com/foaf/0.1/Agent'],
       [ACL.Write.toString()]: [],
       [ACL.Append.toString()]: [],
       [ACL.Control.toString()]: []

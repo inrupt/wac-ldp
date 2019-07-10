@@ -55,6 +55,10 @@ export class Path {
   toString (): string {
     return this.segments.join('/') + (this.isContainer ? '/' : '')
   }
+  toName (): string {
+    // last segment is the name
+    return this.segments[this.segments.length - 1]
+  }
   toUrl (): URL {
     const host: string = this.segments[1]
     let pathnameWithoutLeadingSlash = this.segments.slice(2).join('/') + (this.isContainer ? '/' : '')

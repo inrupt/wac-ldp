@@ -13,18 +13,7 @@ export const globReadHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
   },
-  handle: async function (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
-    if (!skipWac) {
-      await checkAccess({
-        url: wacLdpTask.fullUrl(),
-        isContainer: wacLdpTask.isContainer(),
-        webId: await wacLdpTask.webId(),
-        origin: wacLdpTask.origin(),
-        requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
-        rdfLayer
-      } as AccessCheckTask) // may throw if access is denied
-    }
-
+  handle: async function (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // At this point will have checked read access over the
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
@@ -49,7 +38,7 @@ export const globReadHandler = {
             url: blobUrl,
             isContainer: false,
             webId,
-            origin: wacLdpTask.origin(),
+            origin: await wacLdpTask.origin(),
             requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
             rdfLayer
           } as AccessCheckTask) // may throw if access is denied
@@ -67,7 +56,7 @@ export const globReadHandler = {
 
     return {
       resultType: (wacLdpTask.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
-      resourceData: await mergeRdfSources(rdfSources, wacLdpTask.asJsonLd()),
+      resourceData: await mergeRdfSources(rdfSources, wacLdpTask.rdfType()),
       createdLocation: undefined,
       isContainer: true
     } as WacLdpResponse

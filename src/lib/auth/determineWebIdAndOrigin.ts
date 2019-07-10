@@ -59,10 +59,10 @@ async function getIssuerPubKey (domain: string, kid: string): Promise<string | u
   return publicPem
 }
 
-export async function determineWebId (bearerToken: string | undefined, audience: string): Promise<URL | undefined> {
-  debug('determineWebId', { bearerToken, audience })
+export async function determineWebIdAndOrigin (bearerToken: string | undefined, originFromHeaders: string | undefined): Promise<{ webId: URL | undefined, origin: string | undefined }> {
+  debug('determineWebId', bearerToken)
   if (!bearerToken) {
-    return undefined
+    return { webId: undefined, origin: originFromHeaders }
   }
   try {
     debug('bearerToken before decoding', bearerToken)
@@ -76,19 +76,23 @@ export async function determineWebId (bearerToken: string | undefined, audience:
     const issuerPubKey = await getIssuerPubKey(domain, completeIdToken.header.kid as string)
     if (!issuerPubKey) {
       debug('could not determine issuer pub key', completeIdToken)
-      return
+      return { webId: undefined, origin: originFromHeaders }
     }
     try {
-      debug('verifying id token', issuerPubKey, audience)
-      jwt.verify(payload.id_token, issuerPubKey, { audience })
+      debug('verifying id token', issuerPubKey, payload.iss)
+      jwt.verify(payload.id_token, issuerPubKey, { audience: payload.iss })
     } catch (error) {
       debug('verification failed', error.message)
-      return
+      return { webId: undefined, origin: originFromHeaders }
     }
     debug('payload.id_token after decoding and verifying:', completeIdToken)
-    debug('returning', completeIdToken.payload.sub)
-    return new URL(completeIdToken.payload.sub)
+    debug('returning', completeIdToken.payload.sub, payload.iss)
+    return {
+      webId: new URL(completeIdToken.payload.sub),
+      origin: payload.iss
+    }
   } catch (error) {
     debug(error)
   }
+  return { webId: undefined, origin: originFromHeaders }
 }

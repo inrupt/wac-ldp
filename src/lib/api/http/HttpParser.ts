@@ -1,8 +1,10 @@
 import * as http from 'http'
 import { URL } from 'url'
+import uuid from 'uuid/v4'
 import Debug from 'debug'
-import { determineWebId } from '../../auth/determineWebId'
-
+import MIMEType from 'whatwg-mimetype'
+import { determineWebIdAndOrigin } from '../../auth/determineWebIdAndOrigin'
+import { RdfType, determineRdfType } from '../../rdf/ResourceDataUtils'
 const debug = Debug('HttpParser')
 
 export enum TaskType {
@@ -18,15 +20,16 @@ export enum TaskType {
   unknown
 }
 
-function determineTaskType (method: string | undefined, url: string | undefined): TaskType {
-  if (!method || !url) {
+function determineTaskType (method: string | undefined, urlStr: string | undefined): TaskType {
+  if (!method || !urlStr) {
+    debug('no method or no url! task type unknown', method, urlStr)
     return TaskType.unknown
   }
   // if the URL end with a / then the path indicates a container
   // if the URL end with /* then the path indicates a glob
   // in all other cases, the path indicates a blob
 
-  let lastUrlChar = url.substr(-1)
+  let lastUrlChar = urlStr.substr(-1)
   if (['/', '*'].indexOf(lastUrlChar) === -1) {
     lastUrlChar = '(other)'
   }
@@ -69,6 +72,7 @@ function determineOrigin (headers: http.IncomingHttpHeaders): string | undefined
 }
 
 function determineContentType (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('content-type', headers)
   return headers['content-type']
 }
 
@@ -106,13 +110,8 @@ function determineOmitBody (method: string | undefined): boolean {
   return (['OPTIONS', 'HEAD'].indexOf(method) !== -1)
 }
 
-function determineAsJsonLd (headers: http.IncomingHttpHeaders): boolean {
-  // TODO: use RdfType enum here and 'whatwg-mimetype' package from ResourceDataUtils
-  try {
-    return (!!headers['content-type'] && headers['content-type'].split(';')[0] === 'application/ld+json')
-  } catch (e) {
-    return false
-  }
+function determineRdfTypeFromHeaders (headers: http.IncomingHttpHeaders): RdfType {
+  return determineRdfType(headers ? headers['content-type'] : undefined)
 }
 
 function determineBearerToken (headers: http.IncomingHttpHeaders): string | undefined {
@@ -125,17 +124,48 @@ function determineBearerToken (headers: http.IncomingHttpHeaders): string | unde
   return undefined
 }
 
+function determineOriginFromHeaders (headers: http.IncomingHttpHeaders): string | undefined {
+  debug('determining origin', headers)
+  if (Array.isArray(headers.origin)) {
+    return headers.origin[0]
+  } else {
+    return headers.origin
+  }
+}
+function determineChildNameToCreate (headers: http.IncomingHttpHeaders): string {
+  debug('determining child name to create', headers)
+  if (headers) {
+    if (Array.isArray(headers.slug)) {
+      return headers.slug[0]
+    } else if (headers.slug) {
+      return headers.slug
+    }
+  }
+  return uuid()
+}
+
 function determineSparqlQuery (urlPath: string | undefined): string | undefined {
   const url = new URL('http://example.com' + urlPath)
   debug('determining sparql query', urlPath, url.searchParams, url.searchParams.get('query'))
   return url.searchParams.get('query') || undefined
 }
 
-function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL {
+function determineFullUrl (hostname: string, httpReq: http.IncomingMessage, usesHttps: boolean): URL {
   if (httpReq.url && httpReq.url.substr(-1) === '*') {
     return new URL(hostname + httpReq.url.substring(0, httpReq.url.length - 1))
   }
   return new URL(hostname + httpReq.url)
+}
+
+function determineStorageOrigin (headers: http.IncomingHttpHeaders, usesHttps: boolean): string | undefined {
+  debug('determining storage origin', headers)
+  if (headers && headers.host) {
+    if (Array.isArray(headers.host)) {
+      return `http${(usesHttps ? 's' : '')}://` + headers.host[0]
+    } else {
+      return `http${(usesHttps ? 's' : '')}://` + headers.host
+    }
+  }
 }
 
 function determinePreferMinimalContainer (headers: http.IncomingHttpHeaders): boolean {
@@ -153,26 +183,32 @@ export class WacLdpTask {
   cache: {
     bearerToken?: { value: string | undefined },
     isContainer?: { value: boolean },
-    origin?: { value: string | undefined },
     contentType?: { value: string | undefined },
     ifMatch?: { value: string | undefined },
     ifNoneMatchStar?: { value: boolean },
     ifNoneMatchList?: { value: Array<string> | undefined },
     wacLdpTaskType?: { value: TaskType },
     sparqlQuery?: { value: string | undefined },
-    asJsonLd?: { value: boolean },
+    rdfType?: { value: RdfType },
     omitBody?: { value: boolean },
     fullUrl?: { value: URL },
+    storageHost?: { value: string },
     preferMinimalContainer?: { value: boolean },
+    childNameToCreate?: { value: string },
     requestBody?: { value: Promise<string> },
-    webId?: { value: Promise<URL | undefined> }
+    webIdAndOrigin?: { value: Promise<{ webId: URL | undefined, origin: string | undefined }> }
   }
-  hostName: string
+  defaultHost: string
+  ifMatchRequired: boolean
+  usesHttps: boolean
+
   httpReq: http.IncomingMessage
-  constructor (hostName: string, httpReq: http.IncomingMessage) {
-    this.hostName = hostName
+  constructor (defaultHost: string, httpReq: http.IncomingMessage, usesHttps: boolean) {
+    this.defaultHost = defaultHost
     this.httpReq = httpReq
     this.cache = {}
+    this.usesHttps = usesHttps
+    this.ifMatchRequired = (httpReq.method === 'PUT') // only PUT requires If-Match, POST does not
   }
   isContainer () {
     if (!this.cache.isContainer) {
@@ -193,15 +229,23 @@ export class WacLdpTask {
     return this.cache.bearerToken.value
   }
 
-  origin (): string | undefined {
-    if (!this.cache.origin) {
-      this.cache.origin = {
-        value: determineOrigin(this.httpReq.headers)
+  origin (): Promise<string | undefined> {
+    if (!this.cache.webIdAndOrigin) {
+      this.cache.webIdAndOrigin = {
+        value: determineWebIdAndOrigin(this.bearerToken(), determineOriginFromHeaders(this.httpReq.headers))
       }
     }
-    return this.cache.origin.value
+    return this.cache.webIdAndOrigin.value.then(obj => obj.origin)
   }
 
+  childNameToCreate (): string {
+    if (!this.cache.childNameToCreate) {
+      this.cache.childNameToCreate = {
+        value: determineChildNameToCreate(this.httpReq.headers)
+      }
+    }
+    return this.cache.childNameToCreate.value
+  }
   contentType (): string | undefined {
     if (!this.cache.contentType) {
       this.cache.contentType = {
@@ -256,13 +300,18 @@ export class WacLdpTask {
     return this.cache.sparqlQuery.value
   }
 
-  asJsonLd (): boolean {
-    if (!this.cache.asJsonLd) {
-      this.cache.asJsonLd = {
-        value: determineAsJsonLd(this.httpReq.headers)
+  rdfType (): RdfType {
+    if (!this.cache.rdfType) {
+      this.cache.rdfType = {
+        value: determineRdfTypeFromHeaders(this.httpReq.headers)
       }
     }
-    return this.cache.asJsonLd.value
+    return this.cache.rdfType.value
+  }
+
+  rdfTypeMatches (target: string): boolean {
+    const taskRdfType = this.rdfType()
+    return ((taskRdfType === RdfType.NoPref) || (determineRdfType(target) === taskRdfType))
   }
 
   omitBody (): boolean {
@@ -277,10 +326,19 @@ export class WacLdpTask {
   fullUrl (): URL {
     if (!this.cache.fullUrl) {
       this.cache.fullUrl = {
-        value: determineFullUrl(this.hostName, this.httpReq)
+        value: determineFullUrl(this.storageOrigin(), this.httpReq, this.usesHttps)
       }
     }
     return this.cache.fullUrl.value
+  }
+
+  storageOrigin (): string {
+    if (!this.cache.storageHost) {
+      this.cache.storageHost = {
+        value: determineStorageOrigin(this.httpReq.headers, this.usesHttps) || this.defaultHost
+      }
+    }
+    return this.cache.storageHost.value
   }
 
   preferMinimalContainer (): boolean {
@@ -312,12 +370,12 @@ export class WacLdpTask {
   // edge case if we can still consider this as lazy request parsing,
   // but had to move it here because most operation handlers rely on it.
   webId (): Promise<URL | undefined> {
-    if (!this.cache.webId) {
-      this.cache.webId = {
-        value: determineWebId(this.bearerToken(), this.hostName)
+    if (!this.cache.webIdAndOrigin) {
+      this.cache.webIdAndOrigin = {
+        value: determineWebIdAndOrigin(this.bearerToken(), determineOriginFromHeaders(this.httpReq.headers))
       }
     }
-    return this.cache.webId.value
+    return this.cache.webIdAndOrigin.value.then(obj => obj.webId)
   }
 
   // this one is maybe a bit weird too, open to suggestions
@@ -335,6 +393,7 @@ export class WacLdpTask {
     }
     this.cache.wacLdpTaskType = { value: TaskType.blobWrite }
     this.cache.isContainer = { value: false }
+
     debug('converted', this.cache)
   }
 }

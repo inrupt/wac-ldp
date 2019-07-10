@@ -10,7 +10,7 @@ export const optionsHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.getOptions)
   },
-  handle: function (wacLdpTask: WacLdpTask, aud: string, rdfLayer: RdfLayer, skipWac: boolean): Promise<WacLdpResponse> {
+  handle: function (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     return Promise.resolve({
       resultType: ResultType.OkayWithoutBody,
       resourceData: undefined,

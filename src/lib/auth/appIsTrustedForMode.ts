@@ -18,8 +18,9 @@ export interface OriginCheckTask {
 
 async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLayer: RdfLayer): Promise<boolean> {
   // TODO: move this cache into a decorator pattern, see #81
+  debug('checkOwnerProfile', webId.toString(), origin, mode.toString())
   if (!ownerProfilesCache[webId.toString()]) {
-    debug('cache miss', webId)
+    debug('cache miss', webId.toString())
     ownerProfilesCache[webId.toString()] = await rdfLayer.fetchGraph(webId)
     if (!ownerProfilesCache[webId.toString()]) {
       return Promise.resolve(false)
