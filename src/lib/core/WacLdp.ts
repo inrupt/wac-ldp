@@ -118,9 +118,11 @@ export class WacLdp extends EventEmitter {
       }
     } catch (error) {
       debug('errored', error)
-      if (error.responseStatus) {
+      if (error.resultType) {
+        debug('error has a responseStatus', error.resultType)
         response = error as WacLdpResponse
       } else {
+        debug('error has no resultType', error.message, error)
         response = new ErrorResult(ResultType.InternalServerError) as unknown as WacLdpResponse
       }
     }
