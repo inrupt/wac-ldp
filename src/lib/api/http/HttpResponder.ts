@@ -33,7 +33,11 @@ export interface WacLdpResponse {
   isContainer: boolean
 }
 
-type ResponseContent = { responseStatus: number, responseBody: string | undefined }
+type ResponseContent = {
+  responseStatus: number,
+  responseBody?: string,
+  constrainedBy?: string
+}
 type Responses = { [resultType in keyof typeof ResultType]: ResponseContent }
 
 const responses: Responses = {
@@ -43,19 +47,23 @@ const responses: Responses = {
   },
   [ResultType.CouldNotParse]: {
     responseStatus: 405,
-    responseBody: 'Method not allowed'
+    responseBody: 'Method not allowed',
+    constrainedBy: 'could-not-parse'
   },
   [ResultType.AccessDenied]: {
     responseStatus: 401,
-    responseBody: 'Access denied'
+    responseBody: 'Access denied',
+    constrainedBy: 'wac'
   },
   [ResultType.PreconditionFailed]: {
     responseStatus: 412,
-    responseBody: 'Precondition failed'
+    responseBody: 'Precondition failed',
+    constrainedBy: 'conflict'
   },
   [ResultType.NotFound]: {
     responseStatus: 404,
-    responseBody: 'Not found'
+    responseBody: 'Not found',
+    constrainedBy: 'not-found'
   },
   [ResultType.NotModified]: {
     responseStatus: 304,
@@ -71,7 +79,9 @@ const responses: Responses = {
   },
   [ResultType.MethodNotAllowed]: {
     responseStatus: 405,
-    responseBody: 'Method not allowed'},
+    responseBody: 'Method not allowed',
+    constrainedBy: 'unknown-method'
+  },
   [ResultType.InternalServerError]: {
     responseStatus: 500,
     responseBody: 'Internal server error'
@@ -91,10 +101,14 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
   if (task.isContainer) {
     types.push(`<${LDP.BasicContainer}>; rel="type"`)
   }
-  let links = `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join('; ')}; <https://${options.idpHost}>; rel="http://openid.net/specs/connect/1.0/issuer"`
+  let links = `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join(', ')}, <https://${options.idpHost}>; rel="http://openid.net/specs/connect/1.0/issuer"`
   if (options.storageOrigin) {
-    links += `; <${options.storageOrigin}/.well-known/solid>; rel="service"`
+    links += `, <${options.storageOrigin}/.well-known/solid>; rel="service"`
   }
+  if (responses[task.resultType].constrainedBy) {
+    links += `, <http://www.w3.org/ns/ldp#constrainedBy-${responses[task.resultType].constrainedBy}>; rel="http://www.w3.org/ns/ldp#constrainedBy"`
+  }
+
   const responseHeaders = {
     'Link':  links,
     'X-Powered-By': 'inrupt pod-server (alpha)',
