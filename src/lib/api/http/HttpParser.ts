@@ -150,20 +150,20 @@ function determineSparqlQuery (urlPath: string | undefined): string | undefined 
   return url.searchParams.get('query') || undefined
 }
 
-function determineFullUrl (hostname: string, httpReq: http.IncomingMessage): URL {
+function determineFullUrl (hostname: string, httpReq: http.IncomingMessage, usesHttps: boolean): URL {
   if (httpReq.url && httpReq.url.substr(-1) === '*') {
     return new URL(hostname + httpReq.url.substring(0, httpReq.url.length - 1))
   }
   return new URL(hostname + httpReq.url)
 }
 
-function determineStorageOrigin (headers: http.IncomingHttpHeaders): string | undefined {
+function determineStorageOrigin (headers: http.IncomingHttpHeaders, usesHttps: boolean): string | undefined {
   debug('determining storage origin', headers)
   if (headers && headers.host) {
     if (Array.isArray(headers.host)) {
-      return 'https://' + headers.host[0]
+      return `http${(usesHttps ? 's' : '')}://` + headers.host[0]
     } else {
-      return 'https://' + headers.host
+      return `http${(usesHttps ? 's' : '')}://` + headers.host
     }
   }
 }
@@ -200,12 +200,14 @@ export class WacLdpTask {
   }
   defaultHost: string
   ifMatchRequired: boolean
+  usesHttps: boolean
 
   httpReq: http.IncomingMessage
-  constructor (defaultHost: string, httpReq: http.IncomingMessage) {
+  constructor (defaultHost: string, httpReq: http.IncomingMessage, usesHttps: boolean) {
     this.defaultHost = defaultHost
     this.httpReq = httpReq
     this.cache = {}
+    this.usesHttps = usesHttps
     this.ifMatchRequired = (httpReq.method === 'PUT') // only PUT requires If-Match, POST does not
   }
   isContainer () {
@@ -324,7 +326,7 @@ export class WacLdpTask {
   fullUrl (): URL {
     if (!this.cache.fullUrl) {
       this.cache.fullUrl = {
-        value: determineFullUrl(this.storageOrigin(), this.httpReq)
+        value: determineFullUrl(this.storageOrigin(), this.httpReq, this.usesHttps)
       }
     }
     return this.cache.fullUrl.value
@@ -333,7 +335,7 @@ export class WacLdpTask {
   storageOrigin (): string {
     if (!this.cache.storageHost) {
       this.cache.storageHost = {
-        value: determineStorageOrigin(this.httpReq.headers) || this.defaultHost
+        value: determineStorageOrigin(this.httpReq.headers, this.usesHttps) || this.defaultHost
       }
     }
     return this.cache.storageHost.value

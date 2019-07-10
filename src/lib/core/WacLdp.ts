@@ -41,13 +41,15 @@ export class WacLdp extends EventEmitter {
   skipWac: boolean
   operationHandlers: Array<OperationHandler>
   idpHost: string
-  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string) {
+  usesHttps: boolean
+  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
     super()
     this.rdfLayer = new CachingRdfLayer(aud, storage)
     this.aud = aud
     this.updatesViaUrl = updatesViaUrl
     this.skipWac = skipWac
     this.idpHost = idpHost
+    this.usesHttps = usesHttps
     this.operationHandlers = [
       optionsHandler,
       globReadHandler,
@@ -102,7 +104,7 @@ export class WacLdp extends EventEmitter {
     let requestOrigin: string | undefined
     let bearerToken: string | undefined
     try {
-      const wacLdpTask: WacLdpTask = new WacLdpTask(this.aud, httpReq)
+      const wacLdpTask: WacLdpTask = new WacLdpTask(this.aud, httpReq, this.usesHttps)
       storageOrigin = wacLdpTask.storageOrigin()
       requestOrigin = await wacLdpTask.origin()
       bearerToken = wacLdpTask.bearerToken()
@@ -116,7 +118,11 @@ export class WacLdp extends EventEmitter {
       }
     } catch (error) {
       debug('errored', error)
-      response = error as WacLdpResponse
+      if (error.responseStatus) {
+        response = error as WacLdpResponse
+      } else {
+        response = new ErrorResult(ResultType.InternalServerError) as unknown as WacLdpResponse
+      }
     }
     try {
       debug('response is', response)
@@ -155,7 +161,7 @@ export class WacLdp extends EventEmitter {
   }
 }
 
-export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string) {
-  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac, idpHost)
+export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
+  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac, idpHost, usesHttps)
   return wacLdp.handler.bind(wacLdp)
 }

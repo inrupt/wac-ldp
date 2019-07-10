@@ -29,7 +29,7 @@ class Server {
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
     this.storage = new BlobTreeInMem() // singleton in-memory storage
-    const handler = makeHandler(this.storage, aud, new URL('wss://localhost:8443'), skipWac, 'localhost:8443')
+    const handler = makeHandler(this.storage, aud, new URL('wss://localhost:8443'), skipWac, 'localhost:8443', false)
     this.server = http.createServer(handler)
   }
   listen () {
