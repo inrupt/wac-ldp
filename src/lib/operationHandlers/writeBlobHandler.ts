@@ -19,6 +19,14 @@ export const writeBlobHandler = {
     const resourceDataBefore = await getResourceDataAndCheckETag(task, rdfLayer)
     const blobExists: boolean = !!resourceDataBefore
     debug('operation writeBlob!', blobExists)
+    // see https://github.com/inrupt/wac-ldp/issues/61
+    // and https://github.com/inrupt/wac-ldp/issues/60
+    const ifMatchHeaderPresent = task.ifMatch() || task.ifNoneMatchStar()
+    debug('checking If-Match presence', ifMatchHeaderPresent, task.ifMatch(), task.ifNoneMatchStar(), task.ifMatchRequired, blobExists)
+    if (blobExists || (task.ifMatchRequired && !ifMatchHeaderPresent)) {
+      debug('attempt to overwrite existing resource')
+      throw new ErrorResult(ResultType.PreconditionFailed)
+    }
     const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)
     const contentType: string | undefined = task.contentType()
     debug('contentType', contentType)

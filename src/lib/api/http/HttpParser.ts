@@ -199,11 +199,14 @@ export class WacLdpTask {
     webIdAndOrigin?: { value: Promise<{ webId: URL | undefined, origin: string | undefined }> }
   }
   defaultHost: string
+  ifMatchRequired: boolean
+
   httpReq: http.IncomingMessage
   constructor (defaultHost: string, httpReq: http.IncomingMessage) {
     this.defaultHost = defaultHost
     this.httpReq = httpReq
     this.cache = {}
+    this.ifMatchRequired = (httpReq.method === 'PUT') // only PUT requires If-Match, POST does not
   }
   isContainer () {
     if (!this.cache.isContainer) {
@@ -388,6 +391,7 @@ export class WacLdpTask {
     }
     this.cache.wacLdpTaskType = { value: TaskType.blobWrite }
     this.cache.isContainer = { value: false }
+
     debug('converted', this.cache)
   }
 }
