@@ -42,7 +42,10 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
     return false
   }
   debug('agent check passed!')
-
+  if (!origin) {
+    debug('no origin header, allowed')
+    return true
+  }
   // then check origin:
   return appIsTrustedForMode({
     origin,
