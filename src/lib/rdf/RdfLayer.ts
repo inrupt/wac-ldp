@@ -60,10 +60,10 @@ async function getGraphLocal (blob: Blob): Promise<any> {
 }
 
 export class RdfLayer {
-  serverHost: string
+  serverRootDomain: string
   storage: BlobTree
-  constructor (serverHost: string, storage: BlobTree) {
-    this.serverHost = serverHost
+  constructor (serverRootDomain: string, storage: BlobTree) {
+    this.serverRootDomain = serverRootDomain
     this.storage = storage
   }
   setRootAcl (storageOrigin: URL, owner: URL) {
@@ -85,7 +85,7 @@ export class RdfLayer {
     return this.storage.getContainer(path).exists()
   }
   async fetchGraph (url: URL) {
-    if (url.host === this.serverHost) {
+    if (url.host.endsWith(this.serverRootDomain)) {
       const blob: Blob = this.getLocalBlob(url)
       debug('fetching graph locally')
       return getGraphLocal(blob)
