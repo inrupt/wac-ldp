@@ -24,3 +24,10 @@ test('can fetch a remote graph', async () => {
   const graph = await rdfLayer.fetchGraph(new URL('https://michielbdejong.com/profile/card'))
   expect(graph.length).toEqual(5)
 })
+
+// test.only('gracefully errors about a corrupted remote graph', async () => {
+//   const storage = new BlobTreeInMem()
+//   const rdfLayer = new RdfLayer('example.com', storage)
+//   const graph = await rdfLayer.fetchGraph(new URL('https://michielbdejong.com/bla.txt'))
+//   expect(graph.length).toEqual(5)
+// })
