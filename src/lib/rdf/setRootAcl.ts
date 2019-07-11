@@ -57,6 +57,7 @@ export async function setPublicAcl (storage: BlobTree, owner: URL, inboxUrl: URL
     `  a acl:Authorization;`,
     `  acl:agent foaf:Agent;`,
     `  acl:accessTo <./>;`,
+    `  acl:default <./>;`,
     `  acl:mode`,
     `    acl:${modeName}.`
   ].join('\n'))
