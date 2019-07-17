@@ -132,6 +132,9 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
   if (task.createdLocation) {
     responseHeaders['Location'] = task.createdLocation.toString()
   }
+  if (task.resultType === ResultType.AccessDenied) {
+    responseHeaders['WWW-Authenticate'] = `Bearer realm="${options.storageOrigin}", scope="openid webid"`
+  }
   if (task.resourceData) {
     debug('setting ETag')
     responseHeaders.ETag = `"${task.resourceData.etag}"`
