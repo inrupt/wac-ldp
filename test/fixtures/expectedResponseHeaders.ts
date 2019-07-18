@@ -1,4 +1,16 @@
 export function expectedResponseHeaders (options: any) {
+  const links = [
+    `<.acl>; rel="acl", <.meta>; rel="describedBy"`,
+    `<http://www.w3.org/ns/ldp#Resource>; rel="type"`
+  ]
+  if (options.isContainer) {
+    links.push('<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"')
+  }
+  links.push(`<${options.idp}>; rel="http://openid.net/specs/connect/1.0/issuer"`)
+  links.push(`<${(options.serviceOrigin || 'http://localhost:8080')}/.well-known/solid>; rel="service"`)
+  if (options.constrainedBy) {
+    links.push(`<${options.constrainedBy}>; rel="http://www.w3.org/ns/ldp#constrainedBy"`)
+  }
   let ret: any = {
     'Accept-Patch': 'application/sparql-update',
     'Accept-Post': 'application/sparql-update',
@@ -9,7 +21,7 @@ export function expectedResponseHeaders (options: any) {
     'Access-Control-Allow-Methods': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',
     'Content-Type': options.contentType || 'content/type',
-    'Link': `<.acl>; rel="acl", <.meta>; rel="describedBy", <http://www.w3.org/ns/ldp#Resource>; rel="type"; ${(options.isContainer ? '<http://www.w3.org/ns/ldp#BasicContainer>; rel="type"; ' : '')}<${options.idp}>; rel=\"http://openid.net/specs/connect/1.0/issuer\"; <${(options.serviceOrigin || 'http://localhost:8080')}/.well-known/solid>; rel="service"`,
+    'Link': links.join(', '),
     'Updates-Via': options.updatesVia,
     'Vary': 'Accept, Authorization, Origin',
     'X-Powered-By': 'inrupt pod-server (alpha)'
@@ -19,6 +31,9 @@ export function expectedResponseHeaders (options: any) {
   }
   if (options.location) {
     ret['Location'] = options.location
+  }
+  if (options.wwwAuthenticate) {
+    ret['WWW-Authenticate'] = 'Bearer realm="http://localhost:8080", scope="openid webid"'
   }
   return ret
 }

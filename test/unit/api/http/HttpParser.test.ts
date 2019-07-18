@@ -15,7 +15,7 @@ test('should parse a http request with Bearer token', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = new WacLdpTask('http://localhost:8080', request)
+  const parsed = new WacLdpTask('http://localhost:8080', request, false)
   expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual('the-bearer-token')
   expect(parsed.contentType()).toEqual(undefined)
@@ -43,7 +43,7 @@ test('should parse a http request with If-None-Match: * header', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = new WacLdpTask('http://localhost:8080', request)
+  const parsed = new WacLdpTask('http://localhost:8080', request, false)
   expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual(undefined)
   expect(parsed.contentType()).toEqual(undefined)
@@ -71,7 +71,7 @@ test('should parse a http request with If-None-Match: [list] header', async () =
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = new WacLdpTask('http://localhost:8080', request)
+  const parsed = new WacLdpTask('http://localhost:8080', request, false)
   expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual(undefined)
   expect(parsed.contentType()).toEqual(undefined)
@@ -99,7 +99,7 @@ test('should parse a http request with If-Match header', async () => {
   request.method = 'DELETE'
   request = request as http.IncomingMessage
 
-  const parsed = new WacLdpTask('http://localhost:8080', request)
+  const parsed = new WacLdpTask('http://localhost:8080', request, false)
   expect(parsed.rdfType()).toEqual(RdfType.NoPref)
   expect(parsed.bearerToken()).toEqual(undefined)
   expect(parsed.contentType()).toEqual(undefined)

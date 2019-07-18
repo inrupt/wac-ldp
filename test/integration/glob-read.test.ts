@@ -25,7 +25,7 @@ beforeEach(async () => {
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/ldp-rs2.ttl'))).setData(ldpRs2Data)
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false, 'localhost:8443')
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('ws://localhost:8080'), false, 'localhost:8443', false)
 
 test('handles a GET /* request (glob read)', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge.ttl').toString()
@@ -71,7 +71,7 @@ test('handles a GET /* request (glob read)', async () => {
         contentType: 'text/turtle',
         etag: 'TmBqjXO24ygE+uQdtQuiOA==',
         isContainer: true,
-        updatesVia: 'wss://localhost:8080/'
+        updatesVia: 'ws://localhost:8080/'
       })
     ]
   ])

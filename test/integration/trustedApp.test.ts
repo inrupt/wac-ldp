@@ -13,7 +13,7 @@ let storage: BlobTree
 let handler: any
 beforeEach(() => {
   storage = new BlobTreeInMem()
-  handler = makeHandler(storage, 'https://jackson.solid.community', new URL('wss://jackson.solid.community/'), false, 'localhost:8443')
+  handler = makeHandler(storage, 'https://jackson.solid.community', new URL('wss://jackson.solid.community/'), false, 'localhost:8443', true)
   MockDate.set(1434319925275)
 })
 afterEach(() => {
@@ -31,6 +31,7 @@ test('handles a PUT request by a trusted app', async () => {
   const { bearerToken } = getBearerToken(true)
   httpReq.headers = {
     'content-type': 'text/plain',
+    'if-none-match': '*',
     'authorization': 'Bearer ' + bearerToken
   } as http.IncomingHttpHeaders
   httpReq.url = '/foo/bar' as string

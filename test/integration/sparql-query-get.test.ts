@@ -21,7 +21,7 @@ beforeEach(async () => {
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/foo/ldp-rs1.ttl'))).setData(ldpRs1Data)
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false, 'localhost:8443')
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('ws://localhost:8080'), false, 'localhost:8443', false)
 
 test('handles a SPARQL query in the GET query parameter', async () => {
   const sparqlQuery = fs.readFileSync('test/fixtures/get-query.sparql').toString()
@@ -67,7 +67,7 @@ test('handles a SPARQL query in the GET query parameter', async () => {
         contentType: 'application/sparql+json',
         etag: 'fTeBCZUGRxPpeUUf4DpHFg==',
         isContainer: false,
-        updatesVia: 'wss://localhost:8080/'
+        updatesVia: 'ws://localhost:8080/'
       })
     ]
   ])

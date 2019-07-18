@@ -18,7 +18,7 @@ beforeEach(async () => {
   await storage.getBlob(urlToPath(new URL('http://localhost:8080/public/ldp-rs1.ttl'))).setData(ldpRs1Data)
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080/'), false, 'localhost:8443')
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('ws://localhost:8080/'), false, 'localhost:8443', false)
 
 test.skip('handles an append-only PATCH request with Write permissions', async () => {
   const expectedTurtle = fs.readFileSync('test/fixtures/ldpRs1-2-merge-alt.ttl').toString()
