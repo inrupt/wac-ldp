@@ -16,10 +16,6 @@ export interface OriginCheckTask {
   resourceOwners: Array<URL>
 }
 
-export async function setAppModes (webId: URL, origin: string, modes: Array<URL>, rdfLayer: RdfLayer): Promise<void> {
-  throw new Error('to do: implement!')
-}
-
 export async function getAppModes (webId: URL, origin: string, rdfLayer: RdfLayer): Promise<Array<URL>> {
   // TODO: move this cache into a decorator pattern, see #81
   debug('checkOwnerProfile', webId.toString(), origin)

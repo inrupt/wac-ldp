@@ -17,7 +17,8 @@ import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
 import { checkAccess, determineRequiredAccessModes, AccessCheckTask } from './checkAccess'
-import { getAppModes, setAppModes } from '../auth/appIsTrustedForMode'
+import { getAppModes } from '../auth/appIsTrustedForMode'
+import { setAppModes } from '../rdf/setAppModes'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -143,7 +144,7 @@ export class WacLdp extends EventEmitter {
     return getAppModes(webId, origin, this.rdfLayer)
   }
   setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>) {
-    return setAppModes(webId, origin, modes, this.rdfLayer)
+    return setAppModes(webId, origin, modes, this.rdfLayer.storage)
   }
   async hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean> {
     debug('hasAccess calls checkAccess', {
