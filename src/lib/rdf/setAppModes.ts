@@ -7,7 +7,7 @@ import { ACL } from './rdf-constants'
 const debug = Debug('setAppModes')
 
 export async function setAppModes (webId: URL, origin: string, modes: Array<URL>, storage: BlobTree): Promise<void> {
-  debug(`Registering app (${origin}) with accessModes ${modes.map(url => url.toString()).join(', ')} for webId ${webId}`)
+  debug(`Registering app (${origin}) with accessModes ${modes.map(url => url.toString()).join(', ')} for webId ${webId.toString()}`)
   const blob = storage.getBlob(urlToPath(webId))
   const stream = await blob.getData()
   debug('stream', typeof stream)
@@ -31,12 +31,12 @@ export async function setAppModes (webId: URL, origin: string, modes: Array<URL>
 
   // add new triples
   const application = new rdflib.BlankNode()
-  store.add(rdflib.sym(webId), ACL['trustedApp'], application, webId)
-  store.add(application, ACL['origin'], origin, webId)
+  store.add(rdflib.sym(webId.toString()), ACL['trustedApp'], application, webId.toString())
+  store.add(application, ACL['origin'], origin, webId.toString())
 
   modes.forEach(mode => {
     store.add(application, ACL['mode'], mode)
   })
-  const turtleDoc: string = rdflib.serialize(undefined, store, webId, 'text/turtle')
+  const turtleDoc: string = rdflib.serialize(undefined, store, webId.toString(), 'text/turtle')
   await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
 }

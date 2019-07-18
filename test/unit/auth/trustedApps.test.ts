@@ -50,7 +50,7 @@ test('getTrustedAppModes', async () => {
   ]))
 })
 
-test.only('setTrustedAppModes existing', async () => {
+test('setTrustedAppModes existing', async () => {
   const storage: unknown = {
     getBlob: jest.fn(() => {
       return {
@@ -73,9 +73,44 @@ test.only('setTrustedAppModes existing', async () => {
     new URL('http://www.w3.org/ns/auth/acl#Control')
   ]
   await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', modes, storage as BlobTree)
-  expect(modes).toEqual([
+  const newModes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', new RdfLayer('https://michielbdejong.com', storage as BlobTree))
+
+  expect(newModes).toEqual([
     'http://www.w3.org/ns/auth/acl#Append',
     'http://www.w3.org/ns/auth/acl#Read',
-    'http://www.w3.org/ns/auth/acl#Write'
+    'http://www.w3.org/ns/auth/acl#Write',
+    'http://www.w3.org/ns/auth/acl#Control'
+  ])
+})
+
+test.only('setTrustedAppModes new', async () => {
+  const storage: unknown = {
+    getBlob: jest.fn(() => {
+      return {
+        getData () {
+          return new Promise((resolve, reject) => {
+            fs.readFile(OWNER_PROFILE_FIXTURE, (err, data) => {
+              if (err) {
+                reject('fixture error')
+              }
+              resolve(objectToStream(makeResourceData('text/turtle', data.toString())))
+            })
+          })
+        },
+        setData: jest.fn(() => Promise.resolve())
+      }
+    })
+  }
+  const modes = [
+    new URL('http://www.w3.org/ns/auth/acl#Append'),
+    new URL('http://www.w3.org/ns/auth/acl#Control')
+  ]
+  await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://other.com', modes, storage as BlobTree)
+  const newModes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://other.com', new RdfLayer('https://michielbdejong.com', storage as BlobTree))
+  expect(newModes).toEqual([
+    'http://www.w3.org/ns/auth/acl#Append',
+    'http://www.w3.org/ns/auth/acl#Read',
+    'http://www.w3.org/ns/auth/acl#Write',
+    'http://www.w3.org/ns/auth/acl#Control'
   ])
 })
