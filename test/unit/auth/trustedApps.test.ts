@@ -6,7 +6,7 @@ import { setAppModes } from '../../../src/lib/rdf/setAppModes'
 import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
 import { BlobTree } from '../../../src/lib/storage/BlobTree'
-import { objectToStream, makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
+import { objectToStream, makeResourceData, streamToObject } from '../../../src/lib/rdf/ResourceDataUtils'
 
 const OWNER_PROFILE_FIXTURE = 'test/fixtures/owner-profile.ttl'
 
@@ -50,7 +50,8 @@ test('getTrustedAppModes', async () => {
   ]))
 })
 
-test('setTrustedAppModes existing', async () => {
+test.only('setTrustedAppModes existing', async () => {
+  let stored
   const storage: unknown = {
     getBlob: jest.fn(() => {
       return {
@@ -64,7 +65,9 @@ test('setTrustedAppModes existing', async () => {
             })
           })
         },
-        setData: jest.fn(() => Promise.resolve())
+        setData: async (stream: ReadableStream) => {
+          stored = await streamToObject(stream)
+        }
       }
     })
   }
@@ -73,17 +76,27 @@ test('setTrustedAppModes existing', async () => {
     new URL('http://www.w3.org/ns/auth/acl#Control')
   ]
   await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', modes, storage as BlobTree)
-  const newModes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', new RdfLayer('https://michielbdejong.com', storage as BlobTree))
 
-  expect(newModes).toEqual([
-    'http://www.w3.org/ns/auth/acl#Append',
-    'http://www.w3.org/ns/auth/acl#Read',
-    'http://www.w3.org/ns/auth/acl#Write',
-    'http://www.w3.org/ns/auth/acl#Control'
-  ])
+  expect(stored).toEqual({
+    body: `@prefix : <#>.\
+@prefix acl: <http://www.w3.org/ns/auth/acl#>.\
+@prefix c: <card#>.\
+\
+c:me\
+ true acl:trustedApp\
+   [ true true, "https://pheyvaer.github.io" ]\
+     [\
+     acl:mode acl:Append, acl:Read, acl:Write;\
+         acl:origin <https://pheyvaer.github.io>\
+         ].\
+`,
+    contentType: 'text/turtle',
+    etag: 'NnPOSx3f/o1fEo6jyStQAQ==',
+    rdfType: 1
+  })
 })
 
-test.only('setTrustedAppModes new', async () => {
+test('setTrustedAppModes new', async () => {
   const storage: unknown = {
     getBlob: jest.fn(() => {
       return {
