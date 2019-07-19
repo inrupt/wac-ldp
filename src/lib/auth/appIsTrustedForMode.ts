@@ -16,6 +16,8 @@ export interface OriginCheckTask {
   resourceOwners: Array<URL>
 }
 
+// FIXME: It's weird that setAppModes is in the RDF module, but getAppModes is in the auth module.
+
 export async function getAppModes (webId: URL, origin: string, rdfLayer: RdfLayer): Promise<Array<URL>> {
   // TODO: move this cache into a decorator pattern, see #81
   debug('checkOwnerProfile', webId.toString(), origin)

@@ -50,7 +50,7 @@ test('getTrustedAppModes', async () => {
   ]))
 })
 
-test.only('setTrustedAppModes existing', async () => {
+test('setTrustedAppModes existing', async () => {
   let stored
   const storage: unknown = {
     getBlob: jest.fn(() => {
@@ -78,25 +78,26 @@ test.only('setTrustedAppModes existing', async () => {
   await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', modes, storage as BlobTree)
 
   expect(stored).toEqual({
-    body: `@prefix : <#>.\
-@prefix acl: <http://www.w3.org/ns/auth/acl#>.\
-@prefix c: <card#>.\
-\
-c:me\
- true acl:trustedApp\
-   [ true true, "https://pheyvaer.github.io" ]\
-     [\
-     acl:mode acl:Append, acl:Read, acl:Write;\
-         acl:origin <https://pheyvaer.github.io>\
-         ].\
-`,
+    body: [
+      '@prefix : <#>.',
+      '@prefix acl: <http://www.w3.org/ns/auth/acl#>.',
+      '@prefix c: <card#>.',
+      '',
+      'c:me',
+      '    acl:trustedApp',
+      '            [',
+      '                acl:mode acl:Append, acl:Control;',
+      '                acl:origin <https://pheyvaer.github.io>',
+      '            ].'
+    ].join('\n') + '\n',
     contentType: 'text/turtle',
-    etag: 'NnPOSx3f/o1fEo6jyStQAQ==',
+    etag: 'uqaW7He/rsiuCtTTVMxI2w==',
     rdfType: 1
   })
 })
 
-test('setTrustedAppModes new', async () => {
+test.only('setTrustedAppModes new', async () => {
+  let stored
   const storage: unknown = {
     getBlob: jest.fn(() => {
       return {
@@ -110,7 +111,9 @@ test('setTrustedAppModes new', async () => {
             })
           })
         },
-        setData: jest.fn(() => Promise.resolve())
+        setData: async (stream: ReadableStream) => {
+          stored = await streamToObject(stream)
+        }
       }
     })
   }
@@ -119,11 +122,22 @@ test('setTrustedAppModes new', async () => {
     new URL('http://www.w3.org/ns/auth/acl#Control')
   ]
   await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://other.com', modes, storage as BlobTree)
-  const newModes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://other.com', new RdfLayer('https://michielbdejong.com', storage as BlobTree))
-  expect(newModes).toEqual([
-    'http://www.w3.org/ns/auth/acl#Append',
-    'http://www.w3.org/ns/auth/acl#Read',
-    'http://www.w3.org/ns/auth/acl#Write',
-    'http://www.w3.org/ns/auth/acl#Control'
-  ])
+  expect(stored).toEqual({
+    body: [
+      '@prefix : <#>.',
+      '@prefix acl: <http://www.w3.org/ns/auth/acl#>.',
+      '@prefix c: <card#>.',
+      '',
+      'c:me',
+      '    acl:trustedApp',
+      '        [ acl:mode acl:Append, acl:Control; acl:origin <https://other.com> ],',
+      '            [',
+      '                acl:mode acl:Append, acl:Read, acl:Write;',
+      '                acl:origin <https://pheyvaer.github.io>',
+      '            ].'
+    ].join('\n') + '\n',
+    contentType: 'text/turtle',
+    etag: 'ZnizD9weXrPTANC1tjW/ow==',
+    rdfType: 1
+  })
 })

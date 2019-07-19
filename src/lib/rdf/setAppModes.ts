@@ -24,19 +24,26 @@ export async function setAppModes (webId: URL, origin: string, modes: Array<URL>
 
   const originSym = rdflib.sym(origin)
   // remove existing statements on same origin - if it exists
-  store.statementsMatching(null, ACL['origin'], origin).forEach((st: any) => {
-    store.removeStatements([...store.statementsMatching(null, ACL['trustedApp'], st.subject)])
+  debug('finding statements about ', origin)
+  store.statementsMatching(null, rdflib.sym(ACL['origin'].toString()), originSym).forEach((st: any) => {
+    debug('found', st)
+    debug('removing trustedApp statements with object ', st.subject)
+    store.removeStatements([...store.statementsMatching(null, rdflib.sym(ACL['trustedApp'].toString()), st.subject)])
+    debug('removing statements with subject ', st.subject)
     store.removeStatements([...store.statementsMatching(st.subject)])
   })
+  debug('after removing', store.toNT())
 
   // add new triples
   const application = new rdflib.BlankNode()
-  store.add(rdflib.sym(webId.toString()), ACL['trustedApp'], application, webId.toString())
-  store.add(application, ACL['origin'], origin, webId.toString())
+  store.add(rdflib.sym(webId.toString()), rdflib.sym(ACL['trustedApp'].toString()), application, rdflib.sym(webId.toString()))
+  store.add(application, rdflib.sym(ACL['origin'].toString()), originSym, rdflib.sym(webId.toString()))
 
   modes.forEach(mode => {
-    store.add(application, ACL['mode'], mode)
+    debug('adding', application, ACL['mode'], mode)
+    store.add(application, rdflib.sym(ACL['mode'].toString()), rdflib.sym(mode.toString()))
   })
+  debug('after patch', store.toNT())
   const turtleDoc: string = rdflib.serialize(undefined, store, webId.toString(), 'text/turtle')
   await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
 }
