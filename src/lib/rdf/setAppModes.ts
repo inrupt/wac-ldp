@@ -6,6 +6,8 @@ import { ACL } from './rdf-constants'
 
 const debug = Debug('setAppModes')
 
+// FIXME: It's weird that setAppModes is in the RDF module, but getAppModes is in the auth module.
+
 export async function setAppModes (webId: URL, origin: string, modes: Array<URL>, storage: BlobTree): Promise<void> {
   debug(`Registering app (${origin}) with accessModes ${modes.map(url => url.toString()).join(', ')} for webId ${webId.toString()}`)
   const blob = storage.getBlob(urlToPath(webId))

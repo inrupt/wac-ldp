@@ -96,7 +96,7 @@ test('setTrustedAppModes existing', async () => {
   })
 })
 
-test.only('setTrustedAppModes new', async () => {
+test('setTrustedAppModes new', async () => {
   let stored
   const storage: unknown = {
     getBlob: jest.fn(() => {
