@@ -83,5 +83,6 @@ export async function streamToBuffer (stream: any): Promise<Buffer> {
 export async function streamToObject (stream: any): Promise<any> {
   const buffer = await streamToBuffer(stream)
   const str = buffer.toString()
+  debug(str)
   return JSON.parse(str)
 }

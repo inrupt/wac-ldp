@@ -17,7 +17,7 @@ beforeEach(async () => {
   // Which says origin https://pheyvaer.github.io is trusted by owner https://michielbdejong.com/profile/card#me
 })
 
-const handler = makeHandler(storage, 'http://localhost:8080', new URL('wss://localhost:8080'), false, 'localhost:8443')
+const handler = makeHandler(storage, 'http://localhost:8080', new URL('ws://localhost:8080'), false, 'localhost:8443', false)
 
 test('handles a GET request for a public resource', async () => {
   let streamed = false
@@ -40,8 +40,9 @@ test('handles a GET request for a public resource', async () => {
       expectedResponseHeaders({
         originToAllow: 'https://pheyvaer.github.io',
         contentType: 'text/plain',
-        updatesVia: 'wss://localhost:8080/',
-        idp: 'https://localhost:8443'
+        updatesVia: 'ws://localhost:8080/',
+        idp: 'https://localhost:8443',
+        constrainedBy: 'http://www.w3.org/ns/ldp#constrainedBy-not-found'
       })
     ]
   ])
@@ -71,8 +72,10 @@ test('handles a GET request for a private resource', async () => {
       expectedResponseHeaders({
         originToAllow: 'https://pheyvaer.github.io',
         contentType: 'text/plain',
-        updatesVia: 'wss://localhost:8080/',
-        idp: 'https://localhost:8443'
+        updatesVia: 'ws://localhost:8080/',
+        idp: 'https://localhost:8443',
+        wwwAuthenticate: 'http://localhost:8080',
+        constrainedBy: 'http://www.w3.org/ns/ldp#constrainedBy-wac'
       })
     ]
   ])
@@ -103,8 +106,9 @@ test('sets bearerToken in Updates-Via', async () => {
       expectedResponseHeaders({
         originToAllow: 'https://pheyvaer.github.io',
         contentType: 'text/plain',
-        updatesVia: 'wss://localhost:8080/?bearer_token=some-bearer-token',
-        idp: 'https://localhost:8443'
+        updatesVia: 'ws://localhost:8080/?bearer_token=some-bearer-token',
+        idp: 'https://localhost:8443',
+        constrainedBy: 'http://www.w3.org/ns/ldp#constrainedBy-not-found'
       })
     ]
   ])

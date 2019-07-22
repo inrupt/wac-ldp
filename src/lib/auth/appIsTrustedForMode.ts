@@ -16,14 +16,16 @@ export interface OriginCheckTask {
   resourceOwners: Array<URL>
 }
 
-async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLayer: RdfLayer): Promise<boolean> {
+// FIXME: It's weird that setAppModes is in the RDF module, but getAppModes is in the auth module.
+
+export async function getAppModes (webId: URL, origin: string, rdfLayer: RdfLayer): Promise<Array<URL>> {
   // TODO: move this cache into a decorator pattern, see #81
-  debug('checkOwnerProfile', webId.toString(), origin, mode.toString())
+  debug('checkOwnerProfile', webId.toString(), origin)
   if (!ownerProfilesCache[webId.toString()]) {
     debug('cache miss', webId.toString())
     ownerProfilesCache[webId.toString()] = await rdfLayer.fetchGraph(webId)
     if (!ownerProfilesCache[webId.toString()]) {
-      return Promise.resolve(false)
+      return Promise.resolve([])
     }
   }
   const quads: Array<any> = []
@@ -37,25 +39,25 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLaye
   }
   interface AppNode {
     originMatches?: boolean
-    modeMatches?: boolean
+    modes: Array<URL>
     webIdMatches?: boolean
   }
   const appNodes: { [indexer: string]: AppNode } = {}
   function ensure (str: string) {
     if (!appNodes[str]) {
-      appNodes[str] = {}
+      appNodes[str] = {
+        modes: []
+      }
     }
   }
-  debug('looking for quads:', webId.toString(), origin, mode.toString())
+  debug('looking for quads:', webId.toString(), origin)
   quads.forEach((quad: any): void => {
     debug('considering quad', quad)
     switch (quad.predicate.value) {
       case ACL.mode.toString():
-        debug('mode predicate!', quad.predicate.value, mode.toString())
-        if (mode.toString() === quad.object.value) {
-          ensure(quad.subject.value)
-          appNodes[quad.subject.value].modeMatches = true
-        }
+        debug('mode predicate!', quad.predicate.value)
+        ensure(quad.subject.value)
+        appNodes[quad.subject.value].modes.push(new URL(quad.object.value))
         break
       case ACL.origin.toString():
         debug('origin predicate!', quad.predicate.value, origin)
@@ -76,16 +78,23 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLaye
     }
   })
   debug('appNodes', appNodes)
-  let found = false
-  Object.keys(appNodes).map(nodeName => {
+  for (let nodeName of Object.keys(appNodes)) {
     debug('considering', nodeName, appNodes[nodeName])
-    if (appNodes[nodeName].webIdMatches && appNodes[nodeName].originMatches && appNodes[nodeName].modeMatches) {
-      debug('found')
-      found = true
+    if (appNodes[nodeName].webIdMatches && appNodes[nodeName].originMatches) {
+      return appNodes[nodeName].modes
     }
-  })
-  debug('returning', found)
-  return found
+  }
+  return []
+}
+async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLayer: RdfLayer): Promise<boolean> {
+  const appModes = await getAppModes(webId, origin, rdfLayer)
+  for (let i = 0; i < appModes.length; i++) {
+    if (appModes[i].toString() === mode.toString()) {
+      return true
+    }
+  }
+  debug('returning false')
+  return false
 }
 
 export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: RdfLayer): Promise<boolean> {

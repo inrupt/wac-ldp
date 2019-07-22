@@ -1,9 +1,14 @@
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
-import { appIsTrustedForMode, OriginCheckTask } from '../../../src/lib/auth/appIsTrustedForMode'
+import { appIsTrustedForMode, OriginCheckTask, getAppModes } from '../../../src/lib/auth/appIsTrustedForMode'
+import { setAppModes } from '../../../src/lib/rdf/setAppModes'
 import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
+import { BlobTree } from '../../../src/lib/storage/BlobTree'
+import { objectToStream, makeResourceData, streamToObject } from '../../../src/lib/rdf/ResourceDataUtils'
+
+const OWNER_PROFILE_FIXTURE = 'test/fixtures/owner-profile.ttl'
 
 function readFixture (filename: string): Promise<any> {
   const bodyStream = fs.createReadStream(filename)
@@ -23,9 +28,116 @@ test('finds acl:trustedApps nodes and their modes for a given owners list', asyn
 
   const rdfLayer: unknown = {
     fetchGraph: jest.fn(() => {
-      return readFixture('test/fixtures/owner-profile.ttl')
+      return readFixture(OWNER_PROFILE_FIXTURE)
     })
   }
   const result = await appIsTrustedForMode(task, rdfLayer as RdfLayer)
   expect(result).toEqual(true)
+})
+
+test('getTrustedAppModes', async () => {
+  const rdfLayer: unknown = {
+    fetchGraph: jest.fn(() => {
+      return readFixture('test/fixtures/owner-profile.ttl')
+    })
+  }
+  const modes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', rdfLayer as RdfLayer)
+
+  expect(JSON.stringify(modes)).toEqual(JSON.stringify([
+    new URL('http://www.w3.org/ns/auth/acl#Append'),
+    new URL('http://www.w3.org/ns/auth/acl#Read'),
+    new URL('http://www.w3.org/ns/auth/acl#Write')
+  ]))
+})
+
+test('setTrustedAppModes existing', async () => {
+  let stored
+  const storage: unknown = {
+    getBlob: jest.fn(() => {
+      return {
+        getData () {
+          return new Promise((resolve, reject) => {
+            fs.readFile(OWNER_PROFILE_FIXTURE, (err, data) => {
+              if (err) {
+                reject('fixture error')
+              }
+              resolve(objectToStream(makeResourceData('text/turtle', data.toString())))
+            })
+          })
+        },
+        setData: async (stream: ReadableStream) => {
+          stored = await streamToObject(stream)
+        }
+      }
+    })
+  }
+  const modes = [
+    new URL('http://www.w3.org/ns/auth/acl#Append'),
+    new URL('http://www.w3.org/ns/auth/acl#Control')
+  ]
+  await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', modes, storage as BlobTree)
+
+  expect(stored).toEqual({
+    body: [
+      '@prefix : <#>.',
+      '@prefix acl: <http://www.w3.org/ns/auth/acl#>.',
+      '@prefix c: <card#>.',
+      '',
+      'c:me',
+      '    acl:trustedApp',
+      '            [',
+      '                acl:mode acl:Append, acl:Control;',
+      '                acl:origin <https://pheyvaer.github.io>',
+      '            ].'
+    ].join('\n') + '\n',
+    contentType: 'text/turtle',
+    etag: 'uqaW7He/rsiuCtTTVMxI2w==',
+    rdfType: 1
+  })
+})
+
+test('setTrustedAppModes new', async () => {
+  let stored
+  const storage: unknown = {
+    getBlob: jest.fn(() => {
+      return {
+        getData () {
+          return new Promise((resolve, reject) => {
+            fs.readFile(OWNER_PROFILE_FIXTURE, (err, data) => {
+              if (err) {
+                reject('fixture error')
+              }
+              resolve(objectToStream(makeResourceData('text/turtle', data.toString())))
+            })
+          })
+        },
+        setData: async (stream: ReadableStream) => {
+          stored = await streamToObject(stream)
+        }
+      }
+    })
+  }
+  const modes = [
+    new URL('http://www.w3.org/ns/auth/acl#Append'),
+    new URL('http://www.w3.org/ns/auth/acl#Control')
+  ]
+  await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://other.com', modes, storage as BlobTree)
+  expect(stored).toEqual({
+    body: [
+      '@prefix : <#>.',
+      '@prefix acl: <http://www.w3.org/ns/auth/acl#>.',
+      '@prefix c: <card#>.',
+      '',
+      'c:me',
+      '    acl:trustedApp',
+      '        [ acl:mode acl:Append, acl:Control; acl:origin <https://other.com> ],',
+      '            [',
+      '                acl:mode acl:Append, acl:Read, acl:Write;',
+      '                acl:origin <https://pheyvaer.github.io>',
+      '            ].'
+    ].join('\n') + '\n',
+    contentType: 'text/turtle',
+    etag: 'ZnizD9weXrPTANC1tjW/ow==',
+    rdfType: 1
+  })
 })
