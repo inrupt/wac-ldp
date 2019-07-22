@@ -66,8 +66,8 @@ export class RdfLayer {
     this.serverRootDomain = serverRootDomain
     this.storage = storage
   }
-  setRootAcl (storageOrigin: URL, owner: URL) {
-    return setRootAcl(this.storage, owner, storageOrigin)
+  setRootAcl (storageRoot: URL, owner: URL) {
+    return setRootAcl(this.storage, owner, storageRoot)
   }
   setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
     return setPublicAcl(this.storage, owner, inboxUrl, modeName)

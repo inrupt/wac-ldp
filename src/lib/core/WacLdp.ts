@@ -65,8 +65,8 @@ export class WacLdp extends EventEmitter {
       unknownOperationCatchAll
     ]
   }
-  setRootAcl (storageOrigin: URL, owner: URL) {
-    return this.rdfLayer.setRootAcl(storageOrigin, owner)
+  setRootAcl (storageRoot: URL, owner: URL) {
+    return this.rdfLayer.setRootAcl(storageRoot, owner)
   }
   setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
     return this.rdfLayer.setPublicAcl(inboxUrl, owner, modeName)
