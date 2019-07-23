@@ -1,6 +1,6 @@
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../core/checkAccess'
+import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../auth/checkAccess'
 
 import Debug from 'debug'
 

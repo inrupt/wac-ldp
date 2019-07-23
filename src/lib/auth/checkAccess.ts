@@ -1,6 +1,6 @@
 
-import { OriginCheckTask, appIsTrustedForMode } from '../auth/appIsTrustedForMode'
-import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from '../auth/determineAllowedAgentsForModes'
+import { OriginCheckTask, appIsTrustedForMode } from './appIsTrustedForMode'
+import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from './determineAllowedAgentsForModes'
 import { ACL } from '../rdf/rdf-constants'
 import Debug from 'debug'
 import { TaskType } from '../api/http/HttpParser'
