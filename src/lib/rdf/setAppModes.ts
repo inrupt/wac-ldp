@@ -11,7 +11,7 @@ const debug = Debug('setAppModes')
 
 export async function setAppModes (webId: URL, origin: string, modes: Array<URL>, storage: QuadAndBlobStore): Promise<void> {
   debug(`Registering app (${origin}) with accessModes ${modes.map(url => url.toString()).join(', ')} for webId ${webId.toString()}`)
-  const blob = storage.getBlob(urlToPath(webId))
+  const blob = storage.getBlob(webId)
   const stream = await blob.getData()
   debug('stream', typeof stream)
   let resourceData

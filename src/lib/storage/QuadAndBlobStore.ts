@@ -1,5 +1,5 @@
 import Debug from 'debug'
-import { BlobTree, Path, urlToPath } from './BlobTree'
+import { BlobTree, urlToPath, Path } from './BlobTree'
 import { Member } from './Container'
 import { membersListAsQuadStream } from '../rdf/membersListAsResourceData'
 import { quadStreamFromBlob } from '../rdf/RdfLayer'
@@ -13,11 +13,14 @@ export class QuadAndBlobStore {
   constructor (storage: BlobTree) {
     this.storage = storage
   }
-  getBlob (path: Path) {
+  getBlob (url: URL) {
+    return this.storage.getBlob(urlToPath(url))
+  }
+  getBlobAtPath (path: Path) {
     return this.storage.getBlob(path)
   }
-  getContainer (path: Path) {
-    return this.storage.getContainer(path)
+  getContainer (url: URL) {
+    return this.storage.getContainer(urlToPath(url))
   }
   async getQuadStream (url: URL, preferMinimalContainer?: boolean): Promise<any> {
     const path = urlToPath(url)

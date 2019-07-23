@@ -26,7 +26,7 @@ export async function setRootAcl (storage: QuadAndBlobStore, owner: URL, storage
     `    acl:Read, acl:Write, acl:Control.`
   ].join('\n'))
   const buffer = Buffer.from(JSON.stringify(obj))
-  const blob = storage.getBlob(urlToPath(rootAclUrl))
+  const blob = storage.getBlob(rootAclUrl)
   await blob.setData(bufferToStream(buffer))
 }
 
@@ -63,6 +63,6 @@ export async function setPublicAcl (storage: QuadAndBlobStore, owner: URL, inbox
     `    acl:${modeName}.`
   ].join('\n'))
   const buffer = Buffer.from(JSON.stringify(obj))
-  const blob = storage.getBlob(urlToPath(inboxAclUrl))
+  const blob = storage.getBlob(inboxAclUrl)
   await blob.setData(bufferToStream(buffer))
 }

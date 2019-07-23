@@ -79,12 +79,10 @@ export class RdfLayer {
     return setPublicAcl(this.storage, owner, inboxUrl, modeName)
   }
   getLocalBlob (url: URL): Blob {
-    const path: Path = urlToPath(url)
-    return this.storage.getBlob(path)
+    return this.storage.getBlob(url)
   }
   getLocalContainer (url: URL): Container {
-    const path: Path = urlToPath(url)
-    return this.storage.getContainer(path)
+    return this.storage.getContainer(url)
   }
   async fetchGraph (url: URL) {
     if (url.host.endsWith(this.serverRootDomain)) {
@@ -149,7 +147,7 @@ export class RdfLayer {
     let aclDocPath = (resourcePath.isContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
     debug('aclDocPath from resourcePath', resourcePath, aclDocPath)
     let isAdjacent = true
-    let currentGuessBlob = this.storage.getBlob(aclDocPath)
+    let currentGuessBlob = this.storage.getBlobAtPath(aclDocPath)
     let currentGuessBlobExists = await currentGuessBlob.exists()
     debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
     while (!currentGuessBlobExists) {
@@ -161,7 +159,7 @@ export class RdfLayer {
       isAdjacent = false
       currentIsContainer = true
       aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
-      currentGuessBlob = this.storage.getBlob(aclDocPath)
+      currentGuessBlob = this.storage.getBlobAtPath(aclDocPath)
       currentGuessBlobExists = await currentGuessBlob.exists()
       debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
     }
