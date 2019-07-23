@@ -4,6 +4,7 @@ import { urlToPath } from '../storage/BlobTree'
 import { streamToObject, ResourceData, objectToStream, makeResourceData } from './ResourceDataUtils'
 import { ACL } from './rdf-constants'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
+import * as url from 'url'
 
 const debug = Debug('setAppModes')
 
@@ -11,7 +12,8 @@ const debug = Debug('setAppModes')
 
 export async function setAppModes (webId: URL, origin: string, modes: Array<URL>, storage: QuadAndBlobStore): Promise<void> {
   debug(`Registering app (${origin}) with accessModes ${modes.map(url => url.toString()).join(', ')} for webId ${webId.toString()}`)
-  const blob = storage.getBlob(webId)
+  const webIdDocUrl = new URL(url.format(webId, { fragment: false }))
+  const blob = storage.getBlob(webIdDocUrl)
   const stream = await blob.getData()
   debug('stream', typeof stream)
   let resourceData
