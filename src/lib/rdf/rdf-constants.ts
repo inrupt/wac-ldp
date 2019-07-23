@@ -1,3 +1,4 @@
+export { ACL } from './generated-vocab'
 const PREFIX = {
   ACL: 'http://www.w3.org/ns/auth/acl#',
   FOAF: 'http://xmlns.com/foaf/0.1/',
@@ -6,27 +7,27 @@ const PREFIX = {
   VCARD: 'http://www.w3.org/2006/vcard/ns#'
 }
 
-export const ACL = {
-  AuthenticatedAgent: new URL(PREFIX.ACL + 'AuthenticatedAgent'),
-  Authorization: new URL(PREFIX.ACL + 'Authorization'),
+// export const ACL = {
+//   AuthenticatedAgent: new URL(PREFIX.ACL + 'AuthenticatedAgent'),
+//   Authorization: new URL(PREFIX.ACL + 'Authorization'),
 
-  Read: new URL(PREFIX.ACL + 'Read'),
-  Write: new URL(PREFIX.ACL + 'Write'),
-  Control: new URL(PREFIX.ACL + 'Control'),
-  Append: new URL(PREFIX.ACL + 'Append'),
+//   Read: new URL(PREFIX.ACL + 'Read'),
+//   Write: new URL(PREFIX.ACL + 'Write'),
+//   Control: new URL(PREFIX.ACL + 'Control'),
+//   Append: new URL(PREFIX.ACL + 'Append'),
 
-  accessTo: new URL(PREFIX.ACL + 'accessTo'),
-  default: new URL(PREFIX.ACL + 'default'),
+//   accessTo: new URL(PREFIX.ACL + 'accessTo'),
+//   default: new URL(PREFIX.ACL + 'default'),
 
-  agent: new URL(PREFIX.ACL + 'agent'),
-  agentGroup: new URL(PREFIX.ACL + 'agentGroup'),
-  agentClass: new URL(PREFIX.ACL + 'agentClass'),
-  mode: new URL(PREFIX.ACL + 'mode'),
+//   agent: new URL(PREFIX.ACL + 'agent'),
+//   agentGroup: new URL(PREFIX.ACL + 'agentGroup'),
+//   agentClass: new URL(PREFIX.ACL + 'agentClass'),
+//   mode: new URL(PREFIX.ACL + 'mode'),
 
-  origin: new URL(PREFIX.ACL + 'origin'),
-  trustedApp: new URL(PREFIX.ACL + 'trustedApp')
+//   origin: new URL(PREFIX.ACL + 'origin'),
+//   trustedApp: new URL(PREFIX.ACL + 'trustedApp')
 
-}
+// }
 
 export const FOAF = {
   Agent: new URL(PREFIX.FOAF + 'Agent')
