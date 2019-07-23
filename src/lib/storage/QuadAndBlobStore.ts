@@ -16,6 +16,9 @@ export class QuadAndBlobStore {
   getBlob (path: Path) {
     return this.storage.getBlob(path)
   }
+  getContainer (path: Path) {
+    return this.storage.getContainer(path)
+  }
   async getQuadStream (url: URL, preferMinimalContainer?: boolean): Promise<any> {
     const path = urlToPath(url)
     if (path.isContainer) {
