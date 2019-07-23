@@ -6,12 +6,13 @@ import JsonLdParser from 'rdf-parser-jsonld'
 import convert from 'buffer-to-stream'
 import * as rdflib from 'rdflib'
 
-import { Path, BlobTree, urlToPath } from '../storage/BlobTree'
+import { Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
 import { setRootAcl, setPublicAcl } from './setRootAcl'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
+import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
 const debug = Debug('RdfLayer')
 
@@ -66,8 +67,8 @@ async function getGraphLocal (blob: Blob): Promise<any> {
 
 export class RdfLayer {
   serverRootDomain: string
-  storage: BlobTree
-  constructor (serverRootDomain: string, storage: BlobTree) {
+  storage: QuadAndBlobStore
+  constructor (serverRootDomain: string, storage: QuadAndBlobStore) {
     this.serverRootDomain = serverRootDomain
     this.storage = storage
   }
@@ -80,14 +81,6 @@ export class RdfLayer {
   getLocalBlob (url: URL): Blob {
     const path: Path = urlToPath(url)
     return this.storage.getBlob(path)
-  }
-  getLocalContainer (url: URL): Container {
-    const path: Path = urlToPath(url)
-    return this.storage.getContainer(path)
-  }
-  localContainerExists (url: URL): Promise<boolean> {
-    const path: Path = urlToPath(url)
-    return this.storage.getContainer(path).exists()
   }
   async fetchGraph (url: URL) {
     if (url.host.endsWith(this.serverRootDomain)) {

@@ -3,12 +3,13 @@ import * as rdflib from 'rdflib'
 import { BlobTree, urlToPath } from '../storage/BlobTree'
 import { streamToObject, ResourceData, objectToStream, makeResourceData } from './ResourceDataUtils'
 import { ACL } from './rdf-constants'
+import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
 const debug = Debug('setAppModes')
 
 // FIXME: It's weird that setAppModes is in the RDF module, but getAppModes is in the auth module.
 
-export async function setAppModes (webId: URL, origin: string, modes: Array<URL>, storage: BlobTree): Promise<void> {
+export async function setAppModes (webId: URL, origin: string, modes: Array<URL>, storage: QuadAndBlobStore): Promise<void> {
   debug(`Registering app (${origin}) with accessModes ${modes.map(url => url.toString()).join(', ')} for webId ${webId.toString()}`)
   const blob = storage.getBlob(urlToPath(webId))
   const stream = await blob.getData()

@@ -1,6 +1,6 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { BlobTree } from '../storage/BlobTree'
+import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
@@ -19,6 +19,7 @@ import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationC
 import { checkAccess, determineRequiredAccessModes, AccessCheckTask } from './checkAccess'
 import { getAppModes } from '../auth/appIsTrustedForMode'
 import { setAppModes } from '../rdf/setAppModes'
+import { BlobTree } from '../storage/BlobTree'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -44,7 +45,7 @@ export class WacLdp extends EventEmitter {
   operationHandlers: Array<OperationHandler>
   idpHost: string
   usesHttps: boolean
-  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
+  constructor (storage: QuadAndBlobStore, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
     super()
     this.rdfLayer = new CachingRdfLayer(aud, storage)
     this.aud = aud
@@ -93,9 +94,6 @@ export class WacLdp extends EventEmitter {
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)
-  }
-  async containerExists (url: URL): Promise<boolean> {
-    return this.rdfLayer.localContainerExists(url)
   }
 
   async handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
@@ -171,7 +169,8 @@ export class WacLdp extends EventEmitter {
   }
 }
 
-export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
+export function makeHandler (blobTree: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
+  const storage = new QuadAndBlobStore(blobTree)
   const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac, idpHost, usesHttps)
   return wacLdp.handler.bind(wacLdp)
 }

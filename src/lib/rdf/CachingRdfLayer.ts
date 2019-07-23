@@ -1,6 +1,6 @@
 import { RdfLayer } from './RdfLayer'
 import { Blob } from '../storage/Blob'
-import { BlobTree } from '../storage/BlobTree'
+import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 import * as rdflib from 'rdflib'
 import Debug from 'debug'
 import { ResourceData, streamToObject } from './ResourceDataUtils'
@@ -15,7 +15,7 @@ export class CachingRdfLayer extends RdfLayer {
   graphs: { [url: string]: any }
   stores: { [url: string]: any }
   blobs: { [url: string]: Blob }
-  constructor (serverHost: string, storage: BlobTree) {
+  constructor (serverHost: string, storage: QuadAndBlobStore) {
     super(serverHost, storage)
     this.graphs = {}
     this.stores = {}
