@@ -42,7 +42,7 @@ function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
   return parser.import(bodyStream)
 }
 
-async function getGraphLocal (blob: Blob): Promise<any> {
+export async function quadStreamFromBlob (blob: Blob): Promise<any> {
   const stream = await blob.getData()
   debug('stream', typeof stream)
   let resourceData
@@ -56,6 +56,11 @@ async function getGraphLocal (blob: Blob): Promise<any> {
   const bodyStream = convert(Buffer.from(resourceData.body))
 
   const quadStream = readRdf(resourceData.rdfType, bodyStream)
+  return quadStream
+}
+
+async function getGraphLocal (blob: Blob): Promise<any> {
+  const quadStream = await quadStreamFromBlob(blob)
   return rdf.dataset().import(quadStream)
 }
 
