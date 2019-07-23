@@ -1,8 +1,7 @@
 import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
-import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../authorization/checkAccess'
+import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
 
@@ -10,11 +9,13 @@ import { streamToObject } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
+import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('read-container-handler')
 
 export const readContainerHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
+  requiredAccessModes: [ ACL.Read ],
   handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     let container: any
     container = rdfLayer.getLocalContainer(task.fullUrl())
