@@ -3,7 +3,7 @@ import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpRespond
 
 import Debug from 'debug'
 import { RdfLayer } from '../rdf/RdfLayer'
-import { AccessCheckTask, checkAccess, determineRequiredAccessModes } from '../auth/checkAccess'
+import { AccessCheckTask, checkAccess, determineRequiredAccessModes } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
 
