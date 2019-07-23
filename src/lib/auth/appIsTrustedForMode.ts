@@ -2,7 +2,6 @@
 import Debug from 'debug'
 import { ACL, RDF } from '../rdf/rdf-constants'
 import { RdfLayer } from '../rdf/RdfLayer'
-import { BlobTree } from '../storage/BlobTree'
 
 const debug = Debug('appIsTrustedForMode')
 

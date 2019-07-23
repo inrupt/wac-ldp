@@ -1,6 +1,6 @@
 import { makeResourceData, bufferToStream } from './ResourceDataUtils'
 import { ACL_SUFFIX } from './RdfLayer'
-import { BlobTree, urlToPath } from '../storage/BlobTree'
+import { urlToPath } from '../storage/BlobTree'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
 // TODO: this should be a method on a CachingRdfLayer object,

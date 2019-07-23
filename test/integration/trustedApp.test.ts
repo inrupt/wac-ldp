@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import * as http from 'http'
-import { makeHandler } from '../../src/lib/core/WacLdp'
+import { makeHandler } from '../unit/helpers/makeHandler'
 import { BlobTreeInMem } from '../../src/lib/storage/BlobTreeInMem'
 import { toChunkStream } from '../unit/helpers/toChunkStream'
 import { objectToStream, makeResourceData, streamToObject } from '../../src/lib/rdf/ResourceDataUtils'

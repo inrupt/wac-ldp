@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import * as rdflib from 'rdflib'
-import { BlobTree, urlToPath } from '../storage/BlobTree'
+import { urlToPath } from '../storage/BlobTree'
 import { streamToObject, ResourceData, objectToStream, makeResourceData } from './ResourceDataUtils'
 import { ACL } from './rdf-constants'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'

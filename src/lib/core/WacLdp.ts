@@ -37,6 +37,15 @@ interface OperationHandler {
   handle: (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
 }
 
+export interface WacLdpOptions {
+  storage: QuadAndBlobStore
+  aud: string
+  updatesViaUrl: URL,
+  skipWac: boolean,
+  idpHost: string,
+  usesHttps: boolean
+}
+
 export class WacLdp extends EventEmitter {
   aud: string
   rdfLayer: RdfLayer
@@ -45,14 +54,14 @@ export class WacLdp extends EventEmitter {
   operationHandlers: Array<OperationHandler>
   idpHost: string
   usesHttps: boolean
-  constructor (storage: QuadAndBlobStore, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
+  constructor (options: WacLdpOptions) {
     super()
-    this.rdfLayer = new CachingRdfLayer(aud, storage)
-    this.aud = aud
-    this.updatesViaUrl = updatesViaUrl
-    this.skipWac = skipWac
-    this.idpHost = idpHost
-    this.usesHttps = usesHttps
+    this.rdfLayer = new CachingRdfLayer(options.aud, options.storage)
+    this.aud = options.aud
+    this.updatesViaUrl = options.updatesViaUrl
+    this.skipWac = options.skipWac
+    this.idpHost = options.idpHost
+    this.usesHttps = options.usesHttps
     this.operationHandlers = [
       optionsHandler,
       globReadHandler,
@@ -167,10 +176,4 @@ export class WacLdp extends EventEmitter {
       return false
     }
   }
-}
-
-export function makeHandler (blobTree: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
-  const storage = new QuadAndBlobStore(blobTree)
-  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac, idpHost, usesHttps)
-  return wacLdp.handler.bind(wacLdp)
 }
