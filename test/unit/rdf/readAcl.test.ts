@@ -1,8 +1,9 @@
 import * as fs from 'fs'
-import { RdfLayer, ACL_SUFFIX } from '../../../src/lib/rdf/RdfLayer'
-import { Path, BlobTree, urlToPath } from '../../../src/lib/storage/BlobTree'
+import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
+import { urlToPath } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
 import { RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
+import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
 
 const aclDoc1Turtle = fs.readFileSync('test/fixtures/aclDoc-from-NSS-1.ttl')
 const aclDoc2Turtle = fs.readFileSync('test/fixtures/aclDoc-from-NSS-2.ttl')
@@ -34,7 +35,7 @@ const storage = {
     }
   })
 }
-const rdfLayer = new RdfLayer('https://localhost:8080', storage as unknown as BlobTree)
+const rdfLayer = new RdfLayer('https://localhost:8080', storage as unknown as QuadAndBlobStore)
 
 const quadsExpected = {
   'v1/localhost:8080/foo/.acl': [
