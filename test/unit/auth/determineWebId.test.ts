@@ -1,5 +1,5 @@
 import { getBearerToken } from '../../fixtures/bearerToken'
-import { determineWebIdAndOrigin } from '../../../src/lib/authorization/determineWebIdAndOrigin'
+import { determineWebIdAndOrigin } from '../../../src/lib/api/authentication/determineWebIdAndOrigin'
 
 import MockDate from 'mockdate'
 beforeEach(() => {
