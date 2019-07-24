@@ -85,6 +85,9 @@ export class WacLdp extends EventEmitter {
   createLocalDocument (url: URL, contentType: string, body: string) {
     return this.rdfLayer.createLocalDocument(url, contentType, body)
   }
+  containerExists (url: URL) {
+    return this.rdfLayer.getLocalContainer(url).exists()
+  }
   async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
       if (this.operationHandlers[i].canHandle(task)) {
