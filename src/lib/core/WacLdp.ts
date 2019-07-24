@@ -1,6 +1,6 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { BlobTree } from '../storage/BlobTree'
+import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
@@ -19,6 +19,7 @@ import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationC
 import { checkAccess, determineRequiredAccessModes, AccessCheckTask } from './checkAccess'
 import { getAppModes } from '../auth/appIsTrustedForMode'
 import { setAppModes } from '../rdf/setAppModes'
+import { BlobTree } from '../storage/BlobTree'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -36,6 +37,15 @@ interface OperationHandler {
   handle: (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
 }
 
+export interface WacLdpOptions {
+  storage: QuadAndBlobStore
+  aud: string
+  updatesViaUrl: URL,
+  skipWac: boolean,
+  idpHost: string,
+  usesHttps: boolean
+}
+
 export class WacLdp extends EventEmitter {
   aud: string
   rdfLayer: RdfLayer
@@ -44,14 +54,14 @@ export class WacLdp extends EventEmitter {
   operationHandlers: Array<OperationHandler>
   idpHost: string
   usesHttps: boolean
-  constructor (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
+  constructor (options: WacLdpOptions) {
     super()
-    this.rdfLayer = new CachingRdfLayer(aud, storage)
-    this.aud = aud
-    this.updatesViaUrl = updatesViaUrl
-    this.skipWac = skipWac
-    this.idpHost = idpHost
-    this.usesHttps = usesHttps
+    this.rdfLayer = new CachingRdfLayer(options.aud, options.storage)
+    this.aud = options.aud
+    this.updatesViaUrl = options.updatesViaUrl
+    this.skipWac = options.skipWac
+    this.idpHost = options.idpHost
+    this.usesHttps = options.usesHttps
     this.operationHandlers = [
       optionsHandler,
       globReadHandler,
@@ -93,9 +103,6 @@ export class WacLdp extends EventEmitter {
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)
-  }
-  async containerExists (url: URL): Promise<boolean> {
-    return this.rdfLayer.localContainerExists(url)
   }
 
   async handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
@@ -169,9 +176,4 @@ export class WacLdp extends EventEmitter {
       return false
     }
   }
-}
-
-export function makeHandler (storage: BlobTree, aud: string, updatesViaUrl: URL, skipWac: boolean, idpHost: string, usesHttps: boolean) {
-  const wacLdp = new WacLdp(storage, aud, updatesViaUrl, skipWac, idpHost, usesHttps)
-  return wacLdp.handler.bind(wacLdp)
 }

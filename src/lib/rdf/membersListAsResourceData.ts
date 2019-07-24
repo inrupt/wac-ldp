@@ -7,7 +7,7 @@ import { LDP, RDF } from './rdf-constants'
 
 const debug = Debug('membersListAsResourceData')
 
-function toRdf (containerUrl: URL, membersList: Array<Member>): ReadableStream {
+export function membersListAsQuadStream (containerUrl: URL, membersList: Array<Member>): ReadableStream {
   const dataset = rdf.dataset()
   membersList.map(member => {
     dataset.add(rdf.quad(
@@ -37,6 +37,6 @@ function toRdf (containerUrl: URL, membersList: Array<Member>): ReadableStream {
 
 export async function membersListAsResourceData (containerUrl: URL, membersList: Array<Member>, rdfType: RdfType): Promise<ResourceData> {
   debug('membersListAsResourceData', containerUrl, membersList, rdfType)
-  const dataset = toRdf(containerUrl, membersList)
+  const dataset = membersListAsQuadStream(containerUrl, membersList)
   return rdfToResourceData(dataset, rdfType)
 }

@@ -5,6 +5,7 @@ import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib
 import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
 import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
+import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
 
 test('finds acl:accessTo modes', async () => {
   const bodyStream = fs.createReadStream('test/fixtures/aclDoc-from-NSS-1.ttl')
@@ -18,7 +19,7 @@ test('finds acl:accessTo modes', async () => {
     resourceIsTarget: true,
     contextUrl: new URL('https://example.com'),
     targetUrl: new URL('https://example.com'),
-    rdfLayer: new RdfLayer('https://example.com', new BlobTreeInMem())
+    rdfLayer: new RdfLayer('https://example.com', new QuadAndBlobStore(new BlobTreeInMem()))
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
@@ -41,7 +42,7 @@ test('finds acl:default modes', async () => {
     contextUrl: new URL('/.acl', 'https://example.com/'),
     targetUrl: new URL('/', 'https://example.com/'),
     resourceIsTarget: true,
-    rdfLayer: new RdfLayer('https://example.com', new BlobTreeInMem())
+    rdfLayer: new RdfLayer('https://example.com', new QuadAndBlobStore(new BlobTreeInMem()))
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({
@@ -68,7 +69,7 @@ function testUrlFormat (format: string, target: string, resourceIsTarget: boolea
       resourceIsTarget,
       targetUrl: new URL(target),
       contextUrl: new URL(target + '.acl'),
-      rdfLayer: new RdfLayer('https://example.com', new BlobTreeInMem())
+      rdfLayer: new RdfLayer('https://example.com', new QuadAndBlobStore(new BlobTreeInMem()))
     }
     const result = await determineAllowedAgentsForModes(task)
     expect(result).toEqual({
@@ -105,7 +106,7 @@ test(`acl:default does not imply acl:accessTo`, async () => {
     resourceIsTarget: true,
     targetUrl: new URL('https://example.org/foo/'),
     contextUrl: new URL('https://example.org/foo/.acl'),
-    rdfLayer: new RdfLayer('https://example.com', new BlobTreeInMem())
+    rdfLayer: new RdfLayer('https://example.com', new QuadAndBlobStore(new BlobTreeInMem()))
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({

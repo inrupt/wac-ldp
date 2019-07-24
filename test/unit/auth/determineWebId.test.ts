@@ -19,4 +19,4 @@ test('returns undefined if bearer token is truncated', async () => {
   const { bearerToken, expectedWebId, aud } = getBearerToken(true)
   const { webId } = await determineWebIdAndOrigin(bearerToken.substring(0, 100), undefined)
   expect(webId).toEqual(undefined)
-})  
+})

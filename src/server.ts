@@ -17,20 +17,27 @@ process.env.DEBUG = '*'
 import * as http from 'http'
 import Debug from 'debug'
 import { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
-import { makeHandler } from './lib/core/WacLdp'
+import { WacLdp } from './lib/core/WacLdp'
 import { BlobTree, Path } from './lib/storage/BlobTree'
+import { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
 
 const debug = Debug('server')
 
 class Server {
-  storage: BlobTree
   server: http.Server
   port: number
+  wacLdp: WacLdp
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
-    this.storage = new BlobTreeInMem() // singleton in-memory storage
-    const handler = makeHandler(this.storage, aud, new URL('wss://localhost:8443'), skipWac, 'localhost:8443', false)
-    this.server = http.createServer(handler)
+    this.wacLdp = new WacLdp({
+      storage: new QuadAndBlobStore(new BlobTreeInMem()), // singleton in-memory storage
+      aud,
+      updatesViaUrl: new URL('wss://localhost:8443'),
+      skipWac,
+      idpHost: 'localhost:8443',
+      usesHttps: false
+    })
+    this.server = http.createServer(this.wacLdp.handler.bind(this.wacLdp))
   }
   listen () {
     this.server.listen(this.port)

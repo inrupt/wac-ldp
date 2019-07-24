@@ -1,8 +1,9 @@
 import * as fs from 'fs'
-import { RdfLayer, ACL_SUFFIX } from '../../../src/lib/rdf/RdfLayer'
-import { Path, BlobTree, urlToPath } from '../../../src/lib/storage/BlobTree'
+import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
+import { urlToPath } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
 import { RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
+import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
 
 const aclDoc1Turtle = fs.readFileSync('test/fixtures/aclDoc-from-NSS-1.ttl')
 const aclDoc2Turtle = fs.readFileSync('test/fixtures/aclDoc-from-NSS-2.ttl')
@@ -19,7 +20,7 @@ const kv: {[pathStr: string]: { rdfType: RdfType, body: string } } = {
 }
 
 const storage = {
-  getBlob: jest.fn((path) => {
+  getBlobAtPath: jest.fn((path) => {
     return {
       getData: jest.fn(() => {
         return toChunkStream(JSON.stringify({
@@ -34,7 +35,7 @@ const storage = {
     }
   })
 }
-const rdfLayer = new RdfLayer('https://localhost:8080', storage as unknown as BlobTree)
+const rdfLayer = new RdfLayer('https://localhost:8080', storage as unknown as QuadAndBlobStore)
 
 const quadsExpected = {
   'v1/localhost:8080/foo/.acl': [
@@ -90,7 +91,7 @@ const quadsExpected = {
 }
 
 afterEach(() => {
-  storage.getBlob.mock.calls = []
+  storage.getBlobAtPath.mock.calls = []
 })
 
 test('reads an adjacent ACL doc for a container (Turtle)', async () => {
@@ -100,7 +101,7 @@ test('reads an adjacent ACL doc for a container (Turtle)', async () => {
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
-  expect(storage.getBlob.mock.calls).toEqual([
+  expect(storage.getBlobAtPath.mock.calls).toEqual([
     [ urlToPath(new URL('https://localhost:8080/foo/bar/.acl')) ]
   ])
   expect(quads).toEqual(quadsExpected['v1/localhost:8080/foo/bar/.acl'])
@@ -114,7 +115,7 @@ test('reads an adjacent ACL doc for a container (JSON-LD))', async () => {
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
-  expect(storage.getBlob.mock.calls).toEqual([
+  expect(storage.getBlobAtPath.mock.calls).toEqual([
     [ urlToPath(new URL('https://localhost:8080/foo/jay/.acl')) ]
   ])
   expect(quads).toEqual(quadsExpected['v1/localhost:8080/foo/jay/.acl'])
@@ -128,7 +129,7 @@ test('reads an adjacent ACL doc for a non-container', async () => {
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
-  expect(storage.getBlob.mock.calls).toEqual([
+  expect(storage.getBlobAtPath.mock.calls).toEqual([
     [ urlToPath(new URL('https://localhost:8080/foo/bar/baz.acl')) ]
   ])
   expect(quads).toEqual(quadsExpected['v1/localhost:8080/foo/bar/baz.acl'])
@@ -141,7 +142,7 @@ test('falls back to parent ACL doc for a container', async () => {
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
-  expect(storage.getBlob.mock.calls).toEqual([
+  expect(storage.getBlobAtPath.mock.calls).toEqual([
     [ urlToPath(new URL('https://localhost:8080/foo/bar/no/.acl')) ],
     [ urlToPath(new URL('https://localhost:8080/foo/bar/.acl')) ]
   ])
@@ -155,7 +156,7 @@ test('falls back to container ACL doc for a non-container', async () => {
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
-  expect(storage.getBlob.mock.calls).toEqual([
+  expect(storage.getBlobAtPath.mock.calls).toEqual([
     [ urlToPath(new URL('https://localhost:8080/foo/bar/no.acl')) ],
     [ urlToPath(new URL('https://localhost:8080/foo/bar/.acl')) ]
   ])
@@ -169,7 +170,7 @@ test('falls back to ancestor ACL doc for a container', async () => {
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
-  expect(storage.getBlob.mock.calls).toEqual([
+  expect(storage.getBlobAtPath.mock.calls).toEqual([
     [ urlToPath(new URL('https://localhost:8080/foo/no/no/.acl')) ],
     [ urlToPath(new URL('https://localhost:8080/foo/no/.acl')) ],
     [ urlToPath(new URL('https://localhost:8080/foo/.acl')) ]
@@ -184,7 +185,7 @@ test('falls back to ancestor ACL doc for a non-container', async () => {
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
   })
-  expect(storage.getBlob.mock.calls).toEqual([
+  expect(storage.getBlobAtPath.mock.calls).toEqual([
     [ urlToPath(new URL('https://localhost:8080/foo/no/no.acl')) ],
     [ urlToPath(new URL('https://localhost:8080/foo/no/.acl')) ],
     [ urlToPath(new URL('https://localhost:8080/foo/.acl')) ]
