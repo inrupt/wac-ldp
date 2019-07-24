@@ -1,7 +1,7 @@
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
-import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/auth/determineAllowedAgentsForModes'
+import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/authorization/determineAllowedAgentsForModes'
 import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
 import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'

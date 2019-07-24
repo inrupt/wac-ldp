@@ -3,7 +3,7 @@ import { URL } from 'url'
 import uuid from 'uuid/v4'
 import Debug from 'debug'
 import MIMEType from 'whatwg-mimetype'
-import { determineWebIdAndOrigin } from '../../auth/determineWebIdAndOrigin'
+import { determineWebIdAndOrigin } from '../authentication/determineWebIdAndOrigin'
 import { RdfType, determineRdfType } from '../../rdf/ResourceDataUtils'
 const debug = Debug('HttpParser')
 

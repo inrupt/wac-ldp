@@ -2,18 +2,19 @@ import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../core/checkAccess'
 
 import Debug from 'debug'
 
-import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
+import { makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { RdfLayer } from '../rdf/RdfLayer'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
+import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('update-blob-handler')
 
 export const updateBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate),
+  requiredAccessModes: [ ACL.Read, ACL.Write ],
   handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, rdfLayer)
     if (!resourceData) {

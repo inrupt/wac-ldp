@@ -16,8 +16,8 @@ import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
 import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
 import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
-import { checkAccess, determineRequiredAccessModes, AccessCheckTask } from './checkAccess'
-import { getAppModes } from '../auth/appIsTrustedForMode'
+import { checkAccess, AccessCheckTask } from '../authorization/checkAccess'
+import { getAppModes } from '../authorization/appIsTrustedForMode'
 import { setAppModes } from '../rdf/setAppModes'
 import { BlobTree } from '../storage/BlobTree'
 
@@ -34,6 +34,7 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
 }
 interface OperationHandler {
   canHandle: (wacLdpTask: WacLdpTask) => boolean
+  requiredAccessModes: Array<URL>
   handle: (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
 }
 
@@ -94,7 +95,7 @@ export class WacLdp extends EventEmitter {
             isContainer: task.isContainer(),
             webId: await task.webId(),
             origin: await task.origin(),
-            requiredAccessModes: determineRequiredAccessModes(task.wacLdpTaskType()),
+            requiredAccessModes: this.operationHandlers[i].requiredAccessModes,
             rdfLayer: this.rdfLayer
           } as AccessCheckTask) // may throw if access is denied
         }

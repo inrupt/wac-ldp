@@ -1,7 +1,7 @@
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
-import { appIsTrustedForMode, OriginCheckTask, getAppModes } from '../../../src/lib/auth/appIsTrustedForMode'
+import { appIsTrustedForMode, OriginCheckTask, getAppModes } from '../../../src/lib/authorization/appIsTrustedForMode'
 import { setAppModes } from '../../../src/lib/rdf/setAppModes'
 import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'

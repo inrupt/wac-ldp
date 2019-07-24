@@ -52,7 +52,7 @@ interface Path {
 
 ### Execute Task
 The core application code is in src/lib/core/executeTask.ts and given a `WacLdpTask` (see below), it deals with:
-* calling the functions from src/lib/auth/ to determine whether the request is authorized to begin with
+* calling the functions from src/lib/authorization/ to determine whether the request is authorized to begin with
 * calling the functions from the 'operations on content' component (currently only 'RDF').
 * fetching the main resource from storage
 * in the case of Glob, checking authorization to read each of the contained resources, and fetching those
@@ -63,7 +63,7 @@ The core application code is in src/lib/core/executeTask.ts and given a `WacLdpT
 * in case of an exception, throwing the appropriate `ErrorResult`, to be cast to `WacLdpResult`
 
 ### Auth
-The auth code is in src/lib/auth/ and deals with:
+The auth code is in src/lib/authorization/ and deals with:
 * determining the webId from the bearer token, and checking the signature, expiry, and audience on the there
 * fetching the apprioriate ACL document from storage and loading that into an in-memory RDF graph
 * based on the webId, find out which access modes should be allowed

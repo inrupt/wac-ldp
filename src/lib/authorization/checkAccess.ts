@@ -1,6 +1,6 @@
 
-import { OriginCheckTask, appIsTrustedForMode } from '../auth/appIsTrustedForMode'
-import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from '../auth/determineAllowedAgentsForModes'
+import { OriginCheckTask, appIsTrustedForMode } from './appIsTrustedForMode'
+import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from './determineAllowedAgentsForModes'
 import { ACL } from '../rdf/rdf-constants'
 import Debug from 'debug'
 import { TaskType } from '../api/http/HttpParser'
@@ -8,27 +8,6 @@ import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { RdfLayer, ACL_SUFFIX } from '../rdf/RdfLayer'
 
 const debug = Debug('checkAccess')
-
-// This will be overwritten later if the resource is an ACL doc
-export function determineRequiredAccessModes (wacLdpTaskType: TaskType) {
-  if (wacLdpTaskType === TaskType.unknown || wacLdpTaskType === TaskType.getOptions) {
-    return []
-  }
-  if ([TaskType.blobRead, TaskType.containerRead, TaskType.globRead].indexOf(wacLdpTaskType) !== -1) {
-    return [ ACL.Read ]
-  }
-  if ([TaskType.blobDelete, TaskType.containerDelete, TaskType.blobWrite].indexOf(wacLdpTaskType) !== -1) {
-    return [ ACL.Write ]
-  }
-  if (wacLdpTaskType === TaskType.blobUpdate) {
-    return [ ACL.Read, ACL.Write ] // can fall back to 'read' + 'append' with appendOnly = true
-  }
-  if (wacLdpTaskType === TaskType.containerMemberAdd) {
-    return [ ACL.Append ]
-  }
-  debug('Failed to determine required access modes from task type')
-  throw new ErrorResult(ResultType.InternalServerError)
-}
 
 async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: RdfLayer): Promise<boolean> {
   // first check agent:

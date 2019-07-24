@@ -8,6 +8,7 @@ const debug = Debug('unknown-operation-catch-all')
 
 export const unknownOperationCatchAll = {
   canHandle: (wacLdpTask: WacLdpTask) => true,
+  requiredAccessModes: [],
   handle: function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     debug('operation unknownOperation!')
     throw new ErrorResult(ResultType.MethodNotAllowed)

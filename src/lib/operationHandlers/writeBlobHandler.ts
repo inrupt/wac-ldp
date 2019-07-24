@@ -1,6 +1,5 @@
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../core/checkAccess'
 
 import Debug from 'debug'
 
@@ -10,11 +9,13 @@ import { RdfLayer } from '../rdf/RdfLayer'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { applyQuery } from '../rdf/applyQuery'
+import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('write-blob-handler')
 
 export const writeBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobWrite),
+  requiredAccessModes: [ ACL.Write ],
   handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceDataBefore = await getResourceDataAndCheckETag(task, rdfLayer)
     const blobExists: boolean = !!resourceDataBefore

@@ -1,8 +1,7 @@
 import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
-import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { checkAccess, AccessCheckTask, determineRequiredAccessModes } from '../core/checkAccess'
+import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
 
@@ -12,11 +11,13 @@ import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { applyQuery } from '../rdf/applyQuery'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
+import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('read-blob-handler')
 
 export const readBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead),
+  requiredAccessModes: [ ACL.Read ],
   handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, rdfLayer)
     debug('operation readBlob!', task.rdfType())

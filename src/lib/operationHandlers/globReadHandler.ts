@@ -3,9 +3,10 @@ import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpRespond
 
 import Debug from 'debug'
 import { RdfLayer } from '../rdf/RdfLayer'
-import { AccessCheckTask, checkAccess, determineRequiredAccessModes } from '../core/checkAccess'
+import { AccessCheckTask, checkAccess } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
+import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('glob-read-handler')
 
@@ -13,6 +14,7 @@ export const globReadHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
   },
+  requiredAccessModes: [ ACL.Read ],
   handle: async function (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // At this point will have checked read access over the
     // container, but need to collect all RDF sources, filter on access, and then
@@ -39,7 +41,7 @@ export const globReadHandler = {
             isContainer: false,
             webId,
             origin: await wacLdpTask.origin(),
-            requiredAccessModes: determineRequiredAccessModes(wacLdpTask.wacLdpTaskType()),
+            requiredAccessModes: [ ACL.Read ],
             rdfLayer
           } as AccessCheckTask) // may throw if access is denied
         }

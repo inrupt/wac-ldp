@@ -8,11 +8,13 @@ import { streamToObject, makeResourceData, objectToStream } from '../rdf/Resourc
 import { RdfLayer } from '../rdf/RdfLayer'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { writeBlobHandler } from './writeBlobHandler'
+import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('container-member-add-handler')
 
 export const containerMemberAddHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
+  requiredAccessModes: [ ACL.Append ],
   handle: async function executeTask (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
     // but notice that access check for this is append on the container,
