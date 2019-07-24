@@ -66,8 +66,8 @@ export async function getAppModes (webId: URL, origin: string, rdfLayer: RdfLaye
         }
         break
       case ACL.trustedApp.toString():
-        debug('trustedApp predicate!', quad.predicate.value, webId.toString())
-        if (webId.toString() === quad.subject.value) {
+        debug('trustedApp predicate!', quad.predicate.value, webId.toString(), new URL(quad.subject.value, webId).toString())
+        if (webId.toString() === new URL(quad.subject.value, webId).toString()) {
           ensure(quad.object.value)
           appNodes[quad.object.value].webIdMatches = true
         }
