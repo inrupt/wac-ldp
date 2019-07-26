@@ -4,11 +4,8 @@ import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpRespond
 import Debug from 'debug'
 
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
-import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
+import { makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
-import { resourceDataToRdf } from '../rdf/mergeRdfSources'
-import { rdfToResourceData } from '../rdf/rdfToResourceData'
-import { applyQuery } from '../rdf/applyQuery'
 import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('write-blob-handler')
