@@ -68,9 +68,12 @@ async function getGraphLocal (blob: Blob): Promise<any> {
 export class StoreManager {
   serverRootDomain: string
   storage: QuadAndBlobStore
+  stores: { [url: string]: any }
+
   constructor (serverRootDomain: string, storage: QuadAndBlobStore) {
     this.serverRootDomain = serverRootDomain
     this.storage = storage
+    this.stores = {}
   }
   setRootAcl (storageRoot: URL, owner: URL) {
     return setRootAcl(this.storage, owner, storageRoot)
@@ -171,10 +174,12 @@ export class StoreManager {
   }
 
   async applyPatch (resourceData: ResourceData, sparqlQuery: string, fullUrl: URL, appendOnly: boolean) {
-    const store = rdflib.graph()
-    const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
-    parse(resourceData.body, store, fullUrl.toString(), resourceData.contentType)
-    debug('before patch', store.toNT())
+    if (!this.stores[fullUrl.toString()]) {
+      this.stores[fullUrl.toString()] = rdflib.graph()
+      const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
+      parse(resourceData.body, this.stores[fullUrl.toString()], fullUrl.toString(), resourceData.contentType)
+    }
+    debug('before patch', this.stores[fullUrl.toString()].toNT())
 
     const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
     const patchObject = sparqlUpdateParser(sparqlQuery, rdflib.graph(), fullUrl.toString())
@@ -184,7 +189,7 @@ export class StoreManager {
       throw new ErrorResult(ResultType.AccessDenied)
     }
     await new Promise((resolve, reject) => {
-      store.applyPatch(patchObject, store.sym(fullUrl), (err: Error) => {
+      this.stores[fullUrl.toString()].applyPatch(patchObject, this.stores[fullUrl.toString()].sym(fullUrl), (err: Error) => {
         if (err) {
           reject(err)
         } else {
@@ -192,8 +197,8 @@ export class StoreManager {
         }
       })
     })
-    debug('after patch', store.toNT())
-    return rdflib.serialize(undefined, store, fullUrl, 'text/turtle')
+    debug('after patch', this.stores[fullUrl.toString()].toNT())
+    return rdflib.serialize(undefined, this.stores[fullUrl.toString()], fullUrl, 'text/turtle')
   }
   flushCache (url: URL) {
     // no caching here

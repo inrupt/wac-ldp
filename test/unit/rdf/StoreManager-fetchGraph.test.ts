@@ -14,7 +14,7 @@ test('can fetch a local graph', async () => {
   }))
   const resourceData = makeResourceData('text/turtle', body.toString())
   await blob.setData(await objectToStream(resourceData))
-  const storeManager = new StoreManager('example.com', storage) 
+  const storeManager = new StoreManager('example.com', storage)
   const graph = await storeManager.fetchGraph(new URL('https://example.com/profile/card'))
   expect(graph.length).toEqual(5)
 })

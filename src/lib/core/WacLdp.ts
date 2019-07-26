@@ -6,7 +6,6 @@ import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../ap
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 import { StoreManager } from '../rdf/StoreManager'
-import { CachingStoreManager } from '../rdf/CachingStoreManager'
 import { globReadHandler } from '../operationHandlers/globReadHandler'
 import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 import { readContainerHandler } from '../operationHandlers/readContainerHandler'
@@ -57,7 +56,7 @@ export class WacLdp extends EventEmitter {
   usesHttps: boolean
   constructor (options: WacLdpOptions) {
     super()
-    this.storeManager = new CachingStoreManager(options.aud, options.storage)
+    this.storeManager = new StoreManager(options.aud, options.storage)
     this.aud = options.aud
     this.updatesViaUrl = options.updatesViaUrl
     this.skipWac = options.skipWac

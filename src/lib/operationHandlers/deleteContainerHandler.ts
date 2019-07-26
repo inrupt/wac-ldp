@@ -8,7 +8,7 @@ import Debug from 'debug'
 import { streamToObject } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { Member } from '../storage/Container'
-import { membersListAsResourceData } from '../rdf/membersListAsResourceData'
+import { membersListAsResourceData } from '../storage/membersListAsResourceData'
 import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('delete-container-handler')
