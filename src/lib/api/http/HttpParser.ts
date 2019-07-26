@@ -252,6 +252,10 @@ export class WacLdpTask {
     return this.cache.sparqlQuery.value
   }
 
+  isReadOperation (): boolean {
+    return (!!this.httpReq.method && ['HEAD', 'GET'].indexOf(this.httpReq.method) !== -1)
+  }
+
   rdfType (): RdfType {
     function determineRdfTypeFromHeaders (headers: http.IncomingHttpHeaders): RdfType {
       return determineRdfType(headers ? headers['content-type'] : undefined)

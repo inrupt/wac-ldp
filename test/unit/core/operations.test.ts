@@ -165,6 +165,66 @@ test('read blob (with body)', async () => {
   })
 })
 
+test('read blob (if-none-match 304)', async () => {
+  // see https://github.com/inrupt/wac-ldp/issues/114
+  const node: Blob = {
+    getData: jest.fn(() => {
+      return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
+    }),
+    exists: () => true
+  } as unknown as Blob
+  const storage = {
+    getBlob: () => node
+  } as unknown
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo',
+    method: 'GET',
+    headers: {
+      'if-none-match': '"Eo7PVCo1rFJwqH3HQJGEBA=="'
+    }
+  } as http.IncomingMessage, true)
+  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  expect.assertions(2)
+  await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
+    expect(e.resultType).toEqual(ResultType.NotModified)
+  })
+
+  // FIXME: Why does it call getData twice?
+  expect((node as any).getData.mock.calls).toEqual([
+    []
+  ])
+})
+
+test('write blob (if-none-match 412)', async () => {
+  // see https://github.com/inrupt/wac-ldp/issues/114
+  const node: Blob = {
+    getData: jest.fn(() => {
+      return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
+    }),
+    exists: () => true
+  } as unknown as Blob
+  const storage = {
+    getBlob: () => node
+  } as unknown
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo',
+    method: 'PUT',
+    headers: {
+      'if-none-match': '"Eo7PVCo1rFJwqH3HQJGEBA=="'
+    }
+  } as http.IncomingMessage, true)
+  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  expect.assertions(2)
+  await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
+    expect(e.resultType).toEqual(ResultType.PreconditionFailed)
+  })
+
+  // FIXME: Why does it call getData twice?
+  expect((node as any).getData.mock.calls).toEqual([
+    []
+  ])
+})
+
 test('read container (omit body)', async () => {
   const node: Container = {
     getMembers: jest.fn(() => {
