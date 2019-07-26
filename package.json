@@ -35,7 +35,7 @@
     "@types/mockdate": "^2.0.0",
     "@types/uuid": "^3.4.4",
     "coveralls": "^3.0.5",
-    "jest": "^24.7.1",
+    "jest": "^24.8.0",
     "mockdate": "^2.0.2",
     "ts-jest": "^24.0.2",
     "ts-node-dev": "^1.0.0-pre.40",
