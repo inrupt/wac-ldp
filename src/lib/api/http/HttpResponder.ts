@@ -2,6 +2,8 @@ import * as http from 'http'
 import Debug from 'debug'
 import { ResourceData } from '../../rdf/ResourceDataUtils'
 import { LDP } from '../../rdf/rdf-constants'
+const Link = require('http-link-header')
+
 const debug = Debug('HttpResponder')
 
 export enum ResultType {
@@ -95,22 +97,23 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
   const responseStatus = responses[task.resultType].responseStatus
   const responseBody = responses[task.resultType].responseBody || (task.resourceData ? task.resourceData.body : '')
 
-  const types: Array<string> = [
-    `<${LDP.Resource}>; rel="type"`
-  ]
+  let links = new Link()
+  links.set({ rel: 'acl', uri: '.acl' })
+  links.set({ rel: 'describedBy', uri: '.meta' })
+  links.set({ rel: 'type', uri: LDP.Resource.toString() })
   if (task.isContainer) {
-    types.push(`<${LDP.BasicContainer}>; rel="type"`)
+    links.set({ rel: 'type', uri: LDP.BasicContainer.toString() })
   }
-  let links = `<.acl>; rel="acl", <.meta>; rel="describedBy", ${types.join(', ')}, <https://${options.idpHost}>; rel="http://openid.net/specs/connect/1.0/issuer"`
+  links.set({ rel: 'http://openid.net/specs/connect/1.0/issuer', uri: `https://${options.idpHost}` })
   if (options.storageOrigin) {
-    links += `, <${options.storageOrigin}/.well-known/solid>; rel="service"`
+    links.set({ rel: 'service', uri: `${options.storageOrigin}/.well-known/solid` })
   }
   if (responses[task.resultType].constrainedBy) {
-    links += `, <http://www.w3.org/ns/ldp#constrainedBy-${responses[task.resultType].constrainedBy}>; rel="http://www.w3.org/ns/ldp#constrainedBy"`
+    links.set({ rel: 'http://www.w3.org/ns/ldp#constrainedBy', uri: `http://www.w3.org/ns/ldp#constrainedBy-${responses[task.resultType].constrainedBy}` })
   }
 
   const responseHeaders = {
-    'Link':  links,
+    'Link':  links.toString(),
     'X-Powered-By': 'inrupt pod-server (alpha)',
     'Vary': 'Accept, Authorization, Origin',
     'Allow': 'GET, HEAD, POST, PUT, DELETE, PATCH',

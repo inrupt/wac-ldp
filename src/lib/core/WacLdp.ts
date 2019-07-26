@@ -5,8 +5,7 @@ import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
-import { RdfLayer } from '../rdf/RdfLayer'
-import { CachingRdfLayer } from '../rdf/CachingRdfLayer'
+import { StoreManager } from '../rdf/StoreManager'
 import { globReadHandler } from '../operationHandlers/globReadHandler'
 import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 import { readContainerHandler } from '../operationHandlers/readContainerHandler'
@@ -35,7 +34,7 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
 interface OperationHandler {
   canHandle: (wacLdpTask: WacLdpTask) => boolean
   requiredAccessModes: Array<URL>
-  handle: (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
+  handle: (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
 }
 
 export interface WacLdpOptions {
@@ -49,7 +48,7 @@ export interface WacLdpOptions {
 
 export class WacLdp extends EventEmitter {
   aud: string
-  rdfLayer: RdfLayer
+  storeManager: StoreManager
   updatesViaUrl: URL
   skipWac: boolean
   operationHandlers: Array<OperationHandler>
@@ -57,7 +56,7 @@ export class WacLdp extends EventEmitter {
   usesHttps: boolean
   constructor (options: WacLdpOptions) {
     super()
-    this.rdfLayer = new CachingRdfLayer(options.aud, options.storage)
+    this.storeManager = new StoreManager(options.aud, options.storage)
     this.aud = options.aud
     this.updatesViaUrl = options.updatesViaUrl
     this.skipWac = options.skipWac
@@ -77,16 +76,16 @@ export class WacLdp extends EventEmitter {
     ]
   }
   setRootAcl (storageRoot: URL, owner: URL) {
-    return this.rdfLayer.setRootAcl(storageRoot, owner)
+    return this.storeManager.setRootAcl(storageRoot, owner)
   }
   setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
-    return this.rdfLayer.setPublicAcl(inboxUrl, owner, modeName)
+    return this.storeManager.setPublicAcl(inboxUrl, owner, modeName)
   }
   createLocalDocument (url: URL, contentType: string, body: string) {
-    return this.rdfLayer.createLocalDocument(url, contentType, body)
+    return this.storeManager.createLocalDocument(url, contentType, body)
   }
   containerExists (url: URL) {
-    return this.rdfLayer.getLocalContainer(url).exists()
+    return this.storeManager.getLocalContainer(url).exists()
   }
   async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
@@ -99,11 +98,11 @@ export class WacLdp extends EventEmitter {
             webId: await task.webId(),
             origin: await task.origin(),
             requiredAccessModes: this.operationHandlers[i].requiredAccessModes,
-            rdfLayer: this.rdfLayer
+            storeManager: this.storeManager
           } as AccessCheckTask) // may throw if access is denied
         }
-        debug('calling operation handler', i, task, this.rdfLayer, this.aud, this.skipWac, appendOnly)
-        return this.operationHandlers[i].handle(task, this.rdfLayer, this.aud, this.skipWac, appendOnly)
+        debug('calling operation handler', i, task, this.storeManager, this.aud, this.skipWac, appendOnly)
+        return this.operationHandlers[i].handle(task, this.storeManager, this.aud, this.skipWac, appendOnly)
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)
@@ -152,10 +151,10 @@ export class WacLdp extends EventEmitter {
     }
   }
   getTrustedAppModes (webId: URL, origin: string) {
-    return getAppModes(webId, origin, this.rdfLayer)
+    return getAppModes(webId, origin, this.storeManager)
   }
   setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>) {
-    return setAppModes(webId, origin, modes, this.rdfLayer.storage)
+    return setAppModes(webId, origin, modes, this.storeManager.storage)
   }
   async hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean> {
     debug('hasAccess calls checkAccess', {
@@ -163,7 +162,7 @@ export class WacLdp extends EventEmitter {
       webId,
       origin,
       requiredAccessModes: [ mode ],
-      rdfLayer: 'this.rdfLayer'
+      storeManager: 'this.storeManager'
     })
     try {
       const appendOnly = await checkAccess({
@@ -171,7 +170,7 @@ export class WacLdp extends EventEmitter {
         webId,
         origin,
         requiredAccessModes: [ mode ],
-        rdfLayer: this.rdfLayer
+        storeManager: this.storeManager
       })
       debug({ appendOnly })
       return !appendOnly

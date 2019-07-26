@@ -2,7 +2,7 @@ import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
 import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/authorization/determineAllowedAgentsForModes'
-import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
+import { StoreManager } from '../../../src/lib/rdf/StoreManager'
 
 function readFixture (filename: string): Promise<any> {
   const bodyStream = fs.createReadStream(filename)
@@ -21,11 +21,11 @@ test('finds acl:accessTo modes for local agent group', async () => {
     resourceIsTarget: true,
     contextUrl: new URL('https://example.com'),
     targetUrl: new URL('https://example.com'),
-    rdfLayer: {
+    storeManager: {
       fetchGraph: jest.fn(() => {
         return workGroupsGraph
       })
-    } as unknown as RdfLayer
+    } as unknown as StoreManager
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({

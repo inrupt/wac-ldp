@@ -1,12 +1,12 @@
 import { makeResourceData, bufferToStream } from './ResourceDataUtils'
-import { ACL_SUFFIX } from './RdfLayer'
+import { ACL_SUFFIX } from './StoreManager'
 import { urlToPath } from '../storage/BlobTree'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
-// TODO: this should be a method on a CachingRdfLayer object,
+// TODO: this should be a method on a StoreManager object,
 // which has access to a `this.storage` variable rather than
 // requiring that as an extra parameter. And it should also
-// use the CachingRdfLayer object's knowledge of how to map
+// use the StoreManager object's knowledge of how to map
 // URLs to storage paths
 export async function setRootAcl (storage: QuadAndBlobStore, owner: URL, storageRoot: URL) {
   let rootString = storageRoot.toString()

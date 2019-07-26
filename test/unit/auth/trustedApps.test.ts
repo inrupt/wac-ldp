@@ -3,7 +3,7 @@ import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
 import { appIsTrustedForMode, OriginCheckTask, getAppModes } from '../../../src/lib/authorization/appIsTrustedForMode'
 import { setAppModes } from '../../../src/lib/rdf/setAppModes'
-import { RdfLayer } from '../../../src/lib/rdf/RdfLayer'
+import { StoreManager } from '../../../src/lib/rdf/StoreManager'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
 import { objectToStream, makeResourceData, streamToObject } from '../../../src/lib/rdf/ResourceDataUtils'
 import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
@@ -26,22 +26,22 @@ test('finds acl:trustedApps nodes and their modes for a given owners list', asyn
     resourceOwners: [ new URL('https://michielbdejong.com/profile/card#me')]
   } as OriginCheckTask
 
-  const rdfLayer: unknown = {
+  const storeManager: unknown = {
     fetchGraph: jest.fn(() => {
       return readFixture(OWNER_PROFILE_FIXTURE)
     })
   }
-  const result = await appIsTrustedForMode(task, rdfLayer as RdfLayer)
+  const result = await appIsTrustedForMode(task, storeManager as StoreManager)
   expect(result).toEqual(true)
 })
 
 test('getTrustedAppModes', async () => {
-  const rdfLayer: unknown = {
+  const storeManager: unknown = {
     fetchGraph: jest.fn(() => {
       return readFixture('test/fixtures/owner-profile.ttl')
     })
   }
-  const modes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', rdfLayer as RdfLayer)
+  const modes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', storeManager as StoreManager)
 
   expect(JSON.stringify(modes)).toEqual(JSON.stringify([
     new URL('http://www.w3.org/ns/auth/acl#Append'),

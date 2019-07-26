@@ -5,11 +5,11 @@ import { ACL } from '../rdf/rdf-constants'
 import Debug from 'debug'
 import { TaskType } from '../api/http/HttpParser'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { RdfLayer, ACL_SUFFIX } from '../rdf/RdfLayer'
+import { StoreManager, ACL_SUFFIX } from '../rdf/StoreManager'
 
 const debug = Debug('checkAccess')
 
-async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: RdfLayer): Promise<boolean> {
+async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: StoreManager): Promise<boolean> {
   // first check agent:
   const agents = (allowedAgentsForModes as any)[mode.toString()]
   const webIdAsString: string | undefined = (webId ? webId.toString() : undefined)
@@ -38,7 +38,7 @@ export interface AccessCheckTask {
   webId: URL | undefined
   origin: string
   requiredAccessModes: Array<URL>
-  rdfLayer: RdfLayer
+  storeManager: StoreManager
 }
 
 function urlHasSuffix (url: URL, suffix: string) {
@@ -73,7 +73,7 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
     baseResourceUrl = task.url
     resourceIsAclDocument = false
   }
-  const { aclGraph, targetUrl, contextUrl } = await task.rdfLayer.readAcl(baseResourceUrl)
+  const { aclGraph, targetUrl, contextUrl } = await task.storeManager.readAcl(baseResourceUrl)
   const resourceIsTarget = urlEquals(baseResourceUrl, targetUrl)
   debug('calling allowedAgentsForModes', 'aclGraph', resourceIsTarget, targetUrl.toString(), contextUrl.toString())
 
@@ -95,13 +95,13 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
   // throw if agent or origin does not have access
   await Promise.all(requiredAccessModes.map(async (mode: URL) => {
     debug('required mode', mode.toString())
-    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.rdfLayer)) {
+    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.storeManager)) {
       debug(mode, 'is allowed!')
       return
     }
     debug(`mode ${mode.toString()} is not allowed, but checking for appendOnly now`)
     // SPECIAL CASE: append-only
-    if (mode === ACL.Write && await modeAllowed(ACL.Append, allowedAgentsForModes, task.webId, task.origin, task.rdfLayer)) {
+    if (mode === ACL.Write && await modeAllowed(ACL.Append, allowedAgentsForModes, task.webId, task.origin, task.storeManager)) {
       appendOnly = true
       debug('write was requested and is not allowed but append is; setting appendOnly to true')
       return

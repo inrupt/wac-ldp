@@ -1,9 +1,9 @@
 import Debug from 'debug'
 import rdf from 'rdf-ext'
-import { Member } from '../storage/Container'
-import { rdfToResourceData } from './rdfToResourceData'
-import { ResourceData, RdfType } from './ResourceDataUtils'
-import { LDP, RDF } from './rdf-constants'
+import { Member } from './Container'
+import { rdfToResourceData } from '../rdf/rdfToResourceData'
+import { ResourceData, RdfType } from '../rdf/ResourceDataUtils'
+import { LDP, RDF } from '../rdf/rdf-constants'
 
 const debug = Debug('membersListAsResourceData')
 

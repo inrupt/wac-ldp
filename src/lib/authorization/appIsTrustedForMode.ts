@@ -1,7 +1,7 @@
 
 import Debug from 'debug'
 import { ACL, RDF } from '../rdf/rdf-constants'
-import { RdfLayer } from '../rdf/RdfLayer'
+import { StoreManager } from '../rdf/StoreManager'
 
 const debug = Debug('appIsTrustedForMode')
 
@@ -17,12 +17,12 @@ export interface OriginCheckTask {
 
 // FIXME: It's weird that setAppModes is in the RDF module, but getAppModes is in the auth module.
 
-export async function getAppModes (webId: URL, origin: string, rdfLayer: RdfLayer): Promise<Array<URL>> {
+export async function getAppModes (webId: URL, origin: string, storeManager: StoreManager): Promise<Array<URL>> {
   // TODO: move this cache into a decorator pattern, see #81
   debug('checkOwnerProfile', webId.toString(), origin)
   if (!ownerProfilesCache[webId.toString()]) {
     debug('cache miss', webId.toString())
-    ownerProfilesCache[webId.toString()] = await rdfLayer.fetchGraph(webId)
+    ownerProfilesCache[webId.toString()] = await storeManager.fetchGraph(webId)
     if (!ownerProfilesCache[webId.toString()]) {
       return Promise.resolve([])
     }
@@ -85,8 +85,8 @@ export async function getAppModes (webId: URL, origin: string, rdfLayer: RdfLaye
   }
   return []
 }
-async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLayer: RdfLayer): Promise<boolean> {
-  const appModes = await getAppModes(webId, origin, rdfLayer)
+async function checkOwnerProfile (webId: URL, origin: string, mode: URL, storeManager: StoreManager): Promise<boolean> {
+  const appModes = await getAppModes(webId, origin, storeManager)
   for (let i = 0; i < appModes.length; i++) {
     if (appModes[i].toString() === mode.toString()) {
       return true
@@ -96,7 +96,7 @@ async function checkOwnerProfile (webId: URL, origin: string, mode: URL, rdfLaye
   return false
 }
 
-export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: RdfLayer): Promise<boolean> {
+export async function appIsTrustedForMode (task: OriginCheckTask, graphFetcher: StoreManager): Promise<boolean> {
   return new Promise((resolve, reject) => {
     setTimeout(() => {
       resolve(false)

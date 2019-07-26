@@ -1,10 +1,10 @@
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
-import { RdfLayer } from '../rdf/RdfLayer'
+import { StoreManager } from '../rdf/StoreManager'
 import { ResourceData } from '../rdf/ResourceDataUtils'
 
-export async function getResourceDataAndCheckETag (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer): Promise<ResourceData | undefined> {
-  const resourceData = await rdfLayer.getResourceData(wacLdpTask.fullUrl())
+export async function getResourceDataAndCheckETag (wacLdpTask: WacLdpTask, storeManager: StoreManager): Promise<ResourceData | undefined> {
+  const resourceData = await storeManager.getResourceData(wacLdpTask.fullUrl())
   if (resourceData) { // resource exists
     if (wacLdpTask.ifNoneMatchStar()) { // If-None-Match: * -> resource should not exist
       throw new ErrorResult(ResultType.PreconditionFailed)

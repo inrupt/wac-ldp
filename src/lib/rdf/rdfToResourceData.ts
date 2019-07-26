@@ -1,9 +1,6 @@
-import * as Stream from 'stream'
 import Debug from 'debug'
 import { makeResourceData, ResourceData, RdfType } from './ResourceDataUtils'
 import Formats from 'rdf-formats-common'
-import rdf from 'rdf-ext'
-import { Member } from '../storage/Container'
 
 const formats = Formats()
 const debug = Debug('rdfToResourceData')

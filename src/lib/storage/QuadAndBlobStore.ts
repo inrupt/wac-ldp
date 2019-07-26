@@ -1,8 +1,8 @@
 import Debug from 'debug'
 import { BlobTree, urlToPath, Path } from './BlobTree'
 import { Member } from './Container'
-import { membersListAsQuadStream } from '../rdf/membersListAsResourceData'
-import { quadStreamFromBlob } from '../rdf/RdfLayer'
+import { membersListAsQuadStream } from './membersListAsResourceData'
+import { quadStreamFromBlob } from '../rdf/StoreManager'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { RdfType, objectToStream } from '../rdf/ResourceDataUtils'
 
