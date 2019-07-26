@@ -14,7 +14,7 @@ import { setRootAcl, setPublicAcl } from './setRootAcl'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
-const debug = Debug('RdfLayer')
+const debug = Debug('StoreManager')
 
 export const ACL_SUFFIX = '.acl'
 
@@ -65,7 +65,7 @@ async function getGraphLocal (blob: Blob): Promise<any> {
   return rdf.dataset().import(quadStream)
 }
 
-export class RdfLayer {
+export class StoreManager {
   serverRootDomain: string
   storage: QuadAndBlobStore
   constructor (serverRootDomain: string, storage: QuadAndBlobStore) {

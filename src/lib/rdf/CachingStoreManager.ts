@@ -1,4 +1,4 @@
-import { RdfLayer } from './RdfLayer'
+import { StoreManager } from './StoreManager'
 import { Blob } from '../storage/Blob'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 import * as rdflib from 'rdflib'
@@ -9,7 +9,7 @@ import { WacLdpTask } from '../api/http/HttpParser'
 
 const debug = Debug('Caching RDF Layer')
 
-export class CachingRdfLayer extends RdfLayer {
+export class CachingStoreManager extends StoreManager {
   // FIXME: use one type of in-memory RDF store,
   // currently we use rdf-ext for GET, rdflib.js for PATCH, and Communica for SPARQL-GET
   graphs: { [url: string]: any }

@@ -2,7 +2,7 @@ import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
-import { RdfLayer } from '../rdf/RdfLayer'
+import { StoreManager } from '../rdf/StoreManager'
 import { AccessCheckTask, checkAccess } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
@@ -15,12 +15,12 @@ export const globReadHandler = {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
   },
   requiredAccessModes: [ ACL.Read ],
-  handle: async function (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+  handle: async function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // At this point will have checked read access over the
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
 
-    const containerMembers = await rdfLayer.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
+    const containerMembers = await storeManager.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
     const webId = await wacLdpTask.webId()
     const rdfSources: { [indexer: string]: ResourceData } = {}
     await Promise.all(containerMembers.map(async (member) => {
@@ -29,7 +29,7 @@ export const globReadHandler = {
         return
       }
       const blobUrl = new URL(member.name, wacLdpTask.fullUrl())
-      const data = await rdfLayer.getLocalBlob(blobUrl).getData()
+      const data = await storeManager.getLocalBlob(blobUrl).getData()
       const resourceData = await streamToObject(data)
       if (['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
         return
@@ -42,7 +42,7 @@ export const globReadHandler = {
             webId,
             origin: await wacLdpTask.origin(),
             requiredAccessModes: [ ACL.Read ],
-            rdfLayer
+            storeManager
           } as AccessCheckTask) // may throw if access is denied
         }
         rdfSources[member.name] = resourceData

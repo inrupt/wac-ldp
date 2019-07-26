@@ -5,7 +5,7 @@ import Debug from 'debug'
 
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
-import { RdfLayer } from '../rdf/RdfLayer'
+import { StoreManager } from '../rdf/StoreManager'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { applyQuery } from '../rdf/applyQuery'
@@ -16,8 +16,8 @@ const debug = Debug('write-blob-handler')
 export const writeBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobWrite),
   requiredAccessModes: [ ACL.Write ],
-  handle: async function (task: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
-    const resourceDataBefore = await getResourceDataAndCheckETag(task, rdfLayer)
+  handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+    const resourceDataBefore = await getResourceDataAndCheckETag(task, storeManager)
     const blobExists: boolean = !!resourceDataBefore
     debug('operation writeBlob!', blobExists)
     // see https://github.com/inrupt/wac-ldp/issues/61
@@ -32,7 +32,7 @@ export const writeBlobHandler = {
     const contentType: string | undefined = task.contentType()
     debug('contentType', contentType)
     const resourceData = makeResourceData(contentType ? contentType : '', await task.requestBody())
-    await rdfLayer.setData(task.fullUrl(), objectToStream(resourceData))
+    await storeManager.setData(task.fullUrl(), objectToStream(resourceData))
     debug('write blob handler changed a resource', task.fullUrl())
     return {
       resultType,

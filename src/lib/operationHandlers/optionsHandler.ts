@@ -2,7 +2,7 @@ import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { ResultType, WacLdpResponse } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
-import { RdfLayer } from '../rdf/RdfLayer'
+import { StoreManager } from '../rdf/StoreManager'
 
 const debug = Debug('options-handler')
 
@@ -11,7 +11,7 @@ export const optionsHandler = {
     return (wacLdpTask.wacLdpTaskType() === TaskType.getOptions)
   },
   requiredAccessModes: [],
-  handle: function (wacLdpTask: WacLdpTask, rdfLayer: RdfLayer, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+  handle: function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     return Promise.resolve({
       resultType: ResultType.OkayWithoutBody,
       resourceData: undefined,
