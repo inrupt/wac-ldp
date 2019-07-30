@@ -19,6 +19,8 @@ import { checkAccess, AccessCheckTask } from '../authorization/checkAccess'
 import { getAppModes } from '../authorization/appIsTrustedForMode'
 import { setAppModes } from '../rdf/setAppModes'
 import { BlobTree } from '../storage/BlobTree'
+import { AclManager } from '../authorization/AclManager'
+import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -49,6 +51,7 @@ export interface WacLdpOptions {
 export class WacLdp extends EventEmitter {
   aud: string
   storeManager: StoreManager
+  aclManager: AclManager
   updatesViaUrl: URL
   skipWac: boolean
   operationHandlers: Array<OperationHandler>
@@ -56,7 +59,10 @@ export class WacLdp extends EventEmitter {
   usesHttps: boolean
   constructor (options: WacLdpOptions) {
     super()
-    this.storeManager = new StoreManager(options.aud, options.storage)
+    const serverRootDomain: string = new URL(options.aud).host
+    debug({ serverRootDomain })
+    this.storeManager = new StoreManager(serverRootDomain, options.storage)
+    this.aclManager = new AclManager(this.storeManager)
     this.aud = options.aud
     this.updatesViaUrl = options.updatesViaUrl
     this.skipWac = options.skipWac
@@ -76,13 +82,13 @@ export class WacLdp extends EventEmitter {
     ]
   }
   setRootAcl (storageRoot: URL, owner: URL) {
-    return this.storeManager.setRootAcl(storageRoot, owner)
+    return this.aclManager.setRootAcl(storageRoot, owner)
   }
   setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
-    return this.storeManager.setPublicAcl(inboxUrl, owner, modeName)
+    return this.aclManager.setPublicAcl(inboxUrl, owner, modeName)
   }
   createLocalDocument (url: URL, contentType: string, body: string) {
-    return this.storeManager.createLocalDocument(url, contentType, body)
+    return this.storeManager.setRepresentation(url, objectToStream(makeResourceData(contentType, body)))
   }
   containerExists (url: URL) {
     return this.storeManager.getLocalContainer(url).exists()

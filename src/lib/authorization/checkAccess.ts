@@ -5,11 +5,12 @@ import { ACL } from '../rdf/rdf-constants'
 import Debug from 'debug'
 import { TaskType } from '../api/http/HttpParser'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { StoreManager, ACL_SUFFIX } from '../rdf/StoreManager'
+import { StoreManager } from '../rdf/StoreManager'
+import { ACL_SUFFIX, AclManager } from './AclManager'
 
 const debug = Debug('checkAccess')
 
-async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: StoreManager): Promise<boolean> {
+async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, storeManager: StoreManager): Promise<boolean> {
   // first check agent:
   const agents = (allowedAgentsForModes as any)[mode.toString()]
   const webIdAsString: string | undefined = (webId ? webId.toString() : undefined)
@@ -26,11 +27,12 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
     return true
   }
   // then check origin:
+  debug('checking origin!')
   return appIsTrustedForMode({
     origin,
     mode,
     resourceOwners: allowedAgentsForModes['http://www.w3.org/ns/auth/acl#Control'].map(str => new URL(str))
-  } as OriginCheckTask, graphFetcher)
+  } as OriginCheckTask, storeManager)
 }
 
 export interface AccessCheckTask {
@@ -73,7 +75,8 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
     baseResourceUrl = task.url
     resourceIsAclDocument = false
   }
-  const { aclGraph, targetUrl, contextUrl } = await task.storeManager.readAcl(baseResourceUrl)
+  const aclManager = new AclManager(task.storeManager)
+  const { aclGraph, targetUrl, contextUrl } = await aclManager.readAcl(baseResourceUrl)
   const resourceIsTarget = urlEquals(baseResourceUrl, targetUrl)
   debug('calling allowedAgentsForModes', 'aclGraph', resourceIsTarget, targetUrl.toString(), contextUrl.toString())
 

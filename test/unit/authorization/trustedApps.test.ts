@@ -26,22 +26,14 @@ test('finds acl:trustedApps nodes and their modes for a given owners list', asyn
     resourceOwners: [ new URL('https://michielbdejong.com/profile/card#me')]
   } as OriginCheckTask
 
-  const storeManager: unknown = {
-    fetchGraph: jest.fn(() => {
-      return readFixture(OWNER_PROFILE_FIXTURE)
-    })
-  }
-  const result = await appIsTrustedForMode(task, storeManager as StoreManager)
+  const storeManager = new StoreManager('example.com', {} as any)
+  const result = await appIsTrustedForMode(task, storeManager)
   expect(result).toEqual(true)
 })
 
 test('getTrustedAppModes', async () => {
-  const storeManager: unknown = {
-    fetchGraph: jest.fn(() => {
-      return readFixture('test/fixtures/owner-profile.ttl')
-    })
-  }
-  const modes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', storeManager as StoreManager)
+  const storeManager = new StoreManager('example.com', {} as any)
+  const modes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', storeManager)
 
   expect(JSON.stringify(modes)).toEqual(JSON.stringify([
     new URL('http://www.w3.org/ns/auth/acl#Append'),

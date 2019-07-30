@@ -15,17 +15,13 @@ function readFixture (filename: string): Promise<any> {
 }
 test('finds acl:accessTo modes for local agent group', async () => {
   const dataset = await readFixture('test/fixtures/aclDoc-agent-group.ttl')
-  const workGroupsGraph = await readFixture('test/fixtures/work-groups.ttl')
+  // const workGroupsGraph = await readFixture('test/fixtures/work-groups.ttl')
   const task: ModesCheckTask = {
     aclGraph: dataset,
     resourceIsTarget: true,
     contextUrl: new URL('https://example.com'),
     targetUrl: new URL('https://example.com'),
-    storeManager: {
-      fetchGraph: jest.fn(() => {
-        return workGroupsGraph
-      })
-    } as unknown as StoreManager
+    storeManager: new StoreManager('example.org', {} as any)
   }
   const result = await determineAllowedAgentsForModes(task)
   expect(result).toEqual({

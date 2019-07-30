@@ -30,7 +30,7 @@ test('delete blob', async () => {
     method: 'DELETE',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   const result: WacLdpResponse = await deleteBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
@@ -92,7 +92,7 @@ test('delete container', async () => {
     method: 'GET',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   const result: WacLdpResponse = await deleteContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
@@ -117,7 +117,7 @@ test('read blob (omit body)', async () => {
     url: '/foo',
     method: 'HEAD'
   } as http.IncomingMessage, true)
-  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   const result: WacLdpResponse = await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
@@ -148,7 +148,7 @@ test('read blob (with body)', async () => {
     url: '/foo',
     method: 'GET'
   } as http.IncomingMessage, true)
-  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   const result: WacLdpResponse = await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
@@ -163,6 +163,66 @@ test('read blob (with body)', async () => {
     },
     resultType: ResultType.OkayWithBody
   })
+})
+
+test('read blob (if-none-match 304)', async () => {
+  // see https://github.com/inrupt/wac-ldp/issues/114
+  const node: Blob = {
+    getData: jest.fn(() => {
+      return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
+    }),
+    exists: () => true
+  } as unknown as Blob
+  const storage = {
+    getBlob: () => node
+  } as unknown
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo',
+    method: 'GET',
+    headers: {
+      'if-none-match': '"Eo7PVCo1rFJwqH3HQJGEBA=="'
+    }
+  } as http.IncomingMessage, true)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
+  expect.assertions(2)
+  await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
+    expect(e.resultType).toEqual(ResultType.NotModified)
+  })
+
+  // FIXME: Why does it call getData twice?
+  expect((node as any).getData.mock.calls).toEqual([
+    []
+  ])
+})
+
+test('write blob (if-none-match 412)', async () => {
+  // see https://github.com/inrupt/wac-ldp/issues/114
+  const node: Blob = {
+    getData: jest.fn(() => {
+      return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
+    }),
+    exists: () => true
+  } as unknown as Blob
+  const storage = {
+    getBlob: () => node
+  } as unknown
+  const task = new WacLdpTask('https://example.com', {
+    url: '/foo',
+    method: 'PUT',
+    headers: {
+      'if-none-match': '"Eo7PVCo1rFJwqH3HQJGEBA=="'
+    }
+  } as http.IncomingMessage, true)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
+  expect.assertions(2)
+  await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
+    expect(e.resultType).toEqual(ResultType.PreconditionFailed)
+  })
+
+  // FIXME: Why does it call getData twice?
+  expect((node as any).getData.mock.calls).toEqual([
+    []
+  ])
 })
 
 test('read container (omit body)', async () => {
@@ -180,7 +240,7 @@ test('read container (omit body)', async () => {
     method: 'HEAD',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   const result: WacLdpResponse = await readContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
@@ -217,7 +277,7 @@ test('read container (with body)', async () => {
     method: 'GET',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new StoreManager('https://example.com', storage as QuadAndBlobStore)
+  const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   const result: WacLdpResponse = await readContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []

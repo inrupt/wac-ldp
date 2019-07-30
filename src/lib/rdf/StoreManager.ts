@@ -8,18 +8,49 @@ import * as rdflib from 'rdflib'
 
 import { Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream } from './ResourceDataUtils'
+import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
-import { setRootAcl, setPublicAcl } from './setRootAcl'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
 const debug = Debug('StoreManager')
 
-export const ACL_SUFFIX = '.acl'
-
 export function getEmptyGraph () {
   return rdf.dataset()
+}
+
+export interface RdfNode {
+  value: string
+}
+
+export function stringToRdfNode (str: string): RdfNode {
+  return rdflib.sym(str)
+}
+
+export function urlToRdfNode (url: URL): RdfNode {
+  return stringToRdfNode(url.toString())
+}
+
+export function rdfNodeToString (rdfNode: RdfNode): string {
+  return rdfNode.value
+}
+
+export function rdfNodeToUrl (rdfNode: RdfNode): URL {
+  return new URL(rdfNodeToString(rdfNode))
+}
+
+export interface Pattern {
+  subject?: RdfNode
+  predicate?: RdfNode
+  object?: RdfNode
+  why: RdfNode
+}
+
+export interface Quad {
+  subject: RdfNode
+  predicate: RdfNode
+  object: RdfNode
+  why: RdfNode
 }
 
 function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
@@ -60,7 +91,7 @@ export async function quadStreamFromBlob (blob: Blob): Promise<any> {
   return quadStream
 }
 
-async function getGraphLocal (blob: Blob): Promise<any> {
+export async function getGraphLocal (blob: Blob): Promise<any> {
   const quadStream = await quadStreamFromBlob(blob)
   return rdf.dataset().import(quadStream)
 }
@@ -71,15 +102,12 @@ export class StoreManager {
   stores: { [url: string]: any }
 
   constructor (serverRootDomain: string, storage: QuadAndBlobStore) {
+    if (serverRootDomain.indexOf('/') !== -1) {
+      throw new Error('serverRootDomain should be just the FQDN, no https:// in front')
+    }
     this.serverRootDomain = serverRootDomain
     this.storage = storage
     this.stores = {}
-  }
-  setRootAcl (storageRoot: URL, owner: URL) {
-    return setRootAcl(this.storage, owner, storageRoot)
-  }
-  setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
-    return setPublicAcl(this.storage, owner, inboxUrl, modeName)
   }
   getLocalBlob (url: URL): Blob {
     return this.storage.getBlob(url)
@@ -87,109 +115,67 @@ export class StoreManager {
   getLocalContainer (url: URL): Container {
     return this.storage.getContainer(url)
   }
-  async fetchGraph (url: URL) {
+  async statementsMatching (pattern: Pattern) {
+    debug('statementsMatching', pattern)
+    await this.load(rdfNodeToUrl(pattern.why))
+    debug(this.stores[rdfNodeToString(pattern.why)])
+    const ret = this.stores[rdfNodeToString(pattern.why)].statementsMatching(
+      pattern.subject,
+      pattern.predicate,
+      pattern.object,
+      pattern.why)
+    debug(ret)
+    return ret
+  }
+  async getRepresentation (url: URL): Promise<ResourceData | undefined> {
+    debug('getResourceData - local?', url.host, this.serverRootDomain)
     if (url.host.endsWith(this.serverRootDomain)) {
+      debug('getResourceData local!', url.toString())
       const blob: Blob = this.getLocalBlob(url)
-      debug('fetching graph locally')
-      return getGraphLocal(blob)
+      const data = await blob.getData()
+      if (data) {
+        return streamToObject(data)
+      }
     } else {
       debug('calling node-fetch', url.toString())
       const response: any = await fetch(url.toString())
-      const rdfType = determineRdfType(response.headers.get('content-type'))
-      const quadStream = readRdf(rdfType, response as unknown as ReadableStream)
-      const dataset = await rdf.dataset().import(quadStream)
-      debug('got dataset')
-      return dataset
+      const contentType = response.headers.get('content-type')
+      const etag = response.headers.get('etag')
+      const rdfType = determineRdfType(contentType)
+      const body = (await streamToBuffer(response as unknown as ReadableStream)).toString()
+      return { contentType, body, etag, rdfType }
     }
   }
-  async getResourceData (url: URL): Promise<ResourceData | undefined> {
-    debug('getResourceData!', url.toString())
-    const blob: Blob = this.getLocalBlob(url)
-    const data = await blob.getData()
-    if (data) {
-      return streamToObject(data)
-    }
-  }
-  setData (url: URL, stream: ReadableStream) {
+  setRepresentation (url: URL, stream: ReadableStream) {
     const blob: Blob = this.getLocalBlob(url)
     return blob.setData(stream)
   }
-  async createLocalDocument (url: URL, contentType: string, body: string) {
-    return this.setData(url, objectToStream(makeResourceData(contentType, body)))
-  }
-
-  //  cases:
-  // * request path foo/bar/
-  // * resource path foo/bar/
-  //   * acl path foo/bar/.acl
-  //   * acl path foo/.acl (filter on acl:default)
-  // * request path foo/bar/baz
-  // * resource path foo/bar/baz
-  //   * acl path foo/bar/baz.acl
-  //   * acl path foo/bar/.acl (filter on acl:default)
-  // * request path foo/bar/.acl
-  // * resource path foo/bar/
-  //   * acl path foo/bar/.acl (look for acl:Control)
-  //   * acl path foo/.acl (filter on acl:default, look for acl:Control)
-  // * request path foo/bar/baz.acl
-  // * resource path foo/bar/baz
-  //   * acl path foo/bar/baz.acl (look for acl:Control)
-  //   * acl path foo/bar/.acl (filter on acl:default, look for acl:Control)
-
-  // this method should act on the resource path (not the request path) and
-  // filter on acl:default and just give the ACL triples that
-  // apply for the resource path, so that the acl path becomes irrelevant
-  // from there on.
-  // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
-  // from storage
-  async readAcl (resourceUrl: URL): Promise<{ aclGraph: any, targetUrl: URL, contextUrl: URL }> {
-    debug('readAcl', resourceUrl.toString())
-    const resourcePath = urlToPath(resourceUrl)
-    let currentGuessPath = resourcePath
-    let currentIsContainer = resourcePath.isContainer
-    let aclDocPath = (resourcePath.isContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
-    debug('aclDocPath from resourcePath', resourcePath, aclDocPath)
-    let isAdjacent = true
-    let currentGuessBlob = this.storage.getBlobAtPath(aclDocPath)
-    let currentGuessBlobExists = await currentGuessBlob.exists()
-    debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
-    while (!currentGuessBlobExists) {
-      if (currentGuessPath.isRoot()) {
-        // root ACL, nobody has access:
-        return { aclGraph: getEmptyGraph(), targetUrl: currentGuessPath.toUrl(), contextUrl: aclDocPath.toUrl() }
-      }
-      currentGuessPath = currentGuessPath.toParent()
-      isAdjacent = false
-      currentIsContainer = true
-      aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
-      currentGuessBlob = this.storage.getBlobAtPath(aclDocPath)
-      currentGuessBlobExists = await currentGuessBlob.exists()
-      debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
+  async load (url: URL) {
+    if (this.stores[url.toString()]) {
+      // to do: check if cache needs to be refreshed once in a while
+      return
     }
-    return {
-      aclGraph: await getGraphLocal(currentGuessBlob),
-      targetUrl: currentGuessPath.toUrl(),
-      contextUrl: aclDocPath.toUrl()
-    }
-  }
-
-  async applyPatch (resourceData: ResourceData, sparqlQuery: string, fullUrl: URL, appendOnly: boolean) {
-    if (!this.stores[fullUrl.toString()]) {
-      this.stores[fullUrl.toString()] = rdflib.graph()
+    const resourceData = await this.getRepresentation(url)
+    this.stores[url.toString()] = rdflib.graph()
+    if (resourceData) {
       const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
-      parse(resourceData.body, this.stores[fullUrl.toString()], fullUrl.toString(), resourceData.contentType)
+      parse(resourceData.body, this.stores[url.toString()], url.toString(), resourceData.contentType)
     }
-    debug('before patch', this.stores[fullUrl.toString()].toNT())
+  }
+
+  async patch (url: URL, sparqlQuery: string, appendOnly: boolean) {
+    await this.load(url)
+    debug('before patch', this.stores[url.toString()].toNT())
 
     const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
-    const patchObject = sparqlUpdateParser(sparqlQuery, rdflib.graph(), fullUrl.toString())
+    const patchObject = sparqlUpdateParser(sparqlQuery, rdflib.graph(), url.toString())
     debug('patchObject', patchObject)
     if (appendOnly && typeof patchObject.delete !== 'undefined') {
       debug('appendOnly and patch contains deletes')
       throw new ErrorResult(ResultType.AccessDenied)
     }
     await new Promise((resolve, reject) => {
-      this.stores[fullUrl.toString()].applyPatch(patchObject, this.stores[fullUrl.toString()].sym(fullUrl), (err: Error) => {
+      this.stores[url.toString()].applyPatch(patchObject, this.stores[url.toString()].sym(url), (err: Error) => {
         if (err) {
           reject(err)
         } else {
@@ -197,36 +183,10 @@ export class StoreManager {
         }
       })
     })
-    debug('after patch', this.stores[fullUrl.toString()].toNT())
-    return rdflib.serialize(undefined, this.stores[fullUrl.toString()], fullUrl, 'text/turtle')
+    debug('after patch', this.stores[url.toString()].toNT())
+    return rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
   }
   flushCache (url: URL) {
-    // no caching here
+    delete this.stores[url.toString()]
   }
 }
-
-// Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
-
-// # Root ACL resource for the user account
-// @prefix acl: <http://www.w3.org/ns/auth/acl#>.
-
-// <#owner>
-//     a acl:Authorization;
-
-//     acl:agent <https://michielbdejong.inrupt.net/profile/card#me> ;
-
-//     # Optional owner email, to be used for account recovery:
-//     acl:agent <mailto:michiel@unhosted.org>;
-
-//     # Set the access to the root storage folder itself
-//     acl:accessTo </>;
-
-//     # All resources will inherit this authorization, by default
-//     acl:defaultForNew </>;
-
-//     # The owner has all of the access modes allowed
-//     acl:mode
-//         acl:Read, acl:Write, acl:Control.
-
-// # Data is private by default; no other agents get access unless specifically
-// # authorized in other .acls
