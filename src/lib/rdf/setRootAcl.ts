@@ -1,5 +1,5 @@
 import { makeResourceData, bufferToStream } from './ResourceDataUtils'
-import { ACL_SUFFIX } from '../authorization/AclFinder'
+import { ACL_SUFFIX } from '../authorization/AclManager'
 import { urlToPath } from '../storage/BlobTree'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 

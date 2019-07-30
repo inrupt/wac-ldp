@@ -10,7 +10,6 @@ import { Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
-import { setRootAcl, setPublicAcl } from './setRootAcl'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
@@ -72,12 +71,6 @@ export class StoreManager {
     this.serverRootDomain = serverRootDomain
     this.storage = storage
     this.stores = {}
-  }
-  setRootAcl (storageRoot: URL, owner: URL) {
-    return setRootAcl(this.storage, owner, storageRoot)
-  }
-  setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
-    return setPublicAcl(this.storage, owner, inboxUrl, modeName)
   }
   getLocalBlob (url: URL): Blob {
     return this.storage.getBlob(url)

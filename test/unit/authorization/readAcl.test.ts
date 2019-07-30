@@ -1,6 +1,6 @@
 import * as fs from 'fs'
 import { StoreManager } from '../../../src/lib/rdf/StoreManager'
-import { readAcl } from '../../../src/lib/authorization/AclFinder'
+import { AclManager } from '../../../src/lib/authorization/AclManager'
 import { urlToPath } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
 import { RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
@@ -37,6 +37,7 @@ const storage = {
   })
 }
 const storeManager = new StoreManager('https://localhost:8080', storage as unknown as QuadAndBlobStore)
+const aclManager = new AclManager(storeManager)
 
 const quadsExpected = {
   'v1/localhost:8080/foo/.acl': [
@@ -97,7 +98,7 @@ afterEach(() => {
 
 test('reads an adjacent ACL doc for a container (Turtle)', async () => {
   const url = new URL('https://localhost:8080/foo/bar/')
-  let { aclGraph } = await readAcl(url, storeManager)
+  let { aclGraph } = await aclManager.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -111,7 +112,7 @@ test('reads an adjacent ACL doc for a container (Turtle)', async () => {
 
 test('reads an adjacent ACL doc for a container (JSON-LD))', async () => {
   const url = new URL('https://localhost:8080/foo/jay/')
-  let { aclGraph } = await readAcl(url, storeManager)
+  let { aclGraph } = await aclManager.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -125,7 +126,7 @@ test('reads an adjacent ACL doc for a container (JSON-LD))', async () => {
 
 test('reads an adjacent ACL doc for a non-container', async () => {
   const url = new URL('https://localhost:8080/foo/bar/baz')
-  const { aclGraph } = await readAcl(url, storeManager)
+  const { aclGraph } = await aclManager.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -138,7 +139,7 @@ test('reads an adjacent ACL doc for a non-container', async () => {
 
 test('falls back to parent ACL doc for a container', async () => {
   const url = new URL('https://localhost:8080/foo/bar/no/')
-  const { aclGraph } = await readAcl(url, storeManager)
+  const { aclGraph } = await aclManager.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -152,7 +153,7 @@ test('falls back to parent ACL doc for a container', async () => {
 
 test('falls back to container ACL doc for a non-container', async () => {
   const url = new URL('https://localhost:8080/foo/bar/no')
-  const { aclGraph } = await readAcl(url, storeManager)
+  const { aclGraph } = await aclManager.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -166,7 +167,7 @@ test('falls back to container ACL doc for a non-container', async () => {
 
 test('falls back to ancestor ACL doc for a container', async () => {
   const url = new URL('https://localhost:8080/foo/no/no/')
-  const { aclGraph } = await readAcl(url, storeManager)
+  const { aclGraph } = await aclManager.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())
@@ -181,7 +182,7 @@ test('falls back to ancestor ACL doc for a container', async () => {
 
 test('falls back to ancestor ACL doc for a non-container', async () => {
   const url = new URL('https://localhost:8080/foo/no/no')
-  const { aclGraph } = await readAcl(url, storeManager)
+  const { aclGraph } = await aclManager.readAcl(url)
   const quads: Array<string> = []
   aclGraph.forEach((quad: string) => {
     quads.push(quad.toString())

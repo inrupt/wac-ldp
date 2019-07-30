@@ -6,7 +6,7 @@ import Debug from 'debug'
 import { TaskType } from '../api/http/HttpParser'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { StoreManager } from '../rdf/StoreManager'
-import { ACL_SUFFIX, readAcl } from './AclFinder'
+import { ACL_SUFFIX, AclManager } from './AclManager'
 
 const debug = Debug('checkAccess')
 
@@ -74,7 +74,8 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
     baseResourceUrl = task.url
     resourceIsAclDocument = false
   }
-  const { aclGraph, targetUrl, contextUrl } = await readAcl(baseResourceUrl, task.storeManager)
+  const aclManager = new AclManager(task.storeManager)
+  const { aclGraph, targetUrl, contextUrl } = await aclManager.readAcl(baseResourceUrl)
   const resourceIsTarget = urlEquals(baseResourceUrl, targetUrl)
   debug('calling allowedAgentsForModes', 'aclGraph', resourceIsTarget, targetUrl.toString(), contextUrl.toString())
 
