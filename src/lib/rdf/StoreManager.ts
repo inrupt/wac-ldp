@@ -146,12 +146,9 @@ export class StoreManager {
       return { contentType, body, etag, rdfType }
     }
   }
-  setData (url: URL, stream: ReadableStream) {
+  setRepresentation (url: URL, stream: ReadableStream) {
     const blob: Blob = this.getLocalBlob(url)
     return blob.setData(stream)
-  }
-  async createLocalDocument (url: URL, contentType: string, body: string) {
-    return this.setData(url, objectToStream(makeResourceData(contentType, body)))
   }
   async load (url: URL) {
     if (this.stores[url.toString()]) {
@@ -193,29 +190,3 @@ export class StoreManager {
     delete this.stores[url.toString()]
   }
 }
-
-// Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
-
-// # Root ACL resource for the user account
-// @prefix acl: <http://www.w3.org/ns/auth/acl#>.
-
-// <#owner>
-//     a acl:Authorization;
-
-//     acl:agent <https://michielbdejong.inrupt.net/profile/card#me> ;
-
-//     # Optional owner email, to be used for account recovery:
-//     acl:agent <mailto:michiel@unhosted.org>;
-
-//     # Set the access to the root storage folder itself
-//     acl:accessTo </>;
-
-//     # All resources will inherit this authorization, by default
-//     acl:defaultForNew </>;
-
-//     # The owner has all of the access modes allowed
-//     acl:mode
-//         acl:Read, acl:Write, acl:Control.
-
-// # Data is private by default; no other agents get access unless specifically
-// # authorized in other .acls

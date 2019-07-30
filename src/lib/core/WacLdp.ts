@@ -20,6 +20,7 @@ import { getAppModes } from '../authorization/appIsTrustedForMode'
 import { setAppModes } from '../rdf/setAppModes'
 import { BlobTree } from '../storage/BlobTree'
 import { AclManager } from '../authorization/AclManager'
+import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -87,7 +88,7 @@ export class WacLdp extends EventEmitter {
     return this.aclManager.setPublicAcl(inboxUrl, owner, modeName)
   }
   createLocalDocument (url: URL, contentType: string, body: string) {
-    return this.storeManager.createLocalDocument(url, contentType, body)
+    return this.storeManager.setRepresentation(url, objectToStream(makeResourceData(contentType, body)))
   }
   containerExists (url: URL) {
     return this.storeManager.getLocalContainer(url).exists()
