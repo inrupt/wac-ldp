@@ -5,7 +5,7 @@ import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
 
-import { streamToObject } from '../rdf/ResourceDataUtils'
+import { streamToObject, ResourceData } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../storage/membersListAsResourceData'
@@ -17,20 +17,9 @@ export const readContainerHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
   requiredAccessModes: [ ACL.Read ],
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
-    let container: any
-    container = storeManager.getLocalContainer(task.fullUrl())
-
-    debug('operation readContainer!')
-    debug(container)
-    let membersList: Array<Member>
-    if (task.preferMinimalContainer()) {
-      membersList = []
-    } else {
-      membersList = await container.getMembers()
-    }
-    debug(membersList)
-    const resourceData = await membersListAsResourceData(task.fullUrl(), membersList, task.rdfType())
-    debug(resourceData)
+    const resourceData: ResourceData | undefined = await storeManager.getRepresentation(task.fullUrl(), {
+      preferMinimalContainer: task.preferMinimalContainer()
+    })
     return {
       resultType: (task.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
       resourceData,

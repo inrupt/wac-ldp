@@ -91,7 +91,7 @@ export class WacLdp extends EventEmitter {
     return this.storeManager.setRepresentation(url, objectToStream(makeResourceData(contentType, body)))
   }
   containerExists (url: URL) {
-    return this.storeManager.getLocalContainer(url).exists()
+    return this.storeManager.containerExists(url)
   }
   async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {

@@ -4,7 +4,7 @@ import { Member } from './Container'
 import { membersListAsQuadStream } from './membersListAsResourceData'
 import { quadStreamFromBlob } from '../rdf/StoreManager'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
-import { RdfType, objectToStream } from '../rdf/ResourceDataUtils'
+import { RdfType, objectToStream, streamToObject, bufferToStream } from '../rdf/ResourceDataUtils'
 
 const debug = Debug('quad-and-blob-store')
 
@@ -22,6 +22,26 @@ export class QuadAndBlobStore {
   }
   getContainer (url: URL) {
     return this.storage.getContainer(urlToPath(url))
+  }
+  async getMetaData (url: URL) {
+    if (url.toString().substr(-1) === '/') {
+      const container = this.storage.getContainer(urlToPath(url))
+      return {
+        exists: container.exists(),
+        isContainer: true
+      }
+    } else {
+      const blob = this.storage.getBlob(urlToPath(url))
+      const resourceData = await streamToObject(await blob.getData())
+      return {
+        exists: blob.exists(),
+        isContainer: false,
+        contentType: resourceData.contentType,
+        etag: resourceData.etag,
+        body: bufferToStream(resourceData.body)
+      }
+
+    }
   }
   async getQuadStream (url: URL, preferMinimalContainer?: boolean): Promise<any> {
     const path = urlToPath(url)

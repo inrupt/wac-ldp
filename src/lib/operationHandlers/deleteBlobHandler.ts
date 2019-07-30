@@ -18,8 +18,7 @@ export const deleteBlobHandler = {
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceDataBefore = await getResourceDataAndCheckETag(task, storeManager)
     debug('operation deleteBlob!')
-    const blob = storeManager.getLocalBlob(task.fullUrl())
-    await blob.delete()
+    await storeManager.deleteResource(task.fullUrl())
     return {
       resultType: ResultType.OkayWithoutBody,
       resourcesChanged: [ task.fullUrl() ]

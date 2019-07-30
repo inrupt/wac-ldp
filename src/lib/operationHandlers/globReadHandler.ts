@@ -20,7 +20,7 @@ export const globReadHandler = {
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
 
-    const containerMembers = await storeManager.getLocalContainer(wacLdpTask.fullUrl()).getMembers()
+    const containerMembers = await storeManager.getMembers(wacLdpTask.fullUrl())
     const webId = await wacLdpTask.webId()
     const rdfSources: { [indexer: string]: ResourceData } = {}
     await Promise.all(containerMembers.map(async (member) => {
@@ -29,8 +29,10 @@ export const globReadHandler = {
         return
       }
       const blobUrl = new URL(member.name, wacLdpTask.fullUrl())
-      const data = await storeManager.getLocalBlob(blobUrl).getData()
-      const resourceData = await streamToObject(data)
+      const resourceData = await storeManager.getRepresentation(blobUrl)
+      if (!resourceData) {
+        throw new ErrorResult(ResultType.NotFound)
+      }
       if (['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
         return
       }

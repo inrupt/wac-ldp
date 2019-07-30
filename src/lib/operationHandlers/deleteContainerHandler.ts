@@ -17,12 +17,7 @@ export const deleteContainerHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerDelete),
   requiredAccessModes: [ ACL.Write ],
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
-    let container: any
-    container = storeManager.getLocalContainer(task.fullUrl())
-
-    debug('operation deleteContainer!')
-    debug(container)
-    await container.delete()
+    await storeManager.deleteResource(task.fullUrl())
     return {
       resultType: ResultType.OkayWithoutBody,
       resourcesChanged: [ task.fullUrl() ]

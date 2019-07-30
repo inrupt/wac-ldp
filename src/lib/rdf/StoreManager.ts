@@ -9,7 +9,7 @@ import * as rdflib from 'rdflib'
 import { Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
 import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer } from './ResourceDataUtils'
-import { Container } from '../storage/Container'
+import { Container, Member } from '../storage/Container'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
@@ -96,6 +96,10 @@ export async function getGraphLocal (blob: Blob): Promise<any> {
   return rdf.dataset().import(quadStream)
 }
 
+function requiresTranslation (metaData: any, options: any) {
+  return false
+}
+
 export class StoreManager {
   serverRootDomain: string
   storage: QuadAndBlobStore
@@ -109,11 +113,17 @@ export class StoreManager {
     this.storage = storage
     this.stores = {}
   }
-  getLocalBlob (url: URL): Blob {
-    return this.storage.getBlob(url)
+  deleteResource (url: URL): Promise<void> {
+    const blob = this.storage.getBlob(url)
+    return blob.delete()
   }
-  getLocalContainer (url: URL): Container {
-    return this.storage.getContainer(url)
+  getMembers (url: URL): Promise<Array<Member>> {
+    const container = this.storage.getContainer(url)
+    return container.getMembers()
+  }
+  containerExists (url: URL): Promise<boolean> {
+    const container = this.storage.getContainer(url)
+    return container.exists()
   }
   async statementsMatching (pattern: Pattern) {
     debug('statementsMatching', pattern)
@@ -127,27 +137,62 @@ export class StoreManager {
     debug(ret)
     return ret
   }
-  async getRepresentation (url: URL): Promise<ResourceData | undefined> {
-    debug('getResourceData - local?', url.host, this.serverRootDomain)
-    if (url.host.endsWith(this.serverRootDomain)) {
-      debug('getResourceData local!', url.toString())
-      const blob: Blob = this.getLocalBlob(url)
-      const data = await blob.getData()
-      if (data) {
-        return streamToObject(data)
-      }
-    } else {
-      debug('calling node-fetch', url.toString())
-      const response: any = await fetch(url.toString())
-      const contentType = response.headers.get('content-type')
-      const etag = response.headers.get('etag')
-      const rdfType = determineRdfType(contentType)
-      const body = (await streamToBuffer(response as unknown as ReadableStream)).toString()
-      return { contentType, body, etag, rdfType }
+  getRepresentationFromStore (url: URL): ResourceData {
+    const body = rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
+    // const body = this.stores[url.toString()].toNT()
+    return makeResourceData('text/turtle', body)
+  }
+
+  async getRepresentationFromRemote (url: URL): Promise<ResourceData> {
+    debug('calling node-fetch', url.toString())
+    const response: any = await fetch(url.toString())
+    const contentType = response.headers.get('content-type')
+    const etag = response.headers.get('etag')
+    const rdfType = determineRdfType(contentType)
+    const body = (await streamToBuffer(response as unknown as ReadableStream)).toString()
+    return { contentType, body, etag, rdfType }
+  }
+  // cases:
+  // 1. from cache
+  // 2. remote
+  // 3. container
+  // 4. translate
+  // 5. stream
+  async getRepresentation (url: URL, options?: any): Promise<ResourceData | undefined> {
+    // if cache miss, fetch metadata
+    // if container, serialize quads without caching (we currently don't cache local containers)
+    // if non-container LDP-RS, and requires translation, load and serialize
+    // otherwise stream body
+
+    // 1. check the cache
+    if (this.stores[url.toString()]) {
+      return this.getRepresentationFromStore(url)
     }
+
+    // 2. check remote
+    debug('getResourceData - local?', url.host, this.serverRootDomain)
+    if (!url.host.endsWith(this.serverRootDomain)) {
+      return this.getRepresentationFromRemote(url)
+    }
+    // 3. container
+    const metaData = await this.storage.getMetaData(url)
+    if (metaData.isContainer) {
+      const quadStream = this.storage.getQuadStream(url, (options && options.preferMinimalContainer))
+      const data = rdflib.serialize(undefined, rdflib.graph(), url, 'text/turtle')
+      return makeResourceData('text/turtle', data)
+    }
+
+    // 4. translate
+    if (requiresTranslation(metaData, options)) {
+      await this.load(url)
+      return this.getRepresentationFromStore(url)
+    }
+
+    // 5. stream
+    return makeResourceData(metaData.contentType, (await streamToBuffer(metaData.body)).toString())
   }
   setRepresentation (url: URL, stream: ReadableStream) {
-    const blob: Blob = this.getLocalBlob(url)
+    const blob: Blob = this.storage.getBlob(url)
     return blob.setData(stream)
   }
   async load (url: URL) {
@@ -161,6 +206,10 @@ export class StoreManager {
       const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
       parse(resourceData.body, this.stores[url.toString()], url.toString(), resourceData.contentType)
     }
+  }
+  save (url: URL) {
+    const resourceData = this.getRepresentationFromStore(url)
+    return this.storage.getBlob(url).setData(objectToStream(resourceData))
   }
 
   async patch (url: URL, sparqlQuery: string, appendOnly: boolean) {
@@ -184,7 +233,6 @@ export class StoreManager {
       })
     })
     debug('after patch', this.stores[url.toString()].toNT())
-    return rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
   }
   flushCache (url: URL) {
     delete this.stores[url.toString()]
