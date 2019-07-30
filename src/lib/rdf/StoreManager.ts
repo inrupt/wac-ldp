@@ -16,8 +16,6 @@ import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 
 const debug = Debug('StoreManager')
 
-export const ACL_SUFFIX = '.acl'
-
 export function getEmptyGraph () {
   return rdf.dataset()
 }
@@ -60,7 +58,7 @@ export async function quadStreamFromBlob (blob: Blob): Promise<any> {
   return quadStream
 }
 
-async function getGraphLocal (blob: Blob): Promise<any> {
+export async function getGraphLocal (blob: Blob): Promise<any> {
   const quadStream = await quadStreamFromBlob(blob)
   return rdf.dataset().import(quadStream)
 }
@@ -116,61 +114,6 @@ export class StoreManager {
   }
   async createLocalDocument (url: URL, contentType: string, body: string) {
     return this.setData(url, objectToStream(makeResourceData(contentType, body)))
-  }
-
-  //  cases:
-  // * request path foo/bar/
-  // * resource path foo/bar/
-  //   * acl path foo/bar/.acl
-  //   * acl path foo/.acl (filter on acl:default)
-  // * request path foo/bar/baz
-  // * resource path foo/bar/baz
-  //   * acl path foo/bar/baz.acl
-  //   * acl path foo/bar/.acl (filter on acl:default)
-  // * request path foo/bar/.acl
-  // * resource path foo/bar/
-  //   * acl path foo/bar/.acl (look for acl:Control)
-  //   * acl path foo/.acl (filter on acl:default, look for acl:Control)
-  // * request path foo/bar/baz.acl
-  // * resource path foo/bar/baz
-  //   * acl path foo/bar/baz.acl (look for acl:Control)
-  //   * acl path foo/bar/.acl (filter on acl:default, look for acl:Control)
-
-  // this method should act on the resource path (not the request path) and
-  // filter on acl:default and just give the ACL triples that
-  // apply for the resource path, so that the acl path becomes irrelevant
-  // from there on.
-  // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
-  // from storage
-  async readAcl (resourceUrl: URL): Promise<{ aclGraph: any, targetUrl: URL, contextUrl: URL }> {
-    debug('readAcl', resourceUrl.toString())
-    const resourcePath = urlToPath(resourceUrl)
-    let currentGuessPath = resourcePath
-    let currentIsContainer = resourcePath.isContainer
-    let aclDocPath = (resourcePath.isContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
-    debug('aclDocPath from resourcePath', resourcePath, aclDocPath)
-    let isAdjacent = true
-    let currentGuessBlob = this.storage.getBlobAtPath(aclDocPath)
-    let currentGuessBlobExists = await currentGuessBlob.exists()
-    debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
-    while (!currentGuessBlobExists) {
-      if (currentGuessPath.isRoot()) {
-        // root ACL, nobody has access:
-        return { aclGraph: getEmptyGraph(), targetUrl: currentGuessPath.toUrl(), contextUrl: aclDocPath.toUrl() }
-      }
-      currentGuessPath = currentGuessPath.toParent()
-      isAdjacent = false
-      currentIsContainer = true
-      aclDocPath = (currentIsContainer ? currentGuessPath.toChild(ACL_SUFFIX, false) : currentGuessPath.appendSuffix(ACL_SUFFIX))
-      currentGuessBlob = this.storage.getBlobAtPath(aclDocPath)
-      currentGuessBlobExists = await currentGuessBlob.exists()
-      debug('aclDocPath', aclDocPath.toString(), currentGuessBlobExists)
-    }
-    return {
-      aclGraph: await getGraphLocal(currentGuessBlob),
-      targetUrl: currentGuessPath.toUrl(),
-      contextUrl: aclDocPath.toUrl()
-    }
   }
 
   async applyPatch (resourceData: ResourceData, sparqlQuery: string, fullUrl: URL, appendOnly: boolean) {

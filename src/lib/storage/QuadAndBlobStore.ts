@@ -16,6 +16,7 @@ export class QuadAndBlobStore {
   getBlob (url: URL) {
     return this.storage.getBlob(urlToPath(url))
   }
+  // undocumented shortcut, see https://github.com/inrupt/wac-ldp/issues/124
   getBlobAtPath (path: Path) {
     return this.storage.getBlob(path)
   }
