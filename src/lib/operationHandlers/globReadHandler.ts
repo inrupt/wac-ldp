@@ -20,7 +20,11 @@ export const globReadHandler = {
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
 
-    const containerMembers = await storeManager.getMembers(wacLdpTask.fullUrl())
+    const metaData = await storeManager.getMetaData(wacLdpTask.fullUrl())
+    if (!metaData) {
+      throw new ErrorResult(ResultType.NotFound)
+    }
+    const containerMembers = (metaData.getMembers ? await metaData.getMembers() : [])
     const webId = await wacLdpTask.webId()
     const rdfSources: { [indexer: string]: ResourceData } = {}
     await Promise.all(containerMembers.map(async (member) => {

@@ -11,14 +11,25 @@ import { Blob } from '../storage/Blob'
 import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer } from './ResourceDataUtils'
 import { Container, Member } from '../storage/Container'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
-import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
+import { QuadAndBlobStore, MetaData } from '../storage/QuadAndBlobStore'
 
 const debug = Debug('StoreManager')
+
+async function flattenPromises (promises: Array<Promise<Array<Quad>>>): Promise<Array<Quad>> {
+  const nestedLists: Array<Array<Quad>> = await Promise.all(promises)
+  let flatList: Array<Quad> = []
+  nestedLists.map((list: Array<Quad>) => {
+    flatList = flatList.concat(list)
+  })
+  return flatList
+}
 
 export function getEmptyGraph () {
   return rdf.dataset()
 }
-
+export function newBlankNode () {
+  return new rdflib.BlankNode()
+}
 export interface RdfNode {
   value: string
 }
@@ -40,9 +51,9 @@ export function rdfNodeToUrl (rdfNode: RdfNode): URL {
 }
 
 export interface Pattern {
-  subject?: RdfNode
-  predicate?: RdfNode
-  object?: RdfNode
+  subject?: RdfNode | Array<RdfNode>
+  predicate?: RdfNode | Array<RdfNode>
+  object?: RdfNode | Array<RdfNode>
   why: RdfNode
 }
 
@@ -113,19 +124,57 @@ export class StoreManager {
     this.storage = storage
     this.stores = {}
   }
-  deleteResource (url: URL): Promise<void> {
-    const blob = this.storage.getBlob(url)
-    return blob.delete()
+  delete (url: URL): Promise<void> {
+    return this.storage.delete(url)
   }
-  getMembers (url: URL): Promise<Array<Member>> {
-    const container = this.storage.getContainer(url)
-    return container.getMembers()
+  exists (url: URL): Promise<boolean> {
+    return this.storage.exists(url)
   }
-  containerExists (url: URL): Promise<boolean> {
-    const container = this.storage.getContainer(url)
-    return container.exists()
+  getMetaData (url: URL): Promise<MetaData> {
+    return this.storage.getMetaData(url)
   }
-  async statementsMatching (pattern: Pattern) {
+  async addQuad (quad: Quad) {
+    const docUrl: URL = rdfNodeToUrl(quad.why)
+    await this.load(docUrl)
+    return this.stores[docUrl.toString()].add(quad.subject, quad.predicate, quad.object, quad.why)
+  }
+  async removeStatements (pattern: Pattern) {
+    const docUrl: URL = rdfNodeToUrl(pattern.why)
+    await this.load(docUrl)
+    const statements = this.stores[docUrl.toString()].statementsMatching(pattern.subject, pattern.predicate, pattern.object, pattern.why)
+    this.stores[docUrl.toString()].removeStatements([...statements])
+  }
+  async statementsMatching (pattern: Pattern): Promise<Array<Quad>> {
+    if (pattern.subject && Array.isArray(pattern.subject)) {
+      return flattenPromises(pattern.subject.map((subject: RdfNode) => {
+        return this.statementsMatching({
+          subject,
+          predicate: pattern.predicate,
+          object: pattern.object,
+          why: pattern.why
+        })
+      }))
+    }
+    if (pattern.predicate && Array.isArray(pattern.predicate)) {
+      return flattenPromises(pattern.predicate.map((predicate: RdfNode) => {
+        return this.statementsMatching({
+          subject: pattern.subject,
+          predicate,
+          object: pattern.object,
+          why: pattern.why
+        })
+      }))
+    }
+    if (pattern.object && Array.isArray(pattern.object)) {
+      return flattenPromises(pattern.object.map((object: RdfNode) => {
+        return this.statementsMatching({
+          subject: pattern.subject,
+          predicate: pattern.object,
+          object,
+          why: pattern.why
+        })
+      }))
+    }
     debug('statementsMatching', pattern)
     await this.load(rdfNodeToUrl(pattern.why))
     debug(this.stores[rdfNodeToString(pattern.why)])
@@ -136,6 +185,18 @@ export class StoreManager {
       pattern.why)
     debug(ret)
     return ret
+  }
+  async subjectsMatching (pattern: Pattern): Promise<Array<RdfNode>> {
+    const statements = await this.statementsMatching(pattern)
+    return statements.map((quad: Quad) => quad.subject)
+  }
+  async predicatesMatching (pattern: Pattern): Promise<Array<RdfNode>> {
+    const statements = await this.statementsMatching(pattern)
+    return statements.map((quad: Quad) => quad.predicate)
+  }
+  async objectsMatching (pattern: Pattern): Promise<Array<RdfNode>> {
+    const statements = await this.statementsMatching(pattern)
+    return statements.map((quad: Quad) => quad.object)
   }
   getRepresentationFromStore (url: URL): ResourceData {
     const body = rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
@@ -189,11 +250,10 @@ export class StoreManager {
     }
 
     // 5. stream
-    return makeResourceData(metaData.contentType, (await streamToBuffer(metaData.body)).toString())
+    return makeResourceData(metaData.contentType as string, (await streamToBuffer(metaData.body)).toString())
   }
   setRepresentation (url: URL, stream: ReadableStream) {
-    const blob: Blob = this.storage.getBlob(url)
-    return blob.setData(stream)
+    return this.storage.setData(url, stream)
   }
   async load (url: URL) {
     if (this.stores[url.toString()]) {
@@ -209,7 +269,7 @@ export class StoreManager {
   }
   save (url: URL) {
     const resourceData = this.getRepresentationFromStore(url)
-    return this.storage.getBlob(url).setData(objectToStream(resourceData))
+    return this.storage.setData(url, objectToStream(resourceData))
   }
 
   async patch (url: URL, sparqlQuery: string, appendOnly: boolean) {

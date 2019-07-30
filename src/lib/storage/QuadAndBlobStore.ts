@@ -8,33 +8,47 @@ import { RdfType, objectToStream, streamToObject, bufferToStream } from '../rdf/
 
 const debug = Debug('quad-and-blob-store')
 
+export interface MetaData {
+  exists: boolean
+  isContainer: boolean
+  getMembers?: () => Promise<Array<Member>>
+  contentType?: string // only non-containers have a contentType
+  etag: string
+  body?: ReadableStream
+}
+
 export class QuadAndBlobStore {
   storage: BlobTree
   constructor (storage: BlobTree) {
     this.storage = storage
   }
-  getBlob (url: URL) {
-    return this.storage.getBlob(urlToPath(url))
+  delete (url: URL) {
+    return this.storage.getBlob(urlToPath(url)).delete()
   }
-  // undocumented shortcut, see https://github.com/inrupt/wac-ldp/issues/124
-  getBlobAtPath (path: Path) {
-    return this.storage.getBlob(path)
+  exists (url: URL) {
+    return this.storage.getBlob(urlToPath(url)).exists()
+  }
+  setData (url: URL, data: ReadableStream): Promise<void> {
+    const blob = this.storage.getBlob(urlToPath(url))
+    return blob.setData(data)
   }
   getContainer (url: URL) {
     return this.storage.getContainer(urlToPath(url))
   }
-  async getMetaData (url: URL) {
+  async getMetaData (url: URL): Promise<MetaData> {
     if (url.toString().substr(-1) === '/') {
       const container = this.storage.getContainer(urlToPath(url))
       return {
-        exists: container.exists(),
-        isContainer: true
+        exists: await container.exists(),
+        isContainer: true,
+        getMembers: container.getMembers.bind(container),
+        etag: 'container'
       }
     } else {
       const blob = this.storage.getBlob(urlToPath(url))
       const resourceData = await streamToObject(await blob.getData())
       return {
-        exists: blob.exists(),
+        exists: await blob.exists(),
         isContainer: false,
         contentType: resourceData.contentType,
         etag: resourceData.etag,

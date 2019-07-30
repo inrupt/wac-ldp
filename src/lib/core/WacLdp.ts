@@ -91,7 +91,7 @@ export class WacLdp extends EventEmitter {
     return this.storeManager.setRepresentation(url, objectToStream(makeResourceData(contentType, body)))
   }
   containerExists (url: URL) {
-    return this.storeManager.containerExists(url)
+    return this.storeManager.exists(url)
   }
   async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
@@ -160,7 +160,7 @@ export class WacLdp extends EventEmitter {
     return getAppModes(webId, origin, this.storeManager)
   }
   setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>) {
-    return setAppModes(webId, origin, modes, this.storeManager.storage)
+    return setAppModes(webId, origin, modes, this.storeManager)
   }
   async hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean> {
     debug('hasAccess calls checkAccess', {

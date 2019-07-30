@@ -12,18 +12,14 @@ import { deleteContainerHandler } from '../../../src/lib/operationHandlers/delet
 import { readBlobHandler } from '../../../src/lib/operationHandlers/readBlobHandler'
 import { deleteBlobHandler } from '../../../src/lib/operationHandlers/deleteBlobHandler'
 
-test('delete blob', async () => {
-  const node: Blob = {
-    getData: jest.fn(() => {
-      return toChunkStream(JSON.stringify(makeResourceData('text/plain', 'bla')))
-    }),
-    exists: () => true,
-    delete: jest.fn(() => {
-      //
-    })
-  } as unknown as Blob
+test.only('delete blob', async () => {
   const storage = {
-    getBlob: () => node
+    getMetaData: () => {
+      return {
+        contentType: 'text/plain'
+      }
+    },
+    delete: jest.fn(() => Promise.resolve())
   } as unknown
   const task = new WacLdpTask('https://example.com', {
     url: '/foo',

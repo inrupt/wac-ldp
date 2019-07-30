@@ -1,6 +1,6 @@
 
 import { OriginCheckTask, appIsTrustedForMode } from './appIsTrustedForMode'
-import { ModesCheckTask, determineAllowedAgentsForModes, AccessModes, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN } from './determineAllowedAgentsForModes'
+import { ModesCheckTask, determineAllowedModes as determineAllowedModesForAgent, AGENT_CLASS_ANYBODY, AGENT_CLASS_ANYBODY_LOGGED_IN, ModesMask } from './determineAllowedModes'
 import { ACL } from '../rdf/rdf-constants'
 import Debug from 'debug'
 import { TaskType } from '../api/http/HttpParser'
@@ -9,31 +9,6 @@ import { StoreManager } from '../rdf/StoreManager'
 import { ACL_SUFFIX, AclManager } from './AclManager'
 
 const debug = Debug('checkAccess')
-
-async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, storeManager: StoreManager): Promise<boolean> {
-  // first check agent:
-  const agents = (allowedAgentsForModes as any)[mode.toString()]
-  const webIdAsString: string | undefined = (webId ? webId.toString() : undefined)
-  debug(mode.toString(), agents, webId ? webId.toString() : undefined)
-  if ((agents.indexOf(AGENT_CLASS_ANYBODY.toString()) === -1) &&
-      (agents.indexOf(AGENT_CLASS_ANYBODY_LOGGED_IN.toString()) === -1) &&
-      (!webIdAsString || agents.indexOf(webIdAsString) === -1)) {
-    debug('agent check returning false')
-    return false
-  }
-  debug('agent check passed!')
-  if (!origin) {
-    debug('no origin header, allowed')
-    return true
-  }
-  // then check origin:
-  debug('checking origin!')
-  return appIsTrustedForMode({
-    origin,
-    mode,
-    resourceOwners: allowedAgentsForModes['http://www.w3.org/ns/auth/acl#Control'].map(str => new URL(str))
-  } as OriginCheckTask, storeManager)
-}
 
 export interface AccessCheckTask {
   url: URL
@@ -76,15 +51,16 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
     resourceIsAclDocument = false
   }
   const aclManager = new AclManager(task.storeManager)
-  const { aclGraph, targetUrl, contextUrl } = await aclManager.readAcl(baseResourceUrl)
+  const { targetUrl, contextUrl } = await aclManager.readAcl(baseResourceUrl)
   const resourceIsTarget = urlEquals(baseResourceUrl, targetUrl)
   debug('calling allowedAgentsForModes', 'aclGraph', resourceIsTarget, targetUrl.toString(), contextUrl.toString())
 
-  const allowedAgentsForModes: AccessModes = await determineAllowedAgentsForModes({
-    aclGraph,
+  const allowedModes: ModesMask = await determineAllowedModesForAgent({
     resourceIsTarget,
     targetUrl,
-    contextUrl
+    contextUrl,
+    webId: task.webId,
+    origin: task.origin
   } as ModesCheckTask)
   debug('allowedAgentsForModes')
   let requiredAccessModes
@@ -98,13 +74,13 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
   // throw if agent or origin does not have access
   await Promise.all(requiredAccessModes.map(async (mode: URL) => {
     debug('required mode', mode.toString())
-    if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.storeManager)) {
+    if (allowedModes[mode.toString()]) {
       debug(mode, 'is allowed!')
       return
     }
     debug(`mode ${mode.toString()} is not allowed, but checking for appendOnly now`)
     // SPECIAL CASE: append-only
-    if (mode === ACL.Write && await modeAllowed(ACL.Append, allowedAgentsForModes, task.webId, task.origin, task.storeManager)) {
+    if (mode === ACL.Write && allowedModes[ACL.Append.toString()]) {
       appendOnly = true
       debug('write was requested and is not allowed but append is; setting appendOnly to true')
       return

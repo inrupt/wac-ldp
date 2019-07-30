@@ -23,29 +23,29 @@ export async function getAppModes (webId: URL, origin: string, storeManager: Sto
   const webIdDocNode: RdfNode = urlToRdfNode(webIdDoc)
   debug(storeManager)
   // await storeManager.load(webIdDoc)
-  const trustedAppNodes = await storeManager.statementsMatching({
+  const trustedAppNodes: Array<RdfNode> = await storeManager.subjectsMatching({
     predicate: urlToRdfNode(ACL.origin),
     object: stringToRdfNode(origin),
     why: webIdDocNode
   })
   debug({ trustedAppNodes })
   const modes: any = {}
-  await Promise.all(trustedAppNodes.map(async (quad: any) => {
+  await Promise.all(trustedAppNodes.map(async (node: RdfNode) => {
     const trustStatements = await storeManager.statementsMatching({
       subject: urlToRdfNode(webId),
       predicate: urlToRdfNode(ACL.trustedApp),
-      object: quad.subject,
+      object: node,
       why: webIdDocNode
     })
     debug({ trustStatements })
     if (trustStatements.length > 0) {
-      const modeStatements = await storeManager.statementsMatching({
-        subject: quad.subject,
+      const modeNodes: Array<RdfNode> = await storeManager.objectsMatching({
+        subject: node,
         predicate: urlToRdfNode(ACL.mode),
         why: webIdDocNode
       })
-      await Promise.all(modeStatements.map(async (quad: any) => {
-        modes[rdfNodeToString(quad.object)] = true
+      await Promise.all(modeNodes.map(async (node: RdfNode) => {
+        modes[rdfNodeToString(node)] = true
       }))
     }
   }))
