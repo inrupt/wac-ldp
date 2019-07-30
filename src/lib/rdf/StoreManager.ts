@@ -19,6 +19,33 @@ export function getEmptyGraph () {
   return rdf.dataset()
 }
 
+export interface RdfNode {
+  value: string
+}
+
+export function stringToRdfNode (str: string): RdfNode {
+  return rdflib.sym(str)
+}
+
+export function urlToRdfNode (url: URL): RdfNode {
+  return stringToRdfNode(url.toString())
+}
+
+export function rdfNodeToString (rdfNode: RdfNode): string {
+  return rdfNode.value
+}
+
+export function rdfNodeToUrl (rdfNode: RdfNode): URL {
+  return new URL(rdfNodeToString(rdfNode))
+}
+
+export interface Pattern {
+  subject?: RdfNode
+  predicate?: RdfNode
+  object?: RdfNode
+  why: RdfNode
+}
+
 function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
   let parser
   switch (rdfType) {
@@ -96,9 +123,17 @@ export class StoreManager {
       return dataset
     }
   }
-  async statementsMatching (pattern: { s?: URL, p?: URL, o?: URL, g: URL }) {
-    await this.load(pattern.g)
-    return this.stores[pattern.g.toString()].statementsMatching(pattern.s, pattern.p, pattern.o, pattern.g)
+  async statementsMatching (pattern: Pattern) {
+    debug('statementsMatching', pattern)
+    await this.load(rdfNodeToUrl(pattern.why))
+    debug(this.stores[rdfNodeToString(pattern.why)])
+    const ret = this.stores[rdfNodeToString(pattern.why)].statementsMatching(
+      pattern.subject,
+      pattern.predicate,
+      pattern.object,
+      pattern.why)
+    debug(ret)
+    return ret
   }
   async getRepresentation (url: URL): Promise<ResourceData | undefined> {
     debug('getResourceData - local?', url.host, this.serverRootDomain)

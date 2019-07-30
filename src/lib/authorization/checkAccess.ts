@@ -10,7 +10,7 @@ import { ACL_SUFFIX, AclManager } from './AclManager'
 
 const debug = Debug('checkAccess')
 
-async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, graphFetcher: StoreManager): Promise<boolean> {
+async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId: URL | undefined, origin: string | undefined, storeManager: StoreManager): Promise<boolean> {
   // first check agent:
   const agents = (allowedAgentsForModes as any)[mode.toString()]
   const webIdAsString: string | undefined = (webId ? webId.toString() : undefined)
@@ -27,11 +27,12 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
     return true
   }
   // then check origin:
+  debug('checking origin!')
   return appIsTrustedForMode({
     origin,
     mode,
     resourceOwners: allowedAgentsForModes['http://www.w3.org/ns/auth/acl#Control'].map(str => new URL(str))
-  } as OriginCheckTask, graphFetcher)
+  } as OriginCheckTask, storeManager)
 }
 
 export interface AccessCheckTask {

@@ -19,19 +19,23 @@ function readFixture (filename: string): Promise<any> {
   return rdf.dataset().import(quadStream)
 
 }
-test('finds acl:trustedApps nodes and their modes for a given owners list', async () => {
+test.only('finds acl:trustedApps nodes and their modes for a given owners list', async () => {
   const task = {
     origin: 'https://pheyvaer.github.io',
     mode: ACL.Read,
     resourceOwners: [ new URL('https://michielbdejong.com/profile/card#me')]
   } as OriginCheckTask
 
-  const storeManager: unknown = {
-    fetchGraph: jest.fn(() => {
-      return readFixture(OWNER_PROFILE_FIXTURE)
-    })
-  }
-  const result = await appIsTrustedForMode(task, storeManager as StoreManager)
+  const storeManager = new StoreManager('example.com', {} as any)
+  // = {
+  //   statementsMatching: jest.fn(() => {
+  //     return readFixture(OWNER_PROFILE_FIXTURE)
+  //   }),
+  //   load: async () => {
+  //     // ...
+  //   }
+  // }
+  const result = await appIsTrustedForMode(task, storeManager)
   expect(result).toEqual(true)
 })
 
