@@ -21,7 +21,7 @@ export const updateBlobHandler = {
       throw new ErrorResult(ResultType.NotFound)
     }
     debug('operation updateBlob!', { appendOnly })
-    const turtleDoc: string = await storeManager.applyPatch(resourceData, await task.requestBody() || '', task.fullUrl(), appendOnly)
+    const turtleDoc: string = await storeManager.patch(task.fullUrl(), await task.requestBody() || '', appendOnly)
     const blob = storeManager.getLocalBlob(task.fullUrl())
     await blob.setData(await objectToStream(makeResourceData(resourceData.contentType, turtleDoc)))
     storeManager.flushCache(task.fullUrl())

@@ -139,23 +139,19 @@ export class StoreManager {
     }
   }
 
-  async applyPatch (resourceData: ResourceData, sparqlQuery: string, fullUrl: URL, appendOnly: boolean) {
-    if (!this.stores[fullUrl.toString()]) {
-      this.stores[fullUrl.toString()] = rdflib.graph()
-      const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
-      parse(resourceData.body, this.stores[fullUrl.toString()], fullUrl.toString(), resourceData.contentType)
-    }
-    debug('before patch', this.stores[fullUrl.toString()].toNT())
+  async patch (url: URL, sparqlQuery: string, appendOnly: boolean) {
+    await this.load(url)
+    debug('before patch', this.stores[url.toString()].toNT())
 
     const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
-    const patchObject = sparqlUpdateParser(sparqlQuery, rdflib.graph(), fullUrl.toString())
+    const patchObject = sparqlUpdateParser(sparqlQuery, rdflib.graph(), url.toString())
     debug('patchObject', patchObject)
     if (appendOnly && typeof patchObject.delete !== 'undefined') {
       debug('appendOnly and patch contains deletes')
       throw new ErrorResult(ResultType.AccessDenied)
     }
     await new Promise((resolve, reject) => {
-      this.stores[fullUrl.toString()].applyPatch(patchObject, this.stores[fullUrl.toString()].sym(fullUrl), (err: Error) => {
+      this.stores[url.toString()].applyPatch(patchObject, this.stores[url.toString()].sym(url), (err: Error) => {
         if (err) {
           reject(err)
         } else {
@@ -163,11 +159,11 @@ export class StoreManager {
         }
       })
     })
-    debug('after patch', this.stores[fullUrl.toString()].toNT())
-    return rdflib.serialize(undefined, this.stores[fullUrl.toString()], fullUrl, 'text/turtle')
+    debug('after patch', this.stores[url.toString()].toNT())
+    return rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
   }
   flushCache (url: URL) {
-    // no caching here
+    delete this.stores[url.toString()]
   }
 }
 
