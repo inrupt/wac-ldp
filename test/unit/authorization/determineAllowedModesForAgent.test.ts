@@ -1,7 +1,7 @@
 import rdf from 'rdf-ext'
 import N3Parser from 'rdf-parser-n3'
 import fs from 'fs'
-import { determineAllowedAgentsForModes, ModesCheckTask } from '../../../src/lib/authorization/determineAllowedAgentsForModes'
+import { determineAllowedModes, ModesCheckTask } from '../../../src/lib/authorization/determineAllowedModes'
 import { StoreManager } from '../../../src/lib/rdf/StoreManager'
 import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
@@ -15,13 +15,14 @@ test('finds acl:accessTo modes', async () => {
   let quadStream = parser.import(bodyStream)
   const dataset = await rdf.dataset().import(quadStream)
   const task: ModesCheckTask = {
-    aclGraph: dataset,
     resourceIsTarget: true,
     contextUrl: new URL('https://example.com'),
     targetUrl: new URL('https://example.com'),
+    webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
+    origin: '',
     storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
   }
-  const result = await determineAllowedAgentsForModes(task)
+  const result = await determineAllowedModes(task)
   expect(result).toEqual({
     [ACL.Read.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
     [ACL.Write.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
@@ -38,13 +39,14 @@ test('finds acl:default modes', async () => {
   let quadStream = parser.import(bodyStream)
   const dataset = await rdf.dataset().import(quadStream)
   const task: ModesCheckTask = {
-    aclGraph: dataset,
     contextUrl: new URL('/.acl', 'https://example.com/'),
     targetUrl: new URL('/', 'https://example.com/'),
     resourceIsTarget: true,
+    webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
+    origin: '',
     storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
   }
-  const result = await determineAllowedAgentsForModes(task)
+  const result = await determineAllowedModes(task)
   expect(result).toEqual({
     [ACL.Read.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
     [ACL.Write.toString()]: ['https://michielbdejong.inrupt.net/profile/card#me', 'mailto:michiel@unhosted.org'],
@@ -65,13 +67,14 @@ function testUrlFormat (format: string, target: string, resourceIsTarget: boolea
     let quadStream = parser.import(bodyStream)
     const dataset = await rdf.dataset().import(quadStream)
     const task: ModesCheckTask = {
-      aclGraph: dataset,
       resourceIsTarget,
       targetUrl: new URL(target),
       contextUrl: new URL(target + '.acl'),
+      webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
+      origin: '',
       storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
     }
-    const result = await determineAllowedAgentsForModes(task)
+    const result = await determineAllowedModes(task)
     expect(result).toEqual({
       [ACL.Read.toString()]: ['http://xmlns.com/foaf/0.1/Agent'],
       [ACL.Write.toString()]: [],
@@ -102,13 +105,14 @@ test(`acl:default does not imply acl:accessTo`, async () => {
   let quadStream = parser.import(bodyStream)
   const dataset = await rdf.dataset().import(quadStream)
   const task: ModesCheckTask = {
-    aclGraph: dataset,
     resourceIsTarget: true,
     targetUrl: new URL('https://example.org/foo/'),
     contextUrl: new URL('https://example.org/foo/.acl'),
+    webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
+    origin: '',
     storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
   }
-  const result = await determineAllowedAgentsForModes(task)
+  const result = await determineAllowedModes(task)
   expect(result).toEqual({
     [ACL.Read.toString()]: [],
     [ACL.Write.toString()]: [],
