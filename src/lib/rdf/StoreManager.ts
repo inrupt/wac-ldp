@@ -100,7 +100,7 @@ export class StoreManager {
     await this.load(pattern.g)
     return this.stores[pattern.g.toString()].statementsMatching(pattern.s, pattern.p, pattern.o, pattern.g)
   }
-  async getResourceData (url: URL): Promise<ResourceData | undefined> {
+  async getRepresentation (url: URL): Promise<ResourceData | undefined> {
     debug('getResourceData - local?', url.host, this.serverRootDomain)
     if (url.host.endsWith(this.serverRootDomain)) {
       debug('getResourceData local!', url.toString())
@@ -131,7 +131,7 @@ export class StoreManager {
       // to do: check if cache needs to be refreshed once in a while
       return
     }
-    const resourceData = await this.getResourceData(url)
+    const resourceData = await this.getRepresentation(url)
     this.stores[url.toString()] = rdflib.graph()
     if (resourceData) {
       const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
