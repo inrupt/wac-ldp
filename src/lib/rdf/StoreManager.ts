@@ -46,6 +46,13 @@ export interface Pattern {
   why: RdfNode
 }
 
+export interface Quad {
+  subject: RdfNode
+  predicate: RdfNode
+  object: RdfNode
+  why: RdfNode
+}
+
 function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
   let parser
   switch (rdfType) {
@@ -107,21 +114,6 @@ export class StoreManager {
   }
   getLocalContainer (url: URL): Container {
     return this.storage.getContainer(url)
-  }
-  async fetchGraph (url: URL) {
-    if (url.host.endsWith(this.serverRootDomain)) {
-      const blob: Blob = this.getLocalBlob(url)
-      debug('fetching graph locally')
-      return getGraphLocal(blob)
-    } else {
-      debug('calling node-fetch', url.toString())
-      const response: any = await fetch(url.toString())
-      const rdfType = determineRdfType(response.headers.get('content-type'))
-      const quadStream = readRdf(rdfType, response as unknown as ReadableStream)
-      const dataset = await rdf.dataset().import(quadStream)
-      debug('got dataset')
-      return dataset
-    }
   }
   async statementsMatching (pattern: Pattern) {
     debug('statementsMatching', pattern)

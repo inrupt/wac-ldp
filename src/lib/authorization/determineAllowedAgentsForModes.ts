@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import { ACL, FOAF, RDF, VCARD } from '../rdf/rdf-constants'
-import { StoreManager } from '../rdf/StoreManager'
+import { StoreManager, urlToRdfNode, Quad, rdfNodeToUrl } from '../rdf/StoreManager'
+import { urlToDocUrl } from './appIsTrustedForMode'
 
 const debug = Debug('DetermineAllowedAgentsForModes')
 
@@ -39,32 +40,20 @@ export interface AccessModes {
 }
 
 async function fetchGroupMembers (groupUri: URL, storeManager: StoreManager): Promise<Array<URL>> {
-  debug('fetchGroupMembers', groupUri, storeManager)
-  const vcardsGraph: any = await storeManager.fetchGraph(groupUri)
-  const members: { [indexer: string]: URL } = {}
-  const quads: Array<any> = []
-  try {
-    vcardsGraph.map((quad: any): void => {
-      quads.push(quad)
-    })
-  } catch (err) {
-    debug('error looping over quads!', err)
-  }
-  quads.forEach((quad: any): void => {
-    debug('quad', quad)
-    if (quad.predicate.value === VCARD.hasMember.toString()) {
-      debug('group member!', quad.subject.value, quad.object.value)
-      const subjectUri = new URL(quad.subject.value, groupUri)
-      debug('comparing', subjectUri.toString(), groupUri.toString())
-      if (subjectUri.toString() === groupUri.toString()) {
-        const objectUri = new URL(quad.object.value, groupUri)
-        members[objectUri.toString()] = objectUri
-      }
-    }
-    debug('members now', Object.keys(members))
+  debug('fetchGroupMembers', groupUri.toString())
+  const groupUriNode = urlToRdfNode(groupUri)
+  const groupUriDoc = urlToDocUrl(groupUri)
+  const groupUriDocNode = urlToRdfNode(groupUriDoc)
+  // await storeManager.load(groupUri)
+  const memberStatements = await storeManager.statementsMatching({
+    subject: groupUriNode,
+    predicate: urlToRdfNode(VCARD.hasMember),
+    why: groupUriDocNode
   })
-  debug('members  final', Object.keys(members))
-  return Object.keys(members).map((str: string) => members[str])
+  debug(memberStatements)
+  return memberStatements.map((quad: Quad) => {
+    return rdfNodeToUrl(quad.object)
+  })
 }
 
 function stripTrailingSlash (str: string) {

@@ -19,7 +19,7 @@ function readFixture (filename: string): Promise<any> {
   return rdf.dataset().import(quadStream)
 
 }
-test.only('finds acl:trustedApps nodes and their modes for a given owners list', async () => {
+test('finds acl:trustedApps nodes and their modes for a given owners list', async () => {
   const task = {
     origin: 'https://pheyvaer.github.io',
     mode: ACL.Read,
@@ -27,25 +27,13 @@ test.only('finds acl:trustedApps nodes and their modes for a given owners list',
   } as OriginCheckTask
 
   const storeManager = new StoreManager('example.com', {} as any)
-  // = {
-  //   statementsMatching: jest.fn(() => {
-  //     return readFixture(OWNER_PROFILE_FIXTURE)
-  //   }),
-  //   load: async () => {
-  //     // ...
-  //   }
-  // }
   const result = await appIsTrustedForMode(task, storeManager)
   expect(result).toEqual(true)
 })
 
 test('getTrustedAppModes', async () => {
-  const storeManager: unknown = {
-    fetchGraph: jest.fn(() => {
-      return readFixture('test/fixtures/owner-profile.ttl')
-    })
-  }
-  const modes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', storeManager as StoreManager)
+  const storeManager = new StoreManager('example.com', {} as any)
+  const modes = await getAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', storeManager)
 
   expect(JSON.stringify(modes)).toEqual(JSON.stringify([
     new URL('http://www.w3.org/ns/auth/acl#Append'),

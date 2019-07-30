@@ -22,7 +22,7 @@ export async function getAppModes (webId: URL, origin: string, storeManager: Sto
   const webIdDoc: URL = urlToDocUrl(webId)
   const webIdDocNode: RdfNode = urlToRdfNode(webIdDoc)
   debug(storeManager)
-  await storeManager.load(webIdDoc)
+  // await storeManager.load(webIdDoc)
   const trustedAppNodes = await storeManager.statementsMatching({
     predicate: urlToRdfNode(ACL.origin),
     object: stringToRdfNode(origin),

@@ -15,15 +15,43 @@ test('can fetch a local graph', async () => {
   const resourceData = makeResourceData('text/turtle', body.toString())
   await blob.setData(await objectToStream(resourceData))
   const storeManager = new StoreManager('example.com', storage)
-  const graph = await storeManager.fetchGraph(new URL('https://example.com/profile/card'))
-  expect(graph.length).toEqual(5)
+  const representation = await storeManager.getRepresentation(new URL('https://example.com/profile/card'))
+  expect(representation).toEqual({
+    body: `\n\
+@prefix : <https://michielbdejong.com/profile/card#>.\n\
+@prefix acl: <http://www.w3.org/ns/auth/acl#>.\n\
+\n\
+:me\n\
+    acl:trustedApp\n\
+            [\n\
+                acl:mode acl:Append, acl:Read, acl:Write;\n\
+                acl:origin <https://pheyvaer.github.io>\n\
+            ].`,
+    contentType: 'text/turtle',
+    etag: '2degybTzzuuAYnGNtHV26A==',
+    rdfType: 1
+  })
 })
 
 test('can fetch a remote graph', async () => {
   const storage = new QuadAndBlobStore(new BlobTreeInMem())
   const storeManager = new StoreManager('example.com', storage)
-  const graph = await storeManager.fetchGraph(new URL('https://michielbdejong.com/profile/card'))
-  expect(graph.length).toEqual(5)
+  const representation = await storeManager.getRepresentation(new URL('https://michielbdejong.com/profile/card'))
+  expect(representation).toEqual({
+    body: `\n\
+@prefix : <https://michielbdejong.com/profile/card#>.\n\
+@prefix acl: <http://www.w3.org/ns/auth/acl#>.\n\
+\n\
+:me\n\
+    acl:trustedApp\n\
+            [\n\
+                acl:mode acl:Append, acl:Read, acl:Write;\n\
+                acl:origin <https://pheyvaer.github.io>\n\
+            ].`,
+    contentType: 'text/turtle',
+    etag: undefined,
+    rdfType: 1
+  })
 })
 
 // test('gracefully errors about a corrupted remote graph', async () => {
