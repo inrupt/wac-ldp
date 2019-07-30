@@ -8,7 +8,7 @@ import * as rdflib from 'rdflib'
 
 import { Path, urlToPath } from '../storage/BlobTree'
 import { Blob } from '../storage/Blob'
-import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream } from './ResourceDataUtils'
+import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer } from './ResourceDataUtils'
 import { Container } from '../storage/Container'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
@@ -68,6 +68,9 @@ export class StoreManager {
   stores: { [url: string]: any }
 
   constructor (serverRootDomain: string, storage: QuadAndBlobStore) {
+    if (serverRootDomain.indexOf('/') !== -1) {
+      throw new Error('serverRootDomain should be just the FQDN, no https:// in front')
+    }
     this.serverRootDomain = serverRootDomain
     this.storage = storage
     this.stores = {}
@@ -93,12 +96,27 @@ export class StoreManager {
       return dataset
     }
   }
+  async statementsMatching (pattern: { s?: URL, p?: URL, o?: URL, g: URL }) {
+    await this.load(pattern.g)
+    return this.stores[pattern.g.toString()].statementsMatching(pattern.s, pattern.p, pattern.o, pattern.g)
+  }
   async getResourceData (url: URL): Promise<ResourceData | undefined> {
-    debug('getResourceData!', url.toString())
-    const blob: Blob = this.getLocalBlob(url)
-    const data = await blob.getData()
-    if (data) {
-      return streamToObject(data)
+    debug('getResourceData - local?', url.host, this.serverRootDomain)
+    if (url.host.endsWith(this.serverRootDomain)) {
+      debug('getResourceData local!', url.toString())
+      const blob: Blob = this.getLocalBlob(url)
+      const data = await blob.getData()
+      if (data) {
+        return streamToObject(data)
+      }
+    } else {
+      debug('calling node-fetch', url.toString())
+      const response: any = await fetch(url.toString())
+      const contentType = response.headers.get('content-type')
+      const etag = response.headers.get('etag')
+      const rdfType = determineRdfType(contentType)
+      const body = (await streamToBuffer(response as unknown as ReadableStream)).toString()
+      return { contentType, body, etag, rdfType }
     }
   }
   setData (url: URL, stream: ReadableStream) {
@@ -107,6 +125,18 @@ export class StoreManager {
   }
   async createLocalDocument (url: URL, contentType: string, body: string) {
     return this.setData(url, objectToStream(makeResourceData(contentType, body)))
+  }
+  async load (url: URL) {
+    if (this.stores[url.toString()]) {
+      // to do: check if cache needs to be refreshed once in a while
+      return
+    }
+    const resourceData = await this.getResourceData(url)
+    this.stores[url.toString()] = rdflib.graph()
+    if (resourceData) {
+      const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
+      parse(resourceData.body, this.stores[url.toString()], url.toString(), resourceData.contentType)
+    }
   }
 
   async applyPatch (resourceData: ResourceData, sparqlQuery: string, fullUrl: URL, appendOnly: boolean) {

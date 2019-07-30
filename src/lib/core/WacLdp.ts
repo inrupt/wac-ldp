@@ -58,7 +58,9 @@ export class WacLdp extends EventEmitter {
   usesHttps: boolean
   constructor (options: WacLdpOptions) {
     super()
-    this.storeManager = new StoreManager(options.aud, options.storage)
+    const serverRootDomain: string = new URL(options.aud).host
+    debug({ serverRootDomain })
+    this.storeManager = new StoreManager(serverRootDomain, options.storage)
     this.aclManager = new AclManager(this.storeManager)
     this.aud = options.aud
     this.updatesViaUrl = options.updatesViaUrl

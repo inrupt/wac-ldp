@@ -36,7 +36,7 @@ const storage = {
     }
   })
 }
-const storeManager = new StoreManager('https://localhost:8080', storage as unknown as QuadAndBlobStore)
+const storeManager = new StoreManager('localhost:8080', storage as unknown as QuadAndBlobStore)
 const aclManager = new AclManager(storeManager)
 
 const quadsExpected = {

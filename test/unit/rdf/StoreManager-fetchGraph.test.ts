@@ -26,7 +26,7 @@ test('can fetch a remote graph', async () => {
   expect(graph.length).toEqual(5)
 })
 
-// test.only('gracefully errors about a corrupted remote graph', async () => {
+// test('gracefully errors about a corrupted remote graph', async () => {
 //   const storage = new BlobTreeInMem()
 //   const StoreManager = new StoreManager('example.com', storage)
 //   const graph = await StoreManager.fetchGraph(new URL('https://michielbdejong.com/bla.txt'))
