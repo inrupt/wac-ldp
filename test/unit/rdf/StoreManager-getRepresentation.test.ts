@@ -7,13 +7,12 @@ import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
 
 test('can fetch a local graph', async () => {
   const storage = new QuadAndBlobStore(new BlobTreeInMem())
-  const blob = storage.getBlob(new URL('https://example.com/profile/card'))
   const body: Buffer = await new Promise(resolve => fs.readFile('./test/fixtures/profile-card.ttl', (err, data) => {
     if (err) throw new Error('failed to read fixture')
     resolve(data)
   }))
   const resourceData = makeResourceData('text/turtle', body.toString())
-  await blob.setData(await objectToStream(resourceData))
+  await storage.setData(new URL('https://example.com/profile/card'), await objectToStream(resourceData))
   const storeManager = new StoreManager('example.com', storage)
   const representation = await storeManager.getRepresentation(new URL('https://example.com/profile/card'))
   expect(representation).toEqual({

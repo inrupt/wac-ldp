@@ -250,6 +250,7 @@ export class StoreManager {
     }
 
     // 5. stream
+    debug('streaming', metaData)
     return makeResourceData(metaData.contentType as string, (await streamToBuffer(metaData.body)).toString())
   }
   setRepresentation (url: URL, stream: ReadableStream) {
