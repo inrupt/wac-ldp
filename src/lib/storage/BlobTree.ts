@@ -5,7 +5,7 @@ import { Blob } from './Blob'
 
 const debug = Debug('BlobTree')
 
-const STORAGE_FORMAT = 'v1'
+const STORAGE_FORMAT = 'v2'
 
 // The BlobTree is a tree structure. Its internal Nodes are called Containers. Its leaves are called Blobs.
 // A Blob has methods setData and getData, which take and return a ReadableStream, so that you can store opaque
@@ -52,8 +52,11 @@ export class Path {
     this.segments = segments
     this.isContainer = isContainer
   }
-  toString (): string {
+  toStringMeta (): string {
     return this.segments.join('/') + (this.isContainer ? '/' : '')
+  }
+  toStringBody (): string {
+    return 'bodies/' + this.segments.join('/') + (this.isContainer ? '/' : '')
   }
   toName (): string {
     // last segment is the name

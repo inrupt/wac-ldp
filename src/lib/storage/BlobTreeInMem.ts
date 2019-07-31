@@ -8,6 +8,9 @@ import { bufferToStream, streamToBuffer } from '../rdf/ResourceDataUtils'
 
 const debug = Debug('AtomicTreeInMem')
 
+const SUFFIX_BODY = ':body'
+const SUFFIX_META = ':meta'
+
 class NodeInMem {
   path: Path
   tree: BlobTreeInMem
@@ -66,11 +69,27 @@ class ContainerInMem extends NodeInMem implements Container {
 class BlobInMem extends NodeInMem implements Blob {
   getData (): Promise<ReadableStream | undefined> {
     debug('reading resource', this.path, this.tree.kv)
-    const buffer: Buffer | undefined = this.tree.kv[this.path.toString()]
+    const buffer: Buffer | undefined = this.tree.kv[this.path.toString() + SUFFIX_META]
     if (buffer) {
       return Promise.resolve(bufferToStream(buffer))
     }
     return Promise.resolve(undefined)
+  }
+  getBody (): Promise<ReadableStream | undefined> {
+    debug('reading resource', this.path, this.tree.kv)
+    const buffer: Buffer | undefined = this.tree.kv[this.path.toString() + SUFFIX_BODY]
+    if (buffer) {
+      return Promise.resolve(bufferToStream(buffer))
+    }
+    return Promise.resolve(undefined)
+  }
+  async setDataAndBody (data: ReadableStream, body: ReadableStream) {
+    debug('setData', this.path)
+    this.tree.kv[this.path.toString() + SUFFIX_META] = await streamToBuffer(data)
+    this.tree.kv[this.path.toString() + SUFFIX_BODY] = await streamToBuffer(body)
+    debug('Object.keys(this.tree.kv) after setData', Object.keys(this.tree.kv), this.path, this.path.toString())
+    this.tree.emit('change', { path: this.path })
+    return Promise.resolve()
   }
   async setData (data: ReadableStream) {
     debug('setData', this.path)
