@@ -6,7 +6,7 @@ import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 import Debug from 'debug'
 
 import { streamToObject, ResourceData } from '../rdf/ResourceDataUtils'
-import { StoreManager } from '../rdf/StoreManager'
+import { StoreManager } from '../rdf/RdfLibStoreManager'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../storage/membersListAsResourceData'
 import { ACL } from '../rdf/rdf-constants'

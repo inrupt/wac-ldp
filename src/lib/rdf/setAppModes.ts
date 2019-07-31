@@ -1,7 +1,8 @@
 import Debug from 'debug'
 import { ACL } from './rdf-constants'
 import * as url from 'url'
-import { StoreManager, urlToRdfNode, stringToRdfNode, RdfNode, newBlankNode } from './StoreManager'
+import { StoreManager } from './StoreManager'
+import { urlToRdfNode, stringToRdfNode, RdfNode, newBlankNode } from './RdfLibStoreManager'
 
 const debug = Debug('setAppModes')
 

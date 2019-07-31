@@ -1,6 +1,7 @@
 import Debug from 'debug'
 import { ACL, FOAF, RDF, VCARD } from '../rdf/rdf-constants'
-import { StoreManager, urlToRdfNode, Quad, rdfNodeToUrl, RdfNode, stringToRdfNode } from '../rdf/StoreManager'
+import { StoreManager } from '../rdf/StoreManager'
+import { urlToRdfNode, rdfNodeToUrl, RdfNode, stringToRdfNode } from '../rdf/RdfLibStoreManager'
 import { urlToDocUrl } from './appIsTrustedForMode'
 
 const debug = Debug('DetermineAllowedModes')

@@ -2,7 +2,7 @@ import Debug from 'debug'
 import { urlToPath } from '../storage/BlobTree'
 import { StoreManager, getEmptyGraph, getGraphLocal } from '../rdf/StoreManager'
 import { makeResourceData, bufferToStream } from '../rdf/ResourceDataUtils'
-import { MetaData } from '../storage/QuadAndBlobStore'
+import { ResourceData } from '../storage/QuadAndBlobStore'
 
 // Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
 
@@ -89,7 +89,7 @@ export class AclManager {
   async readAcl (resourceUrl: URL): Promise<{ targetUrl: URL, contextUrl: URL }> {
     debug('readAcl', resourceUrl.toString())
     let currentGuessUrlStr: string = resourceUrl.toString()
-    let metaData: MetaData = await this.storeManager.getMetaData(new URL(currentGuessUrlStr))
+    let metaData: ResourceData = await this.storeManager.getResourceData(new URL(currentGuessUrlStr))
     let currentIsContainer = metaData.isContainer
     let aclDocUrlStr: string = (currentIsContainer ? toChild(currentGuessUrlStr, ACL_SUFFIX, false) : appendSuffix(currentGuessUrlStr, ACL_SUFFIX))
     debug('aclDocPath from resourcePath', resourceUrl.toString(), aclDocUrlStr)

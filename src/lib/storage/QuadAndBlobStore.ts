@@ -1,21 +1,12 @@
 import Debug from 'debug'
-import { BlobTree, urlToPath, Path } from './BlobTree'
+import { BlobTree, urlToPath } from './BlobTree'
 import { Member } from './Container'
 import { membersListAsQuadStream } from './membersListAsResourceData'
-import { quadStreamFromBlob } from '../rdf/StoreManager'
+import { quadStreamFromBlob } from '../rdf/RdfLibStoreManager'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
-import { RdfType, objectToStream, streamToObject, bufferToStream } from '../rdf/ResourceDataUtils'
+import { RdfType, objectToStream, ResourceData, ResourceType, ResourceDataLdpBc, ResourceDataMissing, ResourceDataLdpRsNonContainer, ResourceDataLdpNr } from '../rdf/ResourceDataUtils'
 
 const debug = Debug('quad-and-blob-store')
-
-export interface MetaData {
-  exists: boolean
-  isContainer: boolean
-  getMembers?: () => Promise<Array<Member>>
-  contentType?: string // only non-containers have a contentType
-  etag: string
-  body?: ReadableStream
-}
 
 export class QuadAndBlobStore {
   storage: BlobTree
@@ -35,45 +26,56 @@ export class QuadAndBlobStore {
   getContainer (url: URL) {
     return this.storage.getContainer(urlToPath(url))
   }
-  async getMetaData (url: URL): Promise<MetaData> {
+  async getResourceData (url: URL): Promise<ResourceData> {
     if (url.toString().substr(-1) === '/') {
       const container = this.storage.getContainer(urlToPath(url))
-      return {
-        exists: await container.exists(),
-        isContainer: true,
-        getMembers: container.getMembers.bind(container),
-        etag: 'container'
+      const exists = await container.exists()
+      if (exists) {
+        return {
+          resourceType: ResourceType.LdpBc,
+          getMembers: container.getMembers.bind(container),
+          getQuads: (preferMinimalContainer: boolean): ReadableStream<Quad> => {
+            let membersList: Array<Member>
+            if (preferMinimalContainer) {
+              membersList = []
+            } else {
+              membersList = await container.getMembers()
+            }
+            debug(membersList)
+            return membersListAsQuadStream(url, membersList)
+          },
+          etag: 'container'
+        } as ResourceDataLdpBc
+      } else {
+        return {
+          resourceType: ResourceType.Missing
+        } as ResourceDataMissing
       }
     } else {
       const blob = this.storage.getBlob(urlToPath(url))
-      const resourceData = await streamToObject(await blob.getData())
-      return {
-        exists: await blob.exists(),
-        isContainer: false,
-        contentType: resourceData.contentType,
-        etag: resourceData.etag,
-        body: bufferToStream(resourceData.body)
-      }
 
-    }
-  }
-  async getQuadStream (url: URL, preferMinimalContainer?: boolean): Promise<any> {
-    const path = urlToPath(url)
-    if (path.isContainer) {
-      const container = this.storage.getContainer(path)
-      debug(container)
-      let membersList: Array<Member>
-      if (preferMinimalContainer) {
-        membersList = []
+      const exists = await blob.exists()
+      if (exists) {
+        const metaData = blob.getMetaData()
+        if (metaData.contentType === 'text/turtle') { // QuadAndBlobStore will use this format when storing quads in BlobTree
+          const quadStream = await quadStreamFromBlob(blob)
+          return {
+            resourceType: ResourceType.LdpRsNonContainer,
+            etag: metaData.etag,
+            getQuads: () => quadStream
+          } as ResourceDataLdpRsNonContainer
+        }
+        return {
+          resourceType: ResourceType.LdpNr,
+          etag: metaData.etag,
+          contentType: metaData.contentType,
+          getBody: blob.getBody.bind(blob)
+        } as ResourceDataLdpNr
       } else {
-        membersList = await container.getMembers()
+        return {
+          resourceType: ResourceType.Missing
+        } as ResourceDataMissing
       }
-      debug(membersList)
-      return membersListAsQuadStream(url, membersList)
-    } else {
-      const blob = this.storage.getBlob(path)
-      const stream = await quadStreamFromBlob(blob)
-      return stream
     }
   }
   async setQuadStream (url: URL, quadStream: any): Promise<void> {

@@ -1,7 +1,8 @@
 
 import Debug from 'debug'
-import { ACL, RDF } from '../rdf/rdf-constants'
-import { StoreManager, quadStreamFromBlob, urlToRdfNode, stringToRdfNode, RdfNode, rdfNodeToString } from '../rdf/StoreManager'
+import { ACL } from '../rdf/rdf-constants'
+import { StoreManager } from '../rdf/StoreManager'
+import { urlToRdfNode, stringToRdfNode, RdfNode, rdfNodeToString } from '../rdf/RdfLibStoreManager'
 
 const debug = Debug('appIsTrustedForMode')
 const OWNER_PROFILES_FETCH_TIMEOUT = 2000

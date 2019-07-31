@@ -2,6 +2,8 @@ import convert from 'buffer-to-stream'
 import { calculateETag } from '../util/calculateETag'
 import MIMEType from 'whatwg-mimetype'
 import Debug from 'debug'
+import { Member } from '../storage/Container'
+import { Quad } from './StoreManager';
 
 const debug = Debug('ResourceDataUtils')
 
@@ -12,11 +14,65 @@ export enum RdfType {
   NoPref
 }
 
+// valid combinations:
+// case:     exists isContainer canGetQuads | contentType | getMembers getQuads getBody setQuads setBody
+// missing    false false       false       |             |
+// LDP-BC     true  true        true        |             | yes        yes      no      no       no
+// LDP-RS     true  false       true        |             |            yes      yes     yes      yes
+// LDP-NC     true  false       false       | yes         |                     yes     yes      yes
+
+export enum ResourceType {
+  Missing,
+  LdpBc,
+  LdpRsNonContainer,
+  LdpNr
+}
+export function exists (resourceData: ResourceData) {
+  return (resourceData.resourceType !== ResourceType.Missing)
+}
+export function hasContentType (resourceData: ResourceData) {
+  return (resourceData.resourceType === ResourceType.LdpNr)
+}
+export function hasEtag (resourceData: ResourceData) {
+  return exists(resourceData)
+}
+export function canGetMembers (resourceData: ResourceData) {
+  return (resourceData.resourceType === ResourceType.LdpBc)
+}
+export function canGetQuads (resourceData: ResourceData) {
+  return ([ResourceType.LdpRsNonContainer, ResourceType.LdpBc].indexOf(resourceData.resourceType) !== -1)
+}
+export function canGetBody (resourceData: ResourceData) {
+  return hasContentType(resourceData)
+}
+
 export interface ResourceData {
-  body: string
+  resourceType: ResourceType
+  contentType?: string
+  etag?: string
+  getMembers?: () => Promise<Array<Member>>
+  getQuads?: () => ReadableStream<Quad>
+  getBody?: () => ReadableStream<Buffer>
+}
+export interface ResourceDataMissing {
+  resourceType: ResourceType
+}
+export interface ResourceDataLdpBc {
+  resourceType: ResourceType
+  etag: string
+  getMembers: () => Promise<Array<Member>>
+  getQuads: () => ReadableStream<Quad>
+}
+export interface ResourceDataLdpRsNonContainer {
+  resourceType: ResourceType
+  etag: string
+  getQuads: () => ReadableStream<Quad>
+}
+export interface ResourceDataLdpNr {
+  resourceType: ResourceType
   contentType: string
   etag: string
-  rdfType: RdfType | undefined
+  getBody: () => ReadableStream<Buffer>
 }
 
 export function determineRdfType (contentType: string | undefined): RdfType {

@@ -2,7 +2,7 @@ import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
-import { StoreManager } from '../rdf/StoreManager'
+import { StoreManager } from '../rdf/RdfLibStoreManager'
 import { AccessCheckTask, checkAccess } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
@@ -20,7 +20,7 @@ export const globReadHandler = {
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
 
-    const metaData = await storeManager.getMetaData(wacLdpTask.fullUrl())
+    const metaData = await storeManager.getResourceData(wacLdpTask.fullUrl())
     if (!metaData) {
       throw new ErrorResult(ResultType.NotFound)
     }

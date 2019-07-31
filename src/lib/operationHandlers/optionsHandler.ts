@@ -2,7 +2,7 @@ import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { ResultType, WacLdpResponse } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
-import { StoreManager } from '../rdf/StoreManager'
+import { StoreManager } from '../rdf/RdfLibStoreManager'
 
 const debug = Debug('options-handler')
 

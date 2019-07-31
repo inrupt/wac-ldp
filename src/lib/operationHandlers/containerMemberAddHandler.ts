@@ -5,7 +5,7 @@ import { WacLdpResponse } from '../api/http/HttpResponder'
 import Debug from 'debug'
 
 import { streamToObject, makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
-import { StoreManager } from '../rdf/StoreManager'
+import { StoreManager } from '../rdf/RdfLibStoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { writeBlobHandler } from './writeBlobHandler'
 import { ACL } from '../rdf/rdf-constants'

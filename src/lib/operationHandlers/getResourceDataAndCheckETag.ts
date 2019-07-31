@@ -1,10 +1,10 @@
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
-import { StoreManager } from '../rdf/StoreManager'
-import { MetaData } from '../storage/QuadAndBlobStore'
+import { StoreManager } from '../rdf/RdfLibStoreManager'
+import { ResourceData } from '../storage/QuadAndBlobStore'
 
-export async function getResourceDataAndCheckETag (wacLdpTask: WacLdpTask, storeManager: StoreManager): Promise<MetaData> {
-  const metaData = await storeManager.getMetaData(wacLdpTask.fullUrl())
+export async function getResourceDataAndCheckETag (wacLdpTask: WacLdpTask, storeManager: StoreManager): Promise<ResourceData> {
+  const metaData = await storeManager.getResourceData(wacLdpTask.fullUrl())
   // See https://github.com/inrupt/wac-ldp/issues/114
   const resultTypeToUse = (wacLdpTask.isReadOperation() ? ResultType.NotModified : ResultType.PreconditionFailed)
   if (metaData.exists) {

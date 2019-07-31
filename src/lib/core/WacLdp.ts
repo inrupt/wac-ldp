@@ -21,6 +21,7 @@ import { setAppModes } from '../rdf/setAppModes'
 import { BlobTree } from '../storage/BlobTree'
 import { AclManager } from '../authorization/AclManager'
 import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
+import { RdfLibStoreManager } from '../rdf/RdfLibStoreManager';
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -61,7 +62,7 @@ export class WacLdp extends EventEmitter {
     super()
     const serverRootDomain: string = new URL(options.aud).host
     debug({ serverRootDomain })
-    this.storeManager = new StoreManager(serverRootDomain, options.storage)
+    this.storeManager = new RdfLibStoreManager(serverRootDomain, options.storage)
     this.aclManager = new AclManager(this.storeManager)
     this.aud = options.aud
     this.updatesViaUrl = options.updatesViaUrl
