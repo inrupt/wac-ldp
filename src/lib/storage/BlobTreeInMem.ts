@@ -67,33 +67,38 @@ class ContainerInMem extends NodeInMem implements Container {
 }
 
 class BlobInMem extends NodeInMem implements Blob {
-  getData (): Promise<ReadableStream | undefined> {
+  getData (): Promise<Array<Buffer>> {
     debug('reading resource', this.path, this.tree.kv)
     const buffer: Buffer | undefined = this.tree.kv[this.path.toString() + SUFFIX_META]
     if (buffer) {
       return Promise.resolve(bufferToStream(buffer))
     }
-    return Promise.resolve(undefined)
+    throw new Error('blob does not exist')
   }
-  getBody (): Promise<ReadableStream | undefined> {
+  getBodyVersion (etag: string): Promise<ReadableStream> {
     debug('reading resource', this.path, this.tree.kv)
     const buffer: Buffer | undefined = this.tree.kv[this.path.toString() + SUFFIX_BODY]
     if (buffer) {
       return Promise.resolve(bufferToStream(buffer))
     }
-    return Promise.resolve(undefined)
+    throw new Error('blob does not exist')
   }
-  async setDataAndBody (data: ReadableStream, body: ReadableStream) {
-    debug('setData', this.path)
-    this.tree.kv[this.path.toString() + SUFFIX_META] = await streamToBuffer(data)
-    this.tree.kv[this.path.toString() + SUFFIX_BODY] = await streamToBuffer(body)
+  async setBodyVersion (etag: string, body: ReadableStream<Buffer>): Promise<void> {
+    debug('setBodyVersion', this.path)
+    this.tree.kv[this.path.toString() + SUFFIX_BODY + etag] = await streamToBuffer(body)
     debug('Object.keys(this.tree.kv) after setData', Object.keys(this.tree.kv), this.path, this.path.toString())
-    this.tree.emit('change', { path: this.path })
     return Promise.resolve()
   }
-  async setData (data: ReadableStream) {
+  async deleteBodyVersion (etag: string): Promise<void> {
+    debug('deleteBodyVersion', this.path, etag)
+    delete this.tree.kv[this.path.toString() + SUFFIX_BODY + etag]
+    return Promise.resolve()
+  }
+  async setData (data: Array<Buffer>): Promise<void> {
     debug('setData', this.path)
-    this.tree.kv[this.path.toString()] = await streamToBuffer(data)
+    for (let i = 0; i < data.length; i++) {
+      this.tree.kv[this.path.toString() + SUFFIX_META + i] = data[i]
+    }
     debug('Object.keys(this.tree.kv) after setData', Object.keys(this.tree.kv), this.path, this.path.toString())
     this.tree.emit('change', { path: this.path })
     return Promise.resolve()

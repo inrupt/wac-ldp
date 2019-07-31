@@ -30,7 +30,9 @@ export class ErrorResult extends Error {
 export interface WacLdpResponse {
   resourcesChanged?: Array<URL>
   resultType: ResultType
-  resourceData?: ResourceData
+  contentType?: string
+  etag?: string
+  body?: ReadableStream<Buffer>
   createdLocation?: URL
   isContainer: boolean
 }
@@ -95,7 +97,7 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
 
   debug(responses[task.resultType])
   const responseStatus = responses[task.resultType].responseStatus
-  const responseBody = responses[task.resultType].responseBody || (task.resourceData ? task.resourceData.getBody() : '')
+  const responseBody = responses[task.resultType].responseBody || task.body
 
   let links = new Link()
   links.set({ rel: 'acl', uri: '.acl' })
@@ -126,8 +128,8 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
     'Access-Control-Expose-Headers': 'User, Location, Link, Vary, Last-Modified, ETag, Accept-Patch, Accept-Post, Updates-Via, Allow, WAC-Allow, Content-Length, WWW-Authenticate',
     'Updates-Via': options.updatesVia.toString()
   } as any
-  if (task.resourceData) {
-    responseHeaders['Content-Type'] = task.resourceData.contentType
+  if (task.contentType) {
+    responseHeaders['Content-Type'] = task.contentType
   } else {
     responseHeaders['Content-Type'] = 'text/plain'
     // responseHeaders['Transfer-Encoding'] = 'chunked' // see https://github.com/solid/test-suite/issues/24
@@ -138,9 +140,9 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
   if (task.resultType === ResultType.AccessDenied) {
     responseHeaders['WWW-Authenticate'] = `Bearer realm="${options.storageOrigin}", scope="openid webid"`
   }
-  if (task.resourceData) {
+  if (task.etag) {
     debug('setting ETag')
-    responseHeaders.ETag = `"${task.resourceData.etag}"`
+    responseHeaders.ETag = `"${task.etag}"`
   } else {
     debug('not setting ETag')
   }

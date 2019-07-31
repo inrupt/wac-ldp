@@ -1,6 +1,9 @@
 import { Node } from './Node'
 
 export interface Blob extends Node {
-  getData (): Promise<ReadableStream | undefined>
-  setData (data: ReadableStream): Promise<void>
+  getData (): Promise<Array<Buffer>>
+  setData (data: Array<Buffer>): Promise<void>
+  getBodyVersion (etag: string): Promise<ReadableStream>
+  setBodyVersion (etag: string, data: ReadableStream): Promise<void>
+  deleteBodyVersion (etag: string): Promise<void>
 }

@@ -37,7 +37,7 @@ export const globReadHandler = {
       if (!resourceData) {
         throw new ErrorResult(ResultType.NotFound)
       }
-      if (['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
+      if (resourceData.contentType && ['text/turtle', 'application/ld+json'].indexOf(resourceData.contentType) === -1) { // not an RDF source
         return
       }
       try {
