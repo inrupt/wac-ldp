@@ -4,7 +4,8 @@ import { Member } from './Container'
 import { membersListAsQuadStream } from './membersListAsResourceData'
 import { quadStreamFromBlob } from '../rdf/RdfLibStoreManager'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
-import { RdfType, objectToStream, ResourceData, ResourceType, ResourceDataLdpBc, ResourceDataMissing, ResourceDataLdpRsNonContainer, ResourceDataLdpNr } from '../rdf/ResourceDataUtils'
+import { RdfType, objectToStream, ResourceData, ResourceType, ResourceDataLdpBc, ResourceDataMissing, ResourceDataLdpRsNonContainer, ResourceDataLdpNr, streamToBuffer, makeResourceData, streamToObject, bufferToStream } from '../rdf/ResourceDataUtils'
+import { Quad } from '../rdf/StoreManager';
 
 const debug = Debug('quad-and-blob-store')
 
@@ -16,33 +17,39 @@ export class QuadAndBlobStore {
   delete (url: URL) {
     return this.storage.getBlob(urlToPath(url)).delete()
   }
-  exists (url: URL) {
-    return this.storage.getBlob(urlToPath(url)).exists()
-  }
-  setData (url: URL, data: ReadableStream): Promise<void> {
+  async write (url: URL, resourceData: ResourceData): Promise<void> {
     const blob = this.storage.getBlob(urlToPath(url))
-    return blob.setData(data)
+    if (resourceData.resourceType === ResourceType.LdpNr) {
+      const bodyStream = (resourceData as ResourceDataLdpNr).getBody()
+      const bodyBuffer = await streamToBuffer(bodyStream)
+      const contentType: string = (resourceData as ResourceDataLdpNr).contentType
+      const blobStream = objectToStream(makeResourceData(contentType, bodyBuffer.toString()))
+      await blob.setData(blobStream)
+    }
+    if (resourceData.resourceType === ResourceType.LdpRsNonContainer) {
+      const quadStream = (resourceData as ResourceDataLdpRsNonContainer).getQuads()
+      const bodyBuffer = await streamToBuffer(quadStream)
+      const contentType: string = (resourceData as ResourceDataLdpNr).contentType
+      const blobStream = objectToStream(makeResourceData(contentType, bodyBuffer.toString()))
+      await blob.setData(blobStream)
+    }
   }
-  getContainer (url: URL) {
-    return this.storage.getContainer(urlToPath(url))
-  }
-  async getResourceData (url: URL): Promise<ResourceData> {
+  async read (url: URL): Promise<ResourceData> {
     if (url.toString().substr(-1) === '/') {
       const container = this.storage.getContainer(urlToPath(url))
       const exists = await container.exists()
       if (exists) {
+        const membersList: Array<Member> = await container.getMembers()
         return {
           resourceType: ResourceType.LdpBc,
           getMembers: container.getMembers.bind(container),
           getQuads: (preferMinimalContainer: boolean): ReadableStream<Quad> => {
-            let membersList: Array<Member>
             if (preferMinimalContainer) {
-              membersList = []
+              return membersListAsQuadStream(url, [])
             } else {
-              membersList = await container.getMembers()
+              debug(membersList)
+              return membersListAsQuadStream(url, membersList)
             }
-            debug(membersList)
-            return membersListAsQuadStream(url, membersList)
           },
           etag: 'container'
         } as ResourceDataLdpBc
@@ -56,36 +63,26 @@ export class QuadAndBlobStore {
 
       const exists = await blob.exists()
       if (exists) {
-        const metaData = blob.getMetaData()
-        if (metaData.contentType === 'text/turtle') { // QuadAndBlobStore will use this format when storing quads in BlobTree
+        const blobData = await streamToObject(blob.getData())
+        if (blobData.contentType === 'text/turtle') { // QuadAndBlobStore will use this format when storing quads in BlobTree
           const quadStream = await quadStreamFromBlob(blob)
           return {
             resourceType: ResourceType.LdpRsNonContainer,
-            etag: metaData.etag,
+            etag: blobData.etag,
             getQuads: () => quadStream
           } as ResourceDataLdpRsNonContainer
         }
         return {
           resourceType: ResourceType.LdpNr,
-          etag: metaData.etag,
-          contentType: metaData.contentType,
-          getBody: blob.getBody.bind(blob)
+          etag: blobData.etag,
+          contentType: blobData.contentType,
+          getBody: () => bufferToStream(blobData.body)
         } as ResourceDataLdpNr
       } else {
         return {
           resourceType: ResourceType.Missing
         } as ResourceDataMissing
       }
-    }
-  }
-  async setQuadStream (url: URL, quadStream: any): Promise<void> {
-    const path = urlToPath(url)
-    if (path.isContainer) {
-      throw new Error('cannot set QuadStream on Container')
-    } else {
-      const blob = this.storage.getBlob(path)
-      const resourceData = rdfToResourceData(quadStream, RdfType.Turtle)
-      return blob.setData(objectToStream(resourceData))
     }
   }
 }

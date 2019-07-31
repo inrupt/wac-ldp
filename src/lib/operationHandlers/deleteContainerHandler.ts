@@ -1,14 +1,9 @@
-import { Blob } from '../storage/Blob'
-
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
 
-import { streamToObject } from '../rdf/ResourceDataUtils'
-import { StoreManager } from '../rdf/RdfLibStoreManager'
-import { Member } from '../storage/Container'
-import { membersListAsResourceData } from '../storage/membersListAsResourceData'
+import { StoreManager } from '../rdf/StoreManager'
 import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('delete-container-handler')

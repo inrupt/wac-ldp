@@ -1,6 +1,6 @@
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { WacLdpTask } from '../api/http/HttpParser'
-import { StoreManager } from '../rdf/RdfLibStoreManager'
+import { StoreManager } from '../rdf/StoreManager'
 import { ResourceData } from '../storage/QuadAndBlobStore'
 
 export async function getResourceDataAndCheckETag (wacLdpTask: WacLdpTask, storeManager: StoreManager): Promise<ResourceData> {

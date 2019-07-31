@@ -6,7 +6,7 @@ import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpRespond
 import Debug from 'debug'
 
 import { makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
-import { StoreManager } from '../rdf/RdfLibStoreManager'
+import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
 

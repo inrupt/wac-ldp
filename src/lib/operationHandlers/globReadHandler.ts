@@ -2,7 +2,7 @@ import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
-import { StoreManager } from '../rdf/RdfLibStoreManager'
+import { StoreManager } from '../rdf/StoreManager'
 import { AccessCheckTask, checkAccess } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'

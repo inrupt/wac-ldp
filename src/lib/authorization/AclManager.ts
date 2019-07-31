@@ -1,8 +1,6 @@
 import Debug from 'debug'
-import { urlToPath } from '../storage/BlobTree'
-import { StoreManager, getEmptyGraph, getGraphLocal } from '../rdf/StoreManager'
-import { makeResourceData, bufferToStream } from '../rdf/ResourceDataUtils'
-import { ResourceData } from '../storage/QuadAndBlobStore'
+import { StoreManager } from '../rdf/StoreManager'
+import { makeResourceData, bufferToStream, ResourceData, ResourceType } from '../rdf/ResourceDataUtils'
 
 // Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
 
@@ -89,13 +87,13 @@ export class AclManager {
   async readAcl (resourceUrl: URL): Promise<{ targetUrl: URL, contextUrl: URL }> {
     debug('readAcl', resourceUrl.toString())
     let currentGuessUrlStr: string = resourceUrl.toString()
-    let metaData: ResourceData = await this.storeManager.getResourceData(new URL(currentGuessUrlStr))
-    let currentIsContainer = metaData.isContainer
+    let resourceData: ResourceData = await this.storeManager.getResourceData(new URL(currentGuessUrlStr))
+    let currentIsContainer = (resourceData.resourceType === ResourceType.LdpBc)
     let aclDocUrlStr: string = (currentIsContainer ? toChild(currentGuessUrlStr, ACL_SUFFIX, false) : appendSuffix(currentGuessUrlStr, ACL_SUFFIX))
     debug('aclDocPath from resourcePath', resourceUrl.toString(), aclDocUrlStr)
     let isAdjacent = true
-    let currentGuessBlobExists = metaData.exists
-    debug('aclDocPath', aclDocUrlStr, metaData.exists)
+    let currentGuessBlobExists = (resourceData.resourceType !== ResourceType.Missing)
+    debug('aclDocPath', aclDocUrlStr, resourceData)
     while (!currentGuessBlobExists) {
       // if (/* metaData.isRoot() */ false) {
       //   // root ACL, nobody has access:
@@ -105,7 +103,7 @@ export class AclManager {
       isAdjacent = false
       currentIsContainer = true
       aclDocUrlStr = (currentIsContainer ? toChild(currentGuessUrlStr, ACL_SUFFIX, false) : appendSuffix(currentGuessUrlStr, ACL_SUFFIX))
-      debug('aclDocPath', aclDocUrlStr.toString(), metaData.exists)
+      debug('aclDocPath', aclDocUrlStr.toString(), resourceData)
     }
     return {
       targetUrl: new URL(currentGuessUrlStr),

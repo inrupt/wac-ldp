@@ -6,7 +6,7 @@ import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 import Debug from 'debug'
 
 import { streamToObject, makeResourceData } from '../rdf/ResourceDataUtils'
-import { StoreManager } from '../rdf/RdfLibStoreManager'
+import { StoreManager } from '../rdf/StoreManager'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { newEngine } from '@comunica/actor-init-sparql-rdfjs'

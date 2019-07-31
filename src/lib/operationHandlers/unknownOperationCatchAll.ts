@@ -2,7 +2,7 @@ import { WacLdpTask } from '../api/http/HttpParser'
 import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
-import { StoreManager } from '../rdf/RdfLibStoreManager'
+import { StoreManager } from '../rdf/StoreManager'
 
 const debug = Debug('unknown-operation-catch-all')
 

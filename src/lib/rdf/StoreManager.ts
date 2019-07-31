@@ -1,4 +1,4 @@
-import { ResourceData } from '../storage/QuadAndBlobStore'
+import { ResourceData } from './ResourceDataUtils'
 
 // TODO: align RdfNode with http://rdf.js.org/data-model-spec/#term-interface
 export interface RdfNode {

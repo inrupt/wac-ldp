@@ -51,24 +51,24 @@ export interface ResourceData {
   contentType?: string
   etag?: string
   getMembers?: () => Promise<Array<Member>>
-  getQuads?: () => ReadableStream<Quad>
+  getQuads?: (preferMinimalContainer?: boolean) => ReadableStream<Quad>
   getBody?: () => ReadableStream<Buffer>
 }
 export interface ResourceDataMissing {
   resourceType: ResourceType
 }
-export interface ResourceDataLdpBc {
+export interface ResourceDataLdpBc extends ResourceData {
   resourceType: ResourceType
   etag: string
   getMembers: () => Promise<Array<Member>>
-  getQuads: () => ReadableStream<Quad>
+  getQuads: (preferMinimalContainer?: boolean) => ReadableStream<Quad>
 }
-export interface ResourceDataLdpRsNonContainer {
+export interface ResourceDataLdpRsNonContainer extends ResourceData {
   resourceType: ResourceType
   etag: string
   getQuads: () => ReadableStream<Quad>
 }
-export interface ResourceDataLdpNr {
+export interface ResourceDataLdpNr extends ResourceData {
   resourceType: ResourceType
   contentType: string
   etag: string

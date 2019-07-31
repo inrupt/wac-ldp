@@ -95,7 +95,7 @@ export async function sendHttpResponse (task: WacLdpResponse, options: { updates
 
   debug(responses[task.resultType])
   const responseStatus = responses[task.resultType].responseStatus
-  const responseBody = responses[task.resultType].responseBody || (task.resourceData ? task.resourceData.body : '')
+  const responseBody = responses[task.resultType].responseBody || (task.resourceData ? task.resourceData.getBody() : '')
 
   let links = new Link()
   links.set({ rel: 'acl', uri: '.acl' })
