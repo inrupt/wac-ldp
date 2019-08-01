@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>Blob | wac-ldp-kit</title>
+	<title>Blob | wac-ldp</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">wac-ldp-kit</a>
+					<a href="../index.html" class="title">wac-ldp</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -96,8 +96,11 @@
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_lib_storage_blob_.blob.html#delete" class="tsd-kind-icon">delete</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_lib_storage_blob_.blob.html#deletebodyversion" class="tsd-kind-icon">delete<wbr>Body<wbr>Version</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-interface tsd-is-inherited"><a href="_lib_storage_blob_.blob.html#exists" class="tsd-kind-icon">exists</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_lib_storage_blob_.blob.html#getbodyversion" class="tsd-kind-icon">get<wbr>Body<wbr>Version</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_lib_storage_blob_.blob.html#getdata" class="tsd-kind-icon">get<wbr>Data</a></li>
+								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_lib_storage_blob_.blob.html#setbodyversion" class="tsd-kind-icon">set<wbr>Body<wbr>Version</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-interface"><a href="_lib_storage_blob_.blob.html#setdata" class="tsd-kind-icon">set<wbr>Data</a></li>
 							</ul>
 						</section>
@@ -117,9 +120,32 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_lib_storage_node_.node.html">Node</a>.<a href="_lib_storage_node_.node.html#delete">delete</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/storage/Node.ts#L8">lib/storage/Node.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/Node.ts#L8">lib/storage/Node.ts:8</a></li>
 								</ul>
 							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="deletebodyversion" class="tsd-anchor"></a>
+					<h3>delete<wbr>Body<wbr>Version</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">delete<wbr>Body<wbr>Version<span class="tsd-signature-symbol">(</span>etag<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/Blob.ts#L8">lib/storage/Blob.ts:8</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>etag: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
@@ -135,7 +161,7 @@
 							<aside class="tsd-sources">
 								<p>Inherited from <a href="_lib_storage_node_.node.html">Node</a>.<a href="_lib_storage_node_.node.html#exists">exists</a></p>
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/storage/Node.ts#L7">lib/storage/Node.ts:7</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/Node.ts#L7">lib/storage/Node.ts:7</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -150,19 +176,68 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
-					<a name="getdata" class="tsd-anchor"></a>
-					<h3>get<wbr>Data</h3>
+					<a name="getbodyversion" class="tsd-anchor"></a>
+					<h3>get<wbr>Body<wbr>Version</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">get<wbr>Data<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Body<wbr>Version<span class="tsd-signature-symbol">(</span>etag<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/storage/Blob.ts#L4">lib/storage/Blob.ts:4</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/Blob.ts#L6">lib/storage/Blob.ts:6</a></li>
 								</ul>
 							</aside>
-							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">&gt;</span></h4>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>etag: <span class="tsd-signature-type">string</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="getdata" class="tsd-anchor"></a>
+					<h3>get<wbr>Data</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">get<wbr>Data<span class="tsd-signature-symbol">(</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/Blob.ts#L4">lib/storage/Blob.ts:4</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-interface">
+					<a name="setbodyversion" class="tsd-anchor"></a>
+					<h3>set<wbr>Body<wbr>Version</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Body<wbr>Version<span class="tsd-signature-symbol">(</span>etag<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/Blob.ts#L7">lib/storage/Blob.ts:7</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>etag: <span class="tsd-signature-type">string</span></h5>
+								</li>
+								<li>
+									<h5>data: <span class="tsd-signature-type">ReadableStream</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
 						</li>
 					</ul>
 				</section>
@@ -170,19 +245,19 @@
 					<a name="setdata" class="tsd-anchor"></a>
 					<h3>set<wbr>Data</h3>
 					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-interface">
-						<li class="tsd-signature tsd-kind-icon">set<wbr>Data<span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
+						<li class="tsd-signature tsd-kind-icon">set<wbr>Data<span class="tsd-signature-symbol">(</span>data<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/storage/Blob.ts#L5">lib/storage/Blob.ts:5</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/Blob.ts#L5">lib/storage/Blob.ts:5</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>data: <span class="tsd-signature-type">ReadableStream</span></h5>
+									<h5>data: <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span></h5>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Promise</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">void</span><span class="tsd-signature-symbol">&gt;</span></h4>
@@ -212,11 +287,20 @@
 							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 								<a href="_lib_storage_blob_.blob.html#delete" class="tsd-kind-icon">delete</a>
 							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="_lib_storage_blob_.blob.html#deletebodyversion" class="tsd-kind-icon">delete<wbr>Body<wbr>Version</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-interface tsd-is-inherited">
 								<a href="_lib_storage_blob_.blob.html#exists" class="tsd-kind-icon">exists</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="_lib_storage_blob_.blob.html#getbodyversion" class="tsd-kind-icon">get<wbr>Body<wbr>Version</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
 								<a href="_lib_storage_blob_.blob.html#getdata" class="tsd-kind-icon">get<wbr>Data</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-interface">
+								<a href="_lib_storage_blob_.blob.html#setbodyversion" class="tsd-kind-icon">set<wbr>Body<wbr>Version</a>
 							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-interface">
 								<a href="_lib_storage_blob_.blob.html#setdata" class="tsd-kind-icon">set<wbr>Data</a>

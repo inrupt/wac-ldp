@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>WacLdpResponse | wac-ldp-kit</title>
+	<title>WacLdpResponse | wac-ldp</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">wac-ldp-kit</a>
+					<a href="../index.html" class="title">wac-ldp</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -84,9 +84,12 @@
 						<section class="tsd-index-section ">
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#body" class="tsd-kind-icon">body</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#contenttype" class="tsd-kind-icon">content<wbr>Type</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#createdlocation" class="tsd-kind-icon">created<wbr>Location</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#etag" class="tsd-kind-icon">etag</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#iscontainer" class="tsd-kind-icon">is<wbr>Container</a></li>
-								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#resourcedata" class="tsd-kind-icon">resource<wbr>Data</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#resourceschanged" class="tsd-kind-icon">resources<wbr>Changed</a></li>
 								<li class="tsd-kind-property tsd-parent-kind-interface"><a href="_lib_api_http_httpresponder_.wacldpresponse.html#resulttype" class="tsd-kind-icon">result<wbr>Type</a></li>
 							</ul>
 						</section>
@@ -96,12 +99,42 @@
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Properties</h2>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="createdlocation" class="tsd-anchor"></a>
-					<h3>created<wbr>Location</h3>
-					<div class="tsd-signature tsd-kind-icon">created<wbr>Location<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></div>
+					<a name="body" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> body</h3>
+					<div class="tsd-signature tsd-kind-icon">body<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">ReadableStream</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">Buffer</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpResponder.ts#L30">lib/api/http/HttpResponder.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/api/http/HttpResponder.ts#L35">lib/api/http/HttpResponder.ts:35</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="contenttype" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> content<wbr>Type</h3>
+					<div class="tsd-signature tsd-kind-icon">content<wbr>Type<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/api/http/HttpResponder.ts#L33">lib/api/http/HttpResponder.ts:33</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="createdlocation" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> created<wbr>Location</h3>
+					<div class="tsd-signature tsd-kind-icon">created<wbr>Location<span class="tsd-signature-symbol">:</span> <a href="../classes/_lib_rdf_generated_vocab_acl_.litvocabterm.html#url" class="tsd-signature-type">URL</a></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/api/http/HttpResponder.ts#L36">lib/api/http/HttpResponder.ts:36</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
+					<a name="etag" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> etag</h3>
+					<div class="tsd-signature tsd-kind-icon">etag<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">string</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/api/http/HttpResponder.ts#L34">lib/api/http/HttpResponder.ts:34</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -111,17 +144,17 @@
 					<div class="tsd-signature tsd-kind-icon">is<wbr>Container<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpResponder.ts#L31">lib/api/http/HttpResponder.ts:31</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/api/http/HttpResponder.ts#L37">lib/api/http/HttpResponder.ts:37</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-interface">
-					<a name="resourcedata" class="tsd-anchor"></a>
-					<h3>resource<wbr>Data</h3>
-					<div class="tsd-signature tsd-kind-icon">resource<wbr>Data<span class="tsd-signature-symbol">:</span> <a href="_lib_util_resourcedatautils_.resourcedata.html" class="tsd-signature-type">ResourceData</a><span class="tsd-signature-symbol"> | </span><span class="tsd-signature-type">undefined</span></div>
+					<a name="resourceschanged" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagOptional">Optional</span> resources<wbr>Changed</h3>
+					<div class="tsd-signature tsd-kind-icon">resources<wbr>Changed<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol">&gt;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpResponder.ts#L29">lib/api/http/HttpResponder.ts:29</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/api/http/HttpResponder.ts#L31">lib/api/http/HttpResponder.ts:31</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -131,7 +164,7 @@
 					<div class="tsd-signature tsd-kind-icon">result<wbr>Type<span class="tsd-signature-symbol">:</span> <a href="../enums/_lib_api_http_httpresponder_.resulttype.html" class="tsd-signature-type">ResultType</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/api/http/HttpResponder.ts#L28">lib/api/http/HttpResponder.ts:28</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/api/http/HttpResponder.ts#L32">lib/api/http/HttpResponder.ts:32</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -162,13 +195,22 @@
 						<a href="_lib_api_http_httpresponder_.wacldpresponse.html" class="tsd-kind-icon">Wac<wbr>Ldp<wbr>Response</a>
 						<ul>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#body" class="tsd-kind-icon">body</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#contenttype" class="tsd-kind-icon">content<wbr>Type</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#createdlocation" class="tsd-kind-icon">created<wbr>Location</a>
+							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-interface">
+								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#etag" class="tsd-kind-icon">etag</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#iscontainer" class="tsd-kind-icon">is<wbr>Container</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
-								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#resourcedata" class="tsd-kind-icon">resource<wbr>Data</a>
+								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#resourceschanged" class="tsd-kind-icon">resources<wbr>Changed</a>
 							</li>
 							<li class=" tsd-kind-property tsd-parent-kind-interface">
 								<a href="_lib_api_http_httpresponder_.wacldpresponse.html#resulttype" class="tsd-kind-icon">result<wbr>Type</a>
@@ -177,11 +219,20 @@
 					</li>
 				</ul>
 				<ul class="after-current">
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_lib_api_http_httpresponder_.html#responsecontent" class="tsd-kind-icon">Response<wbr>Content</a>
+					</li>
+					<li class=" tsd-kind-type-alias tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_lib_api_http_httpresponder_.html#responses" class="tsd-kind-icon">Responses</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="../modules/_lib_api_http_httpresponder_.html#link" class="tsd-kind-icon">Link</a>
+					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="../modules/_lib_api_http_httpresponder_.html#debug" class="tsd-kind-icon">debug</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
-						<a href="../modules/_lib_api_http_httpresponder_.html#responses" class="tsd-kind-icon">responses</a>
+						<a href="../modules/_lib_api_http_httpresponder_.html#responses-1" class="tsd-kind-icon">responses</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="../modules/_lib_api_http_httpresponder_.html#sendhttpresponse" class="tsd-kind-icon">send<wbr>Http<wbr>Response</a>

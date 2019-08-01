@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;lib/storage/BlobTree&quot; | wac-ldp-kit</title>
+	<title>&quot;lib/storage/BlobTree&quot; | wac-ldp</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">wac-ldp-kit</a>
+					<a href="../index.html" class="title">wac-ldp</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -85,13 +85,15 @@
 						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Variables</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_storage_blobtree_.html#storage_format" class="tsd-kind-icon">STORAGE_<wbr>FORMAT</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_storage_blobtree_.html#debug" class="tsd-kind-icon">debug</a></li>
 							</ul>
 						</section>
-						<section class="tsd-index-section tsd-is-not-exported">
+						<section class="tsd-index-section ">
 							<h3>Functions</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported"><a href="_lib_storage_blobtree_.html#copystringarray" class="tsd-kind-icon">copy<wbr>String<wbr>Array</a></li>
+								<li class="tsd-kind-function tsd-parent-kind-external-module"><a href="_lib_storage_blobtree_.html#urltopath" class="tsd-kind-icon">url<wbr>ToPath</a></li>
 							</ul>
 						</section>
 					</div>
@@ -100,17 +102,27 @@
 			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
 				<h2>Variables</h2>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="storage_format" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> STORAGE_<wbr>FORMAT</h3>
+					<div class="tsd-signature tsd-kind-icon">STORAGE_<wbr>FORMAT<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">"v2"</span><span class="tsd-signature-symbol"> =&nbsp;&quot;v2&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/BlobTree.ts#L8">lib/storage/BlobTree.ts:8</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 					<a name="debug" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> debug</h3>
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Debugger</span><span class="tsd-signature-symbol"> =&nbsp;Debug(&#x27;BlobTree&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/storage/BlobTree.ts#L5">lib/storage/BlobTree.ts:5</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/BlobTree.ts#L6">lib/storage/BlobTree.ts:6</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
-			<section class="tsd-panel-group tsd-member-group tsd-is-not-exported">
+			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Functions</h2>
 				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
 					<a name="copystringarray" class="tsd-anchor"></a>
@@ -122,7 +134,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/lib/storage/BlobTree.ts#L18">lib/storage/BlobTree.ts:18</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/BlobTree.ts#L21">lib/storage/BlobTree.ts:21</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -132,6 +144,29 @@
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">Array</span><span class="tsd-signature-symbol">&lt;</span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol">&gt;</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function tsd-parent-kind-external-module">
+					<a name="urltopath" class="tsd-anchor"></a>
+					<h3>url<wbr>ToPath</h3>
+					<ul class="tsd-signatures tsd-kind-function tsd-parent-kind-external-module">
+						<li class="tsd-signature tsd-kind-icon">url<wbr>ToPath<span class="tsd-signature-symbol">(</span>url<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">URL</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="../classes/_lib_storage_blobtree_.path.html" class="tsd-signature-type">Path</a></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/lib/storage/BlobTree.ts#L25">lib/storage/BlobTree.ts:25</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>url: <span class="tsd-signature-type">URL</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <a href="../classes/_lib_storage_blobtree_.path.html" class="tsd-signature-type">Path</a></h4>
 						</li>
 					</ul>
 				</section>
@@ -157,10 +192,16 @@
 						<a href="../interfaces/_lib_storage_blobtree_.blobtree.html" class="tsd-kind-icon">Blob<wbr>Tree</a>
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_lib_storage_blobtree_.html#storage_format" class="tsd-kind-icon">STORAGE_<wbr>FORMAT</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_lib_storage_blobtree_.html#debug" class="tsd-kind-icon">debug</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_lib_storage_blobtree_.html#copystringarray" class="tsd-kind-icon">copy<wbr>String<wbr>Array</a>
+					</li>
+					<li class=" tsd-kind-function tsd-parent-kind-external-module">
+						<a href="_lib_storage_blobtree_.html#urltopath" class="tsd-kind-icon">url<wbr>ToPath</a>
 					</li>
 				</ul>
 			</nav>

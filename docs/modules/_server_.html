@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>&quot;server&quot; | wac-ldp-kit</title>
+	<title>&quot;server&quot; | wac-ldp</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="../assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="../index.html" class="title">wac-ldp-kit</a>
+					<a href="../index.html" class="title">wac-ldp</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -71,6 +71,12 @@
 				<section class="tsd-panel tsd-index-panel">
 					<div class="tsd-index-content">
 						<section class="tsd-index-section tsd-is-not-exported">
+							<h3>Modules</h3>
+							<ul class="tsd-index-list">
+								<li class="tsd-kind-module tsd-parent-kind-external-module tsd-is-not-exported"><a href="_server_.__global.html" class="tsd-kind-icon">__global</a></li>
+							</ul>
+						</section>
+						<section class="tsd-index-section tsd-is-not-exported">
 							<h3>Classes</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-class tsd-parent-kind-external-module tsd-is-not-exported"><a href="../classes/_server_.server.html" class="tsd-kind-icon">Server</a></li>
@@ -83,6 +89,7 @@
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_server_.html#debug" class="tsd-kind-icon">debug</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_server_.html#port" class="tsd-kind-icon">port</a></li>
 								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_server_.html#server-1" class="tsd-kind-icon">server</a></li>
+								<li class="tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported"><a href="_server_.html#skipwac" class="tsd-kind-icon">skip<wbr>Wac</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
@@ -99,10 +106,10 @@
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 					<a name="aud" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> aud</h3>
-					<div class="tsd-signature tsd-kind-icon">aud<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;process.env.AUD || &#x27;https://localhost:8443&#x27;</span></div>
+					<div class="tsd-signature tsd-kind-icon">aud<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> =&nbsp;process.env.AUD || &#x60;http://localhost:${port}&#x60;</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/server.ts#L32">server.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/server.ts#L56">server.ts:56</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -112,7 +119,7 @@
 					<div class="tsd-signature tsd-kind-icon">debug<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">Debugger</span><span class="tsd-signature-symbol"> =&nbsp;Debug(&#x27;server&#x27;)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/server.ts#L7">server.ts:7</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/server.ts#L24">server.ts:24</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -122,17 +129,27 @@
 					<div class="tsd-signature tsd-kind-icon">port<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">number</span><span class="tsd-signature-symbol"> =&nbsp;parseInt((process.env.PORT ? process.env.PORT : &#x27;&#x27;), 10) || 8080</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/server.ts#L30">server.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/server.ts#L53">server.ts:53</a></li>
 						</ul>
 					</aside>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 					<a name="server-1" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> server</h3>
-					<div class="tsd-signature tsd-kind-icon">server<span class="tsd-signature-symbol">:</span> <a href="../classes/_server_.server.html" class="tsd-signature-type">Server</a><span class="tsd-signature-symbol"> =&nbsp;new Server(port, aud)</span></div>
+					<div class="tsd-signature tsd-kind-icon">server<span class="tsd-signature-symbol">:</span> <a href="../classes/_server_.server.html" class="tsd-signature-type">Server</a><span class="tsd-signature-symbol"> =&nbsp;new Server(port, aud, skipWac)</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/server.ts#L33">server.ts:33</a></li>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/server.ts#L57">server.ts:57</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+					<a name="skipwac" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> skip<wbr>Wac</h3>
+					<div class="tsd-signature tsd-kind-icon">skip<wbr>Wac<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">boolean</span><span class="tsd-signature-symbol"> =&nbsp;!!process.env.SKIP_WAC</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/server.ts#L54">server.ts:54</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -149,7 +166,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/a290509/src/server.ts#L37">server.ts:37</a></li>
+									<li>Defined in <a href="https://github.com/inrupt/wac-ldp/blob/7ec4d41/src/server.ts#L61">server.ts:61</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">void</span></h4>
@@ -166,6 +183,11 @@
 					</li>
 					<li class="current tsd-kind-external-module">
 						<a href="_server_.html">"server"</a>
+						<ul>
+							<li class=" tsd-kind-module tsd-parent-kind-external-module tsd-is-not-exported">
+								<a href="_server_.__global.html">__global</a>
+							</li>
+						</ul>
 					</li>
 				</ul>
 			</nav>
@@ -185,6 +207,9 @@
 					</li>
 					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
 						<a href="_server_.html#server-1" class="tsd-kind-icon">server</a>
+					</li>
+					<li class=" tsd-kind-variable tsd-parent-kind-external-module tsd-is-not-exported">
+						<a href="_server_.html#skipwac" class="tsd-kind-icon">skip<wbr>Wac</a>
 					</li>
 					<li class=" tsd-kind-function tsd-parent-kind-external-module">
 						<a href="_server_.html#closeserver" class="tsd-kind-icon">close<wbr>Server</a>
