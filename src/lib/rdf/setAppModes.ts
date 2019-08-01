@@ -1,8 +1,8 @@
 import Debug from 'debug'
 import { ACL } from './rdf-constants'
 import * as url from 'url'
-import { StoreManager } from './StoreManager'
-import { urlToRdfNode, stringToRdfNode, RdfNode, newBlankNode } from './RdfLibStoreManager'
+import { StoreManager, RdfJsTerm } from './StoreManager'
+import { urlToRdfJsTerm, stringToRdfJsTerm, newBlankNode } from './RdfLibStoreManager'
 
 const debug = Debug('setAppModes')
 
@@ -14,45 +14,45 @@ export async function setAppModes (webId: URL, origin: string, modes: Array<URL>
   // remove existing statements on same origin - if it exists
   debug('finding statements about ', origin)
   const existingNodes = await storeManager.subjectsMatching({
-    predicate: urlToRdfNode(ACL['origin']),
-    object: stringToRdfNode(origin),
-    why: urlToRdfNode(webIdDocUrl)
+    predicate: urlToRdfJsTerm(ACL['origin']),
+    object: stringToRdfJsTerm(origin),
+    graph: urlToRdfJsTerm(webIdDocUrl)
   })
-  debug('removing trustedApp statements with objects ', existingNodes.map((node: RdfNode) => node.value))
-  await storeManager.removeStatements({
-    predicate: urlToRdfNode(ACL.trustedApp),
+  debug('removing trustedApp statements with objects ', existingNodes.map((node: RdfJsTerm) => node.value))
+  await storeManager.deleteMatches({
+    predicate: urlToRdfJsTerm(ACL.trustedApp),
     object: existingNodes,
-    why: urlToRdfNode(webIdDocUrl)
+    graph: urlToRdfJsTerm(webIdDocUrl)
   })
-  debug('removing statements with subjects ', existingNodes.map((node: RdfNode) => node.value))
-  await storeManager.removeStatements({
+  debug('removing statements with subjects ', existingNodes.map((node: RdfJsTerm) => node.value))
+  await storeManager.deleteMatches({
     subject: existingNodes,
-    why: urlToRdfNode(webIdDocUrl)
+    graph: urlToRdfJsTerm(webIdDocUrl)
   })
   debug('after removing', storeManager)
 
   // add new triples
-  const application = newBlankNode()
+  const application: RdfJsTerm = newBlankNode()
   await storeManager.addQuad({
-    subject: urlToRdfNode(webId),
-    predicate: urlToRdfNode(ACL.trustedApp),
+    subject: urlToRdfJsTerm(webId),
+    predicate: urlToRdfJsTerm(ACL.trustedApp),
     object: application,
-    why: urlToRdfNode(webIdDocUrl)
+    graph: urlToRdfJsTerm(webIdDocUrl)
   })
   await storeManager.addQuad({
     subject: application,
-    predicate: urlToRdfNode(ACL.origin),
-    object: stringToRdfNode(origin),
-    why: urlToRdfNode(webIdDocUrl)
+    predicate: urlToRdfJsTerm(ACL.origin),
+    object: stringToRdfJsTerm(origin),
+    graph: urlToRdfJsTerm(webIdDocUrl)
   })
 
   await Promise.all(modes.map(mode => {
     debug('adding', application, ACL.mode.toString(), mode)
     return storeManager.addQuad({
       subject: application,
-      predicate: urlToRdfNode(ACL.mode),
-      object: urlToRdfNode(mode),
-      why: urlToRdfNode(webIdDocUrl)
+      predicate: urlToRdfJsTerm(ACL.mode),
+      object: urlToRdfJsTerm(mode),
+      graph: urlToRdfJsTerm(webIdDocUrl)
     })
   }))
   debug('after patch', storeManager)

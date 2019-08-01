@@ -9,7 +9,7 @@ import { Blob } from '../storage/Blob'
 import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer, ResourceDataLdpRsNonContainer, ResourceDataLdpNr, ResourceType, ResourceDataLdpBc, exists } from './ResourceDataUtils'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
-import { StoreManager, Quad, Pattern } from './StoreManager'
+import { StoreManager, Quad, Pattern, RdfJsTerm } from './StoreManager'
 
 const debug = Debug('StoreManager')
 
@@ -24,27 +24,24 @@ async function flattenPromises (promises: Array<Promise<Array<Quad>>>): Promise<
 export function getEmptyGraph () {
   return rdf.dataset()
 }
-export function newBlankNode () {
+export function newBlankNode (): RdfJsTerm {
   return new rdflib.BlankNode()
 }
-export interface RdfNode {
-  value: string
-}
 
-export function stringToRdfNode (str: string): RdfNode {
+export function stringToRdfJsTerm (str: string): RdfJsTerm {
   return rdflib.sym(str)
 }
 
-export function urlToRdfNode (url: URL): RdfNode {
-  return stringToRdfNode(url.toString())
+export function urlToRdfJsTerm (url: URL): RdfJsTerm {
+  return stringToRdfJsTerm(url.toString())
 }
 
-export function rdfNodeToString (rdfNode: RdfNode): string {
-  return rdfNode.value
+export function rdfNodeToString (rdfTerm: RdfJsTerm): string {
+  return rdfTerm.value
 }
 
-export function rdfNodeToUrl (rdfNode: RdfNode): URL {
-  return new URL(rdfNodeToString(rdfNode))
+export function rdfNodeToUrl (rdfTerm: RdfJsTerm): URL {
+  return new URL(rdfNodeToString(rdfTerm))
 }
 
 function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
@@ -116,68 +113,68 @@ export class RdfLibStoreManager implements StoreManager {
     return this.storage.read(url)
   }
   async addQuad (quad: Quad) {
-    const docUrl: URL = rdfNodeToUrl(quad.why)
+    const docUrl: URL = rdfNodeToUrl(quad.graph)
     await this.load(docUrl)
-    return this.stores[docUrl.toString()].add(quad.subject, quad.predicate, quad.object, quad.why)
+    return this.stores[docUrl.toString()].add(quad.subject, quad.predicate, quad.object, quad.graph)
   }
-  async removeStatements (pattern: Pattern) {
-    const docUrl: URL = rdfNodeToUrl(pattern.why)
+  async deleteMatches (pattern: Pattern) {
+    const docUrl: URL = rdfNodeToUrl(pattern.graph)
     await this.load(docUrl)
-    const statements = this.stores[docUrl.toString()].statementsMatching(pattern.subject, pattern.predicate, pattern.object, pattern.why)
+    const statements = this.stores[docUrl.toString()].statementsMatching(pattern.subject, pattern.predicate, pattern.object, pattern.graph)
     this.stores[docUrl.toString()].removeStatements([...statements])
   }
-  async statementsMatching (pattern: Pattern): Promise<Array<Quad>> {
+  async match (pattern: Pattern): Promise<Array<Quad>> {
     if (pattern.subject && Array.isArray(pattern.subject)) {
-      return flattenPromises(pattern.subject.map((subject: RdfNode) => {
-        return this.statementsMatching({
+      return flattenPromises(pattern.subject.map((subject: RdfJsTerm) => {
+        return this.match({
           subject,
           predicate: pattern.predicate,
           object: pattern.object,
-          why: pattern.why
+          graph: pattern.graph
         })
       }))
     }
     if (pattern.predicate && Array.isArray(pattern.predicate)) {
-      return flattenPromises(pattern.predicate.map((predicate: RdfNode) => {
-        return this.statementsMatching({
+      return flattenPromises(pattern.predicate.map((predicate: RdfJsTerm) => {
+        return this.match({
           subject: pattern.subject,
           predicate,
           object: pattern.object,
-          why: pattern.why
+          graph: pattern.graph
         })
       }))
     }
     if (pattern.object && Array.isArray(pattern.object)) {
-      return flattenPromises(pattern.object.map((object: RdfNode) => {
-        return this.statementsMatching({
+      return flattenPromises(pattern.object.map((object: RdfJsTerm) => {
+        return this.match({
           subject: pattern.subject,
           predicate: pattern.object,
           object,
-          why: pattern.why
+          graph: pattern.graph
         })
       }))
     }
     debug('statementsMatching', pattern)
-    await this.load(rdfNodeToUrl(pattern.why))
-    debug(this.stores[rdfNodeToString(pattern.why)])
-    const ret = this.stores[rdfNodeToString(pattern.why)].statementsMatching(
+    await this.load(rdfNodeToUrl(pattern.graph))
+    debug(this.stores[rdfNodeToString(pattern.graph)])
+    const ret = this.stores[rdfNodeToString(pattern.graph)].statementsMatching(
       pattern.subject,
       pattern.predicate,
       pattern.object,
-      pattern.why)
+      pattern.graph)
     debug(ret)
     return ret
   }
-  async subjectsMatching (pattern: Pattern): Promise<Array<RdfNode>> {
-    const statements = await this.statementsMatching(pattern)
+  async subjectsMatching (pattern: Pattern): Promise<Array<RdfJsTerm>> {
+    const statements = await this.match(pattern)
     return statements.map((quad: Quad) => quad.subject)
   }
-  async predicatesMatching (pattern: Pattern): Promise<Array<RdfNode>> {
-    const statements = await this.statementsMatching(pattern)
+  async predicatesMatching (pattern: Pattern): Promise<Array<RdfJsTerm>> {
+    const statements = await this.match(pattern)
     return statements.map((quad: Quad) => quad.predicate)
   }
-  async objectsMatching (pattern: Pattern): Promise<Array<RdfNode>> {
-    const statements = await this.statementsMatching(pattern)
+  async objectsMatching (pattern: Pattern): Promise<Array<RdfJsTerm>> {
+    const statements = await this.match(pattern)
     return statements.map((quad: Quad) => quad.object)
   }
   getRepresentationFromStore (url: URL): ResourceData {

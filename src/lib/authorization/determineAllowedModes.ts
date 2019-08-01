@@ -1,7 +1,7 @@
 import Debug from 'debug'
 import { ACL, FOAF, RDF, VCARD } from '../rdf/rdf-constants'
-import { StoreManager } from '../rdf/StoreManager'
-import { urlToRdfNode, rdfNodeToUrl, RdfNode, stringToRdfNode } from '../rdf/RdfLibStoreManager'
+import { StoreManager, RdfJsTerm } from '../rdf/StoreManager'
+import { urlToRdfJsTerm, rdfNodeToUrl, stringToRdfJsTerm } from '../rdf/RdfLibStoreManager'
 import { urlToDocUrl } from './appIsTrustedForMode'
 
 const debug = Debug('DetermineAllowedModes')
@@ -43,16 +43,16 @@ export interface ModesMask {
   [index: string]: boolean
 }
 
-async function fetchGroupMembers (groupUri: URL, storeManager: StoreManager): Promise<Array<RdfNode>> {
+async function fetchGroupMembers (groupUri: URL, storeManager: StoreManager): Promise<Array<RdfJsTerm>> {
   debug('fetchGroupMembers', groupUri.toString())
-  const groupUriNode = urlToRdfNode(groupUri)
+  const groupUriNode = urlToRdfJsTerm(groupUri)
   const groupUriDoc = urlToDocUrl(groupUri)
-  const groupUriDocNode = urlToRdfNode(groupUriDoc)
+  const groupUriDocNode = urlToRdfJsTerm(groupUriDoc)
   // await storeManager.load(groupUri)
   const memberNodes = await storeManager.objectsMatching({
     subject: groupUriNode,
-    predicate: urlToRdfNode(VCARD.hasMember),
-    why: groupUriDocNode
+    predicate: urlToRdfJsTerm(VCARD.hasMember),
+    graph: groupUriDocNode
   })
   debug(memberNodes)
   return memberNodes
@@ -73,32 +73,32 @@ function urlsEquivalent (grantUrl: URL, targetURL: URL): boolean {
 export async function determineAllowedModes (task: ModesCheckTask): Promise<ModesMask> {
   const accessPredicate: string = (task.resourceIsTarget ? ACL.accessTo.toString() : ACL.default.toString())
   // debug('task', task)
-  const authorizationNodes: Array<RdfNode> = await task.storeManager.subjectsMatching({
-    predicate: urlToRdfNode(RDF.type),
-    object: urlToRdfNode(ACL.Authorization),
-    why: urlToRdfNode(task.contextUrl)
+  const authorizationNodes: Array<RdfJsTerm> = await task.storeManager.subjectsMatching({
+    predicate: urlToRdfJsTerm(RDF.type),
+    object: urlToRdfJsTerm(ACL.Authorization),
+    graph: urlToRdfJsTerm(task.contextUrl)
   })
-  let agentNodes: Array<RdfNode> = [ urlToRdfNode(AGENT_CLASS_ANYBODY) ]
+  let agentNodes: Array<RdfJsTerm> = [ urlToRdfJsTerm(AGENT_CLASS_ANYBODY) ]
   if (task.webId) {
-    agentNodes.push(urlToRdfNode(AGENT_CLASS_ANYBODY_LOGGED_IN))
-    agentNodes.push(urlToRdfNode(task.webId))
+    agentNodes.push(urlToRdfJsTerm(AGENT_CLASS_ANYBODY_LOGGED_IN))
+    agentNodes.push(urlToRdfJsTerm(task.webId))
   }
   const authorizationNodesAboutAgent = await task.storeManager.subjectsMatching({
     subject: authorizationNodes,
-    predicate: urlToRdfNode(ACL.agent),
+    predicate: urlToRdfJsTerm(ACL.agent),
     object: agentNodes,
-    why: urlToRdfNode(task.contextUrl)
+    graph: urlToRdfJsTerm(task.contextUrl)
   })
   const alsoAboutTargetResource = await task.storeManager.subjectsMatching({
     subject: authorizationNodesAboutAgent,
-    predicate: stringToRdfNode(accessPredicate),
-    object: urlToRdfNode(task.targetUrl),
-    why: urlToRdfNode(task.contextUrl)
+    predicate: stringToRdfJsTerm(accessPredicate),
+    object: urlToRdfJsTerm(task.targetUrl),
+    graph: urlToRdfJsTerm(task.contextUrl)
   })
   const modes = await task.storeManager.objectsMatching({
     subject: alsoAboutTargetResource,
-    predicate: urlToRdfNode(ACL.mode),
-    why: urlToRdfNode(task.contextUrl)
+    predicate: urlToRdfJsTerm(ACL.mode),
+    graph: urlToRdfJsTerm(task.contextUrl)
   })
   let ret = {
     ACL_READ: false,
@@ -106,7 +106,7 @@ export async function determineAllowedModes (task: ModesCheckTask): Promise<Mode
     ACL_APPEND: false,
     ACL_CONTROL: false
   } as ModesMask
-  modes.map((node: RdfNode) => {
+  modes.map((node: RdfJsTerm) => {
     ret[rdfNodeToUrl(node).toString()] = true
   })
   return ret

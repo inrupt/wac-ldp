@@ -1,8 +1,8 @@
 
 import Debug from 'debug'
 import { ACL } from '../rdf/rdf-constants'
-import { StoreManager } from '../rdf/StoreManager'
-import { urlToRdfNode, stringToRdfNode, RdfNode, rdfNodeToString } from '../rdf/RdfLibStoreManager'
+import { StoreManager, RdfJsTerm } from '../rdf/StoreManager'
+import { urlToRdfJsTerm, stringToRdfJsTerm, rdfNodeToString } from '../rdf/RdfLibStoreManager'
 
 const debug = Debug('appIsTrustedForMode')
 const OWNER_PROFILES_FETCH_TIMEOUT = 2000
@@ -21,31 +21,31 @@ export function urlToDocUrl (url: URL): URL {
 
 export async function getAppModes (webId: URL, origin: string, storeManager: StoreManager): Promise<Array<URL>> {
   const webIdDoc: URL = urlToDocUrl(webId)
-  const webIdDocNode: RdfNode = urlToRdfNode(webIdDoc)
+  const webIdDocNode: RdfJsTerm = urlToRdfJsTerm(webIdDoc)
   debug(storeManager)
   // await storeManager.load(webIdDoc)
-  const trustedAppNodes: Array<RdfNode> = await storeManager.subjectsMatching({
-    predicate: urlToRdfNode(ACL.origin),
-    object: stringToRdfNode(origin),
-    why: webIdDocNode
+  const trustedAppNodes: Array<RdfJsTerm> = await storeManager.subjectsMatching({
+    predicate: urlToRdfJsTerm(ACL.origin),
+    object: stringToRdfJsTerm(origin),
+    graph: webIdDocNode
   })
   debug({ trustedAppNodes })
   const modes: any = {}
-  await Promise.all(trustedAppNodes.map(async (node: RdfNode) => {
-    const trustStatements = await storeManager.statementsMatching({
-      subject: urlToRdfNode(webId),
-      predicate: urlToRdfNode(ACL.trustedApp),
+  await Promise.all(trustedAppNodes.map(async (node: RdfJsTerm) => {
+    const trustStatements = await storeManager.match({
+      subject: urlToRdfJsTerm(webId),
+      predicate: urlToRdfJsTerm(ACL.trustedApp),
       object: node,
-      why: webIdDocNode
+      graph: webIdDocNode
     })
     debug({ trustStatements })
     if (trustStatements.length > 0) {
-      const modeNodes: Array<RdfNode> = await storeManager.objectsMatching({
+      const modeNodes: Array<RdfJsTerm> = await storeManager.objectsMatching({
         subject: node,
-        predicate: urlToRdfNode(ACL.mode),
-        why: webIdDocNode
+        predicate: urlToRdfJsTerm(ACL.mode),
+        graph: webIdDocNode
       })
-      await Promise.all(modeNodes.map(async (node: RdfNode) => {
+      await Promise.all(modeNodes.map(async (node: RdfJsTerm) => {
         modes[rdfNodeToString(node)] = true
       }))
     }
