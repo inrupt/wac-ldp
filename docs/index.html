@@ -3,7 +3,7 @@
 <head>
 	<meta charset="utf-8">
 	<meta http-equiv="X-UA-Compatible" content="IE=edge">
-	<title>wac-ldp-kit</title>
+	<title>wac-ldp</title>
 	<meta name="description" content="">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 	<link rel="stylesheet" href="assets/css/main.css">
@@ -22,7 +22,7 @@
 						<li class="state loading">Preparing search index...</li>
 						<li class="state failure">The search index is not available</li>
 					</ul>
-					<a href="index.html" class="title">wac-ldp-kit</a>
+					<a href="index.html" class="title">wac-ldp</a>
 				</div>
 				<div class="table-cell" id="tsd-widgets">
 					<div id="tsd-filter">
@@ -56,7 +56,7 @@
 					<a href="globals.html">Globals</a>
 				</li>
 			</ul>
-			<h1> wac-ldp-kit</h1>
+			<h1> wac-ldp</h1>
 		</div>
 	</div>
 </header>
@@ -68,27 +68,58 @@
 				<p><a href="https://travis-ci.org/inrupt/wac-ldp"><img src="https://travis-ci.org/inrupt/wac-ldp.svg?branch=master" alt="Build Status"></a> <a href="https://coveralls.io/github/inrupt/wac-ldp?branch=master"><img src="https://coveralls.io/repos/github/inrupt/wac-ldp/badge.svg?branch=master" alt="Coverage Status"></a> <a href="https://greenkeeper.io/"><img src="https://badges.greenkeeper.io/inrupt/wac-ldp.svg" alt="Greenkeeper badge"></a></p>
 				<p>A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.</p>
 				<h2 id="code-structure">Code Structure</h2>
-				<p><img src="https://user-images.githubusercontent.com/408412/56473918-6e3c3680-6472-11e9-980d-2ed6c1c762dc.png" alt="wac-ldp component diagram"></p>
+				<p><img src="https://user-images.githubusercontent.com/408412/57371602-6f1fd880-7193-11e9-8ae2-653f949b731d.png" alt="wac-ldp component diagram">)</p>
 				<h3 id="entry-point">Entry point</h3>
-				<p>The entry point is src/server.ts, which instantiates a http server, a BlobTree storage, and the core app.</p>
-				<h3 id="blobtree">BlobTree</h3>
+				<p>The entry point is src/server.ts, which instantiates a http server, a BlobTree storage, and the core app. This is not drawn in the diagram above.</p>
+				<h3 id="storage">Storage</h3>
 				<p>The BlobTree storage exposes a carefully tuned interface to the persistence layer, which is similar to the well-known &quot;key-value store&quot; concept, where opaque Blobs can be stored and retrieved, using arbitrary strings as keys. But the BlobTree interface differs from a key-value store interface in that it not only allows writing and reading blobs of data, but also querying &#39;Containers&#39;, which is similar to doing <code>ls</code> on a folder on a unix file system: it gives you a list of the directly contained blobs and containers.
 				This means that if we store all LDP resources inside BlobTree blobs, using the resource path from the http level as the blob&#39;s path at the BlobTree level, then implementing LDP GET requests on containers becomes very easy out of the box.</p>
-				<h3 id="core">Core</h3>
-				<p>The core application code is in src/lib/code/ and deals with:</p>
+				<p>The interface looks as follows (<code>BlobTree</code> in the diagram):</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">interface</span> BlobTree <span class="hljs-keyword">extends</span> events.EventEmitter {
+  getContainer (path: Path): Container
+  getBlob (path: Path): Blob
+}
+<span class="hljs-keyword">interface</span> Node {
+  exists (): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">boolean</span>&gt;,
+  <span class="hljs-keyword">delete</span> (): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+}
+<span class="hljs-keyword">interface</span> Blob <span class="hljs-keyword">extends</span> Node {
+  getData (): <span class="hljs-built_in">Promise</span>&lt;ReadableStream | <span class="hljs-literal">undefined</span>&gt;
+  setData (data: ReadableStream): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">void</span>&gt;
+}
+<span class="hljs-keyword">interface</span> Container <span class="hljs-keyword">extends</span> Node {
+  getMembers (): <span class="hljs-built_in">Promise</span>&lt;<span class="hljs-built_in">Array</span>&lt;Member&gt;&gt;
+}
+<span class="hljs-keyword">interface</span> Member {
+  name: <span class="hljs-built_in">string</span>
+  isContainer: <span class="hljs-built_in">boolean</span>
+}
+<span class="hljs-keyword">interface</span> Path {
+  <span class="hljs-keyword">constructor</span> (<span class="hljs-params">segments: <span class="hljs-built_in">Array</span>&lt;<span class="hljs-built_in">string</span>&gt;</span>)
+  toParent (<span class="hljs-params"></span>): Path
+  toChild (<span class="hljs-params">segment: <span class="hljs-built_in">string</span></span>): Path
+  isRoot (<span class="hljs-params"></span>): boolean
+  toString (<span class="hljs-params"></span>): string
+  toContainerPathPrefix (<span class="hljs-params"></span>): string
+  hasSuffix (<span class="hljs-params">suffix: <span class="hljs-built_in">string</span></span>): boolean
+  removeSuffix (<span class="hljs-params">suffix: <span class="hljs-built_in">string</span></span>): Path
+  appendSuffix (<span class="hljs-params">suffix: <span class="hljs-built_in">string</span></span>): Path
+}</code></pre>
+				<h3 id="execute-task">Execute Task</h3>
+				<p>The core application code is in src/lib/core/executeTask.ts and given a <code>WacLdpTask</code> (see below), it deals with:</p>
 				<ul>
-					<li>calling src/lib/api/http/HttpParser to parse the HTTP request</li>
-					<li>calling the functions from src/lib/auth/ to determine whether the request is authorized to begin with</li>
+					<li>calling the functions from src/lib/authorization/ to determine whether the request is authorized to begin with</li>
+					<li>calling the functions from the &#39;operations on content&#39; component (currently only &#39;RDF&#39;).</li>
 					<li>fetching the main resource from storage</li>
 					<li>in the case of Glob, checking authorization to read each of the contained resources, and fetching those</li>
 					<li>in the case of POST to a container, picking a name for the new resource and fetching a handle to that</li>
 					<li>check the ETag of the resource in case an If-Match or If-None-Match header was present on the request</li>
-					<li>given the necessary handle(s) to BlobTree node(s), execute the desired operation from src/lib/operations/ (in the case of PATCH, adding a parameter whether it should be executed append-only)</li>
-					<li>in case of succses, passing the result back to src/lib/api/http/HttpResponder</li>
-					<li>in case of an exception, passing the appropriate http response back to src/lib/api/http/HttpResponder</li>
+					<li>given the necessary handle(s) to BlobTree node(s), execute the desired operation from src/lib/core/basicOperations.ts (in the case of PATCH, adding a parameter whether it should be executed append-only)</li>
+					<li>in case of success, producing the <code>WacLdpResult</code> (see below) result for src/lib/api/http/HttpResponder</li>
+					<li>in case of an exception, throwing the appropriate <code>ErrorResult</code>, to be cast to <code>WacLdpResult</code></li>
 				</ul>
 				<h3 id="auth">Auth</h3>
-				<p>The auth code is in src/lib/auth/ and deals with:</p>
+				<p>The auth code is in src/lib/authorization/ and deals with:</p>
 				<ul>
 					<li>determining the webId from the bearer token, and checking the signature, expiry, and audience on the there</li>
 					<li>fetching the apprioriate ACL document from storage and loading that into an in-memory RDF graph</li>
@@ -96,12 +127,76 @@
 					<li>based on the origin, find out whether at least one of the resource owner has that origin as a trusted app</li>
 					<li>decide if the required access mode is authorized (with a special case for append-only approval of a PATCH)</li>
 				</ul>
+				<p>The Auth Interface looks as follows:</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">determineWebId</span> (<span class="hljs-params">bearerToken: <span class="hljs-built_in">string</span>, audience: <span class="hljs-built_in">string</span></span>): <span class="hljs-title">Promise</span>&lt;<span class="hljs-title">string</span> | <span class="hljs-title">undefined</span>&gt;
+<span class="hljs-title">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">readAcl</span> (<span class="hljs-params">resourcePath: Path, resourceIsContainer: <span class="hljs-built_in">boolean</span>, storage: BlobTree</span>)
+<span class="hljs-title">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">determineAllowedAgentsForModes</span> (<span class="hljs-params">task: ModesCheckTask</span>): <span class="hljs-title">Promise</span>&lt;<span class="hljs-title">AccessModes</span>&gt;
+<span class="hljs-title">interface</span> <span class="hljs-title">ModesCheckTask</span> </span>{
+  <span class="hljs-title">aclGraph</span>: <span class="hljs-title">any</span>,
+  <span class="hljs-title">isAdjacent</span>: <span class="hljs-title">boolean</span>,
+  <span class="hljs-title">resourcePath</span>: <span class="hljs-title">string</span>
+}
+<span class="hljs-title">interface</span> <span class="hljs-title">AccessModes</span> </span>{
+  <span class="hljs-title">read</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+  <span class="hljs-title">write</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+  <span class="hljs-title">append</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+  <span class="hljs-title">control</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+}
+<span class="hljs-title">async</span> <span class="hljs-function"><span class="hljs-keyword">function</span> <span class="hljs-title">appIsTrustedForMode</span> (<span class="hljs-params">task: OriginCheckTask</span>): <span class="hljs-title">Promise</span>&lt;<span class="hljs-title">boolean</span>&gt;
+<span class="hljs-title">interface</span> <span class="hljs-title">OriginCheckTask</span> </span>{
+  <span class="hljs-title">origin</span>: <span class="hljs-title">string</span>,
+  <span class="hljs-title">mode</span>: <span class="hljs-title">string</span>,
+  <span class="hljs-title">resourceOwners</span>: <span class="hljs-title">Array</span>&lt;<span class="hljs-title">string</span>&gt;
+}</span></code></pre>
 				<h3 id="http">HTTP</h3>
 				<p>In src/lib/api/http/ are two important classes, one for parsing an incoming http request, and one for constructing an outgoing http response. Although each step they do, like setting a numeric http response status code, or extracting a bearer token string from an authorization header, is computationally simple, a lot of the correctness of this module (looking at <a href="https://github.com/w3c/ldp-testsuite">https://github.com/w3c/ldp-testsuite</a> and the WAC test suite that is under development) depends on the details in these two files.</p>
-				<h3 id="operations">Operations</h3>
-				<p>This is where the action is, each file in src/lib/operations/ does the actual execution of the operation as intended in the incoming HTTP/LDP request. At the same time, each of these files is also really small because of all the preparation that already went before it (the parsing of the http request, and the access checks) and because of the way the BlobTree storage interface was designed, with these operations in mind. For instance a DeleteBlob operation just calls blob.delete, and that&#39;s it.</p>
-				<h3 id="utils">Utils</h3>
-				<p>The ReadContainer operation does need to do a bit of work to convert the list of members as reported by the BlobTree Container into an RDF representation like Turtle or JSON-LD. We use RDF-EXT for this, and the calls to that module are wrapped into a util in the src/lib/utils/ folder. Likewise, there are some functions there to deal with how the body, content type, and ETag of a resource can be streamed from and to the BlobTree storage.</p>
+				<pre><code class="language-ts"><span class="hljs-keyword">interface</span> WacLdpTask {
+  isContainer: <span class="hljs-built_in">boolean</span>
+  omitBody: <span class="hljs-built_in">boolean</span>
+  parsedContentType: ParsedContentType | <span class="hljs-literal">undefined</span>
+  origin: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  contentType: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  ifMatch: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  ifNoneMatchStar: <span class="hljs-built_in">boolean</span>
+  ifNoneMatchList: <span class="hljs-built_in">Array</span>&lt;<span class="hljs-built_in">string</span>&gt; | <span class="hljs-literal">undefined</span>
+  bearerToken: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  wacLdpTaskType: TaskType
+  path: Path
+  requestBody: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+}
+<span class="hljs-keyword">enum</span> TaskType {
+  containerRead,
+  containerMemberAdd,
+  containerDelete,
+  globRead,
+  blobRead,
+  blobWrite,
+  blobUpdate,
+  blobDelete,
+  getOptions,
+  unknown
+}
+<span class="hljs-keyword">enum</span> ParsedContentType {
+  RdfJsonLd,
+  RdfTurtle
+}
+<span class="hljs-keyword">interface</span> WacLdpResponse {
+  resultType: ResultType
+  resourceData: ResourceData | <span class="hljs-literal">undefined</span>
+  createdLocation: <span class="hljs-built_in">string</span> | <span class="hljs-literal">undefined</span>
+  isContainer: <span class="hljs-built_in">boolean</span>
+}</code></pre>
+				<h3 id="rdf">RDF</h3>
+				<p>The following operations are available:</p>
+				<ul>
+					<li>readFromBlob (looks at the content-type and the body and reads these into an in-memory RDF graph object)</li>
+					<li>readFromContainer (looks at the container member list and reads that into an in-memory RDF graph object)</li>
+					<li>writeToBlob (serializes an RDF graph object to the requested representation)</li>
+					<li>applyPatch</li>
+					<li>applyFilter</li>
+				</ul>
+				<p>Currently supported representations for RDF are Turtle and JSON-LD. The only currently allowed patch type for RDF are <code>SPARQL-update (any)</code> and <code>SPARQL-update (appendOnly)</code>. The currently allowed filter types for RDF are <code>SPARQL-SELECT</code>, <code>ldp-paging</code>, and <code>prefer-minimal-container</code>.
+				In the future, we might add similar modules for e.g. HTML/RDFa or partial updates to binary blobs, and when that happens we will turn this component into an abstract &#39;content operations&#39; component, of which RDF, HTML/RDFa and Binary are instantiations.</p>
 				<p>Published under an MIT license by inrupt, Inc.</p>
 				<p>Contributors:</p>
 				<ul>
@@ -112,6 +207,7 @@
 					<li>Pat McBennett</li>
 					<li>Justin Bingham</li>
 					<li>Sebastien Dubois</li>
+					<li>elf Pavlik</li>
 				</ul>
 			</div>
 		</div>
@@ -125,64 +221,103 @@
 						<a href="modules/___mocks___http_.html">"__mocks__/http"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
+						<a href="modules/___mocks___node_fetch_.html">"__mocks__/node-<wbr>fetch"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_exports_.html">"exports"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
 						<a href="modules/_lib_api_http_httpparser_.html">"lib/api/http/<wbr>Http<wbr>Parser"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_lib_api_http_httpresponder_.html">"lib/api/http/<wbr>Http<wbr>Responder"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_auth___mocks___node_fetch_.html">"lib/auth/__mocks__/node-<wbr>fetch"</a>
+						<a href="modules/_lib_authentication_determinewebidandorigin_.html">"lib/authentication/determine<wbr>Web<wbr>IdAnd<wbr>Origin"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_auth_appistrustedformode_.html">"lib/auth/app<wbr>IsTrusted<wbr>For<wbr>Mode"</a>
+						<a href="modules/_lib_authorization_aclmanager_.html">"lib/authorization/<wbr>Acl<wbr>Manager"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_auth_determineallowedagentsformodes_.html">"lib/auth/determine<wbr>Allowed<wbr>Agents<wbr>For<wbr>Modes"</a>
+						<a href="modules/_lib_authorization_appistrustedformode_.html">"lib/authorization/app<wbr>IsTrusted<wbr>For<wbr>Mode"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_auth_determinewebid_.html">"lib/auth/determine<wbr>Web<wbr>Id"</a>
+						<a href="modules/_lib_authorization_checkaccess_.html">"lib/authorization/check<wbr>Access"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_auth_readacl_.html">"lib/auth/read<wbr>Acl"</a>
+						<a href="modules/_lib_authorization_determineallowedmodes_.html">"lib/authorization/determine<wbr>Allowed<wbr>Modes"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_core_app_.html">"lib/core/app"</a>
+						<a href="modules/_lib_core_wacldp_.html">"lib/core/<wbr>Wac<wbr>Ldp"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_core_checkaccess_.html">"lib/core/check<wbr>Access"</a>
+						<a href="modules/_lib_operationhandlers_containermemberaddhandler_.html">"lib/operation<wbr>Handlers/container<wbr>Member<wbr>Add<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_core_determineoperation_.html">"lib/core/determine<wbr>Operation"</a>
+						<a href="modules/_lib_operationhandlers_deleteblobhandler_.html">"lib/operation<wbr>Handlers/delete<wbr>Blob<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_core_executetask_.html">"lib/core/execute<wbr>Task"</a>
+						<a href="modules/_lib_operationhandlers_deletecontainerhandler_.html">"lib/operation<wbr>Handlers/delete<wbr>Container<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_core_getblobandchecketag_.html">"lib/core/get<wbr>Blob<wbr>And<wbr>CheckETag"</a>
+						<a href="modules/_lib_operationhandlers_getresourcedataandchecketag_.html">"lib/operation<wbr>Handlers/get<wbr>Resource<wbr>Data<wbr>And<wbr>CheckETag"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_deleteblob_.html">"lib/operations/delete<wbr>Blob"</a>
+						<a href="modules/_lib_operationhandlers_globreadhandler_.html">"lib/operation<wbr>Handlers/glob<wbr>Read<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_deletecontainer_.html">"lib/operations/delete<wbr>Container"</a>
+						<a href="modules/_lib_operationhandlers_optionshandler_.html">"lib/operation<wbr>Handlers/options<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_readblob_.html">"lib/operations/read<wbr>Blob"</a>
+						<a href="modules/_lib_operationhandlers_readblobhandler_.html">"lib/operation<wbr>Handlers/read<wbr>Blob<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_readcontainer_.html">"lib/operations/read<wbr>Container"</a>
+						<a href="modules/_lib_operationhandlers_readcontainerhandler_.html">"lib/operation<wbr>Handlers/read<wbr>Container<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_readglob_.html">"lib/operations/read<wbr>Glob"</a>
+						<a href="modules/_lib_operationhandlers_unknownoperationcatchall_.html">"lib/operation<wbr>Handlers/unknown<wbr>Operation<wbr>Catch<wbr>All"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_unknownoperation_.html">"lib/operations/unknown<wbr>Operation"</a>
+						<a href="modules/_lib_operationhandlers_updateblobhandler_.html">"lib/operation<wbr>Handlers/update<wbr>Blob<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_updateblob_.html">"lib/operations/update<wbr>Blob"</a>
+						<a href="modules/_lib_operationhandlers_writeblobhandler_.html">"lib/operation<wbr>Handlers/write<wbr>Blob<wbr>Handler"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_operations_writeblob_.html">"lib/operations/write<wbr>Blob"</a>
+						<a href="modules/_lib_rdf_rdflibstoremanager_.html">"lib/rdf/<wbr>Rdf<wbr>Lib<wbr>Store<wbr>Manager"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_resourcedatautils_.html">"lib/rdf/<wbr>Resource<wbr>Data<wbr>Utils"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_storemanager_.html">"lib/rdf/<wbr>Store<wbr>Manager"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_acl_.html">"lib/rdf/generated-<wbr>vocab-<wbr>acl"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_foaf_.html">"lib/rdf/generated-<wbr>vocab-<wbr>foaf"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_ldp_.html">"lib/rdf/generated-<wbr>vocab-<wbr>ldp"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_rdf_.html">"lib/rdf/generated-<wbr>vocab-<wbr>rdf"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_generated_vocab_vcard_.html">"lib/rdf/generated-<wbr>vocab-<wbr>vcard"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_mergerdfsources_.html">"lib/rdf/merge<wbr>Rdf<wbr>Sources"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_rdf_constants_.html">"lib/rdf/rdf-<wbr>constants"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_rdftoresourcedata_.html">"lib/rdf/rdf<wbr>ToResource<wbr>Data"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_rdf_setappmodes_.html">"lib/rdf/set<wbr>App<wbr>Modes"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_lib_storage_blob_.html">"lib/storage/<wbr>Blob"</a>
@@ -200,19 +335,13 @@
 						<a href="modules/_lib_storage_node_.html">"lib/storage/<wbr>Node"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_util_resourcedatautils_.html">"lib/util/<wbr>Resource<wbr>Data<wbr>Utils"</a>
+						<a href="modules/_lib_storage_quadandblobstore_.html">"lib/storage/<wbr>Quad<wbr>And<wbr>Blob<wbr>Store"</a>
+					</li>
+					<li class=" tsd-kind-external-module">
+						<a href="modules/_lib_storage_memberslistasresourcedata_.html">"lib/storage/members<wbr>List<wbr>AsResource<wbr>Data"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_lib_util_calculateetag_.html">"lib/util/calculateETag"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_util_memberslistasresourcedata_.html">"lib/util/members<wbr>List<wbr>AsResource<wbr>Data"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_util_mergerdfsources_.html">"lib/util/merge<wbr>Rdf<wbr>Sources"</a>
-					</li>
-					<li class=" tsd-kind-external-module">
-						<a href="modules/_lib_util_rdftoresourcedata_.html">"lib/util/rdf<wbr>ToResource<wbr>Data"</a>
 					</li>
 					<li class=" tsd-kind-external-module">
 						<a href="modules/_server_.html">"server"</a>
