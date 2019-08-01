@@ -21,7 +21,7 @@ import { setAppModes } from '../rdf/setAppModes'
 import { BlobTree } from '../storage/BlobTree'
 import { AclManager } from '../authorization/AclManager'
 import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
-import { RdfLibStoreManager } from '../rdf/RdfLibStoreManager';
+import { RdfLibStoreManager } from '../rdf/RdfLibStoreManager'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -128,7 +128,7 @@ export class WacLdp extends EventEmitter {
       requestOrigin = await wacLdpTask.origin()
       bearerToken = wacLdpTask.bearerToken()
       response = await this.handleOperation(wacLdpTask)
-      debug('resourcesChanged', response.resourceData)
+      debug('resourcesChanged')
       if (response.resourcesChanged) {
         response.resourcesChanged.forEach((url: URL) => {
           debug('emitting change event', url)

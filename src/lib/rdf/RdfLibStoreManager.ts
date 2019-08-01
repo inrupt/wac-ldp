@@ -68,7 +68,7 @@ function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
   return parser.import(bodyStream)
 }
 
-export async function quadStreamFromBlob (blob: Blob): Promise<ReadableStream<Quad>> {
+export async function quadStreamFromBlob (blob: Blob, rdfType: RdfType): Promise<ReadableStream<Quad>> {
   const stream = await blob.getData()
   debug('stream', typeof stream)
   let resourceData
@@ -83,7 +83,8 @@ export async function quadStreamFromBlob (blob: Blob): Promise<ReadableStream<Qu
 }
 
 export async function getGraphLocal (blob: Blob): Promise<any> {
-  const quadStream = await quadStreamFromBlob(blob)
+  const resourceData: ResourceData = await streamToObject(blob.getData())
+  const quadStream = await quadStreamFromBlob(blob, determineRdfType(resourceData.contentType))
   return rdf.dataset().import(quadStream)
 }
 

@@ -1,11 +1,9 @@
 import rdf from 'rdf-ext'
 import Debug from 'debug'
-import convert from 'buffer-to-stream'
-import N3Parser from 'rdf-parser-n3'
-import JsonLdParser from 'rdf-parser-jsonld'
 
-import { ResourceData, RdfType } from './ResourceDataUtils'
+import { ResourceData, RdfType, canGetQuads, ResourceDataLdpRsNonContainer } from './ResourceDataUtils'
 import { rdfToResourceData } from './rdfToResourceData'
+import { Quad } from './StoreManager'
 
 const debug = Debug('mergeRdfSources')
 
@@ -14,20 +12,11 @@ async function readAndMerge (rdfSources: { [indexer: string]: ResourceData }): P
   debug('created dataset')
   dataset.forEach((quad: any) => { debug(quad.toString()) })
   for (let i in rdfSources) {
-    let parser
-    if (rdfSources[i].rdfType === RdfType.JsonLd) {
-      parser = new JsonLdParser({ factory: rdf })
-    } else if (rdfSources[i].rdfType === RdfType.Turtle) {
-      parser = new N3Parser({ factory: rdf })
+    if (canGetQuads(rdfSources[i])) {
+      const quadStream: ReadableStream<Quad> = (rdfSources[i] as ResourceDataLdpRsNonContainer).getQuads()
+      await dataset.import(quadStream)
     }
-    if (!parser) {
-      debug('no parser found for', rdfSources[i].rdfType)
-      continue
-    }
-    const bodyStream = convert(Buffer.from(rdfSources[i].body))
-    const quadStream = parser.import(bodyStream)
-    await dataset.import(quadStream)
-    debug('after import', rdfSources[i].body)
+    debug('after import', i)
     dataset.forEach((quad: any) => { debug(quad.toString()) })
     debug('done listing quads', dataset)
   }

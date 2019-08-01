@@ -4,8 +4,8 @@ import { Member } from './Container'
 import { membersListAsQuadStream } from './membersListAsResourceData'
 import { quadStreamFromBlob } from '../rdf/RdfLibStoreManager'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
-import { RdfType, objectToStream, ResourceData, ResourceType, ResourceDataLdpBc, ResourceDataMissing, ResourceDataLdpRsNonContainer, ResourceDataLdpNr, streamToBuffer, makeResourceData, streamToObject, bufferToStream } from '../rdf/ResourceDataUtils'
-import { Quad } from '../rdf/StoreManager';
+import { RdfType, objectToStream, ResourceData, ResourceType, ResourceDataLdpBc, ResourceDataMissing, ResourceDataLdpRsNonContainer, ResourceDataLdpNr, streamToBuffer, makeResourceData, streamToObject, bufferToStream, determineRdfType } from '../rdf/ResourceDataUtils'
+import { Quad } from '../rdf/StoreManager'
 
 const debug = Debug('quad-and-blob-store')
 
@@ -64,8 +64,8 @@ export class QuadAndBlobStore {
       const exists = await blob.exists()
       if (exists) {
         const blobData = await streamToObject(blob.getData())
-        if (blobData.contentType === 'text/turtle') { // QuadAndBlobStore will use this format when storing quads in BlobTree
-          const quadStream = await quadStreamFromBlob(blob)
+        if (determineRdfType(blobData.contentType) === RdfType.Turtle) { // QuadAndBlobStore will use this format when storing quads in BlobTree
+          const quadStream = await quadStreamFromBlob(blob, RdfType.Turtle)
           return {
             resourceType: ResourceType.LdpRsNonContainer,
             etag: blobData.etag,

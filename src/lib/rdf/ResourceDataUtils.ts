@@ -3,7 +3,7 @@ import { calculateETag } from '../util/calculateETag'
 import MIMEType from 'whatwg-mimetype'
 import Debug from 'debug'
 import { Member } from '../storage/Container'
-import { Quad } from './StoreManager';
+import { Quad } from './StoreManager'
 
 const debug = Debug('ResourceDataUtils')
 
@@ -101,11 +101,12 @@ export function determineRdfType (contentType: string | undefined): RdfType {
 }
 
 export function makeResourceData (contentType: string, body: string): ResourceData {
+  const bodyStream: ReadableStream<Buffer> = bufferToStream(Buffer.from(body))
   return {
+    resourceType: ResourceType.LdpRsNonContainer,
     contentType,
-    body,
-    etag: calculateETag(body),
-    rdfType: determineRdfType(contentType)
+    getBody: () => bodyStream,
+    etag: calculateETag(body)
   }
 }
 
