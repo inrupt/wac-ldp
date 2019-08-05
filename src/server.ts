@@ -18,8 +18,8 @@ import * as http from 'http'
 import Debug from 'debug'
 import { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
 import { WacLdp } from './lib/core/WacLdp'
-import { BlobTree, Path } from './lib/storage/BlobTree'
 import { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
+import { WacLdpImpl } from './lib/core/WacLdpImpl'
 
 const debug = Debug('server')
 
@@ -29,7 +29,7 @@ class Server {
   wacLdp: WacLdp
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
-    this.wacLdp = new WacLdp({
+    this.wacLdp = new WacLdpImpl({
       storage: new QuadAndBlobStore(new BlobTreeInMem()), // singleton in-memory storage
       aud,
       updatesViaUrl: new URL('wss://localhost:8443'),
