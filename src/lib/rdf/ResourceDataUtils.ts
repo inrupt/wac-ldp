@@ -2,7 +2,7 @@ import convert from 'buffer-to-stream'
 import { calculateETag } from '../util/calculateETag'
 import MIMEType from 'whatwg-mimetype'
 import Debug from 'debug'
-import { Member } from '../storage/Container'
+import { Member } from '../storage/BufferTree'
 import { Quad } from './StoreManager'
 
 const debug = Debug('ResourceDataUtils')

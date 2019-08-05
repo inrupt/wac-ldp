@@ -16,7 +16,7 @@ process.env.DEBUG = '*'
 
 import * as http from 'http'
 import Debug from 'debug'
-import { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
+import { BufferTreeInMem } from './lib/storage/BufferTreeInMem'
 import { WacLdp } from './lib/core/WacLdp'
 import { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
 import { WacLdpImpl } from './lib/core/WacLdpImpl'
@@ -30,7 +30,7 @@ class Server {
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
     this.wacLdp = new WacLdpImpl({
-      storage: new QuadAndBlobStore(new BlobTreeInMem()), // singleton in-memory storage
+      storage: new QuadAndBlobStore(new BufferTreeInMem()), // singleton in-memory storage
       aud,
       updatesViaUrl: new URL('wss://localhost:8443'),
       skipWac,

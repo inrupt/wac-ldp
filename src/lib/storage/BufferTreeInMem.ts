@@ -1,10 +1,9 @@
 import * as events from 'events'
 import Debug from 'debug'
-import { Node } from './Node'
-import { Container, Member } from './Container'
-import { Blob } from './Blob'
-import { BlobTree, Path } from './BlobTree'
+import { ResourceNode } from './ResourceNode'
+import { BufferTree, Path, Member } from './BufferTree'
 import { bufferToStream, streamToBuffer } from '../rdf/ResourceDataUtils'
+import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 
 const debug = Debug('AtomicTreeInMem')
 
@@ -13,16 +12,16 @@ const SUFFIX_META = ':meta'
 
 class NodeInMem {
   path: Path
-  tree: BlobTreeInMem
+  tree: BufferTreeInMem
 
-  constructor (path: Path, tree: BlobTreeInMem) {
+  constructor (path: Path, tree: BufferTreeInMem) {
     this.path = path
     this.tree = tree
     debug('constructed node', path, Object.keys(tree.kv))
   }
 }
 
-class ContainerInMem extends NodeInMem implements Container {
+class ContainerInMem extends NodeInMem {
   getDescendents () {
     const containerPathPrefix = this.path.toString()
     debug('getDescendents', containerPathPrefix)
@@ -66,7 +65,7 @@ class ContainerInMem extends NodeInMem implements Container {
   }
 }
 
-class BlobInMem extends NodeInMem implements Blob {
+class BlobInMem extends NodeInMem implements ResourceNode {
   getData (): Promise<Array<Buffer>> {
     debug('reading resource', this.path, this.tree.kv)
     const buffer: Buffer | undefined = this.tree.kv[this.path.toString() + SUFFIX_META]
@@ -114,7 +113,7 @@ class BlobInMem extends NodeInMem implements Blob {
   }
 }
 
-export class BlobTreeInMem extends events.EventEmitter {
+export class BufferTreeInMem extends events.EventEmitter implements BufferTree {
   kv: { [pathStr: string]: Buffer | undefined }
   constructor () {
     super()
@@ -122,10 +121,11 @@ export class BlobTreeInMem extends events.EventEmitter {
     debug('constructed in-mem store', this.kv)
   }
 
-  getContainer (path: Path) {
-    return new ContainerInMem(path, this)
+  getMembers (path: Path) {
+    const container = new ContainerInMem(path, this)
+    return container.getMembers()
   }
-  getBlob (path: Path) {
+  getResourceNode (path: Path) {
     return new BlobInMem(path, this)
   }
 }

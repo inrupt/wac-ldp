@@ -1,4 +1,4 @@
-import { Blob } from '../storage/Blob'
+import { ResourceNode } from '../storage/ResourceNode'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'

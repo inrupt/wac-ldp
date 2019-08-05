@@ -1,7 +1,6 @@
 import * as events from 'events'
 import Debug from 'debug'
-import { Container } from './Container'
-import { Blob } from './Blob'
+import { ResourceNode } from './ResourceNode'
 
 const debug = Debug('BlobTree')
 
@@ -35,6 +34,11 @@ export function urlToPath (url: URL) {
   segments[0] = url.host
   segments.unshift(STORAGE_FORMAT)
   return new Path(segments, isContainer)
+}
+
+export interface Member {
+  name: string
+  isContainer: boolean
 }
 
 export class Path {
@@ -120,7 +124,7 @@ export class Path {
 // getData/setData when doesn't exist
 // containers always exist, unless there is a blob at their filename
 // creating a path ignores the trailing slash
-export interface BlobTree extends events.EventEmitter {
-  getContainer (path: Path): Container
-  getBlob (path: Path): Blob
+export interface BufferTree extends events.EventEmitter {
+  getMembers (path: Path): Promise<Array<Member> | undefined>
+  getResourceNode (path: Path): ResourceNode
 }

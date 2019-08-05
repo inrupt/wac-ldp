@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import rdf from 'rdf-ext'
-import { Member } from './Container'
+import { Member } from './BufferTree'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { ResourceData, RdfType } from '../rdf/ResourceDataUtils'
 import { LDP, RDF } from '../rdf/rdf-constants'

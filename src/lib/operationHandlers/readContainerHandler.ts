@@ -1,4 +1,4 @@
-import { Blob } from '../storage/Blob'
+import { ResourceNode } from '../storage/ResourceNode'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
@@ -7,7 +7,7 @@ import Debug from 'debug'
 
 import { streamToObject, ResourceData } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
-import { Member } from '../storage/Container'
+import { Member } from '../storage/BufferTree'
 import { membersListAsResourceData } from '../storage/membersListAsResourceData'
 import { ACL } from '../rdf/rdf-constants'
 

@@ -5,7 +5,7 @@ import N3Parser from 'rdf-parser-n3'
 import JsonLdParser from 'rdf-parser-jsonld'
 import * as rdflib from 'rdflib'
 
-import { Blob } from '../storage/Blob'
+import { ResourceNode } from '../storage/ResourceNode'
 import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer, ResourceDataLdpRsNonContainer, ResourceDataLdpNr, ResourceType, ResourceDataLdpBc, exists } from './ResourceDataUtils'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
@@ -65,7 +65,7 @@ function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
   return parser.import(bodyStream)
 }
 
-export async function quadStreamFromBlob (blob: Blob, rdfType: RdfType): Promise<ReadableStream<Quad>> {
+export async function quadStreamFromBlob (blob: ResourceNode, rdfType: RdfType): Promise<ReadableStream<Quad>> {
   const stream = await blob.getData()
   debug('stream', typeof stream)
   let resourceData
@@ -79,7 +79,7 @@ export async function quadStreamFromBlob (blob: Blob, rdfType: RdfType): Promise
   return resourceData.getQuads()
 }
 
-export async function getGraphLocal (blob: Blob): Promise<any> {
+export async function getGraphLocal (blob: ResourceNode): Promise<any> {
   const resourceData: ResourceData = await streamToObject(blob.getData())
   const quadStream = await quadStreamFromBlob(blob, determineRdfType(resourceData.contentType))
   return rdf.dataset().import(quadStream)
