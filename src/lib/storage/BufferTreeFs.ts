@@ -2,15 +2,15 @@ import { Member } from './Container'
 import * as fs from 'fs'
 import * as path from 'path'
 
-export interface ReadableResource {
-  body: ReadableStream<Buffer>
-  metaData: { [i: string]: Buffer }
+export interface Resource {
+  getBodyStream (): ReadableStream<Buffer>
+  getMetaData (): { [i: string]: Buffer }
+  replace (newVersion: Resource): Promise<void>
 }
 
 export interface BufferTree {
   getMembers (url: URL): Promise<Array<Member> | undefined>
-  getResource (url: URL): Promise<ReadableResource>
-  setResource (url: URL, data: ReadableResource): Promise<void>
+  getResource (url: URL): Promise<Resource>
 }
 
 function urlToPath (url: URL, contentType: string): string {
