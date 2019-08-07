@@ -4,153 +4,91 @@
 
 A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.
 
-## Code Structure
+## 1. BufferTree
+At each path there is either a container, a non-container, or nothing; errors that will be thrown:
 
-![wac-ldp component diagram](https://user-images.githubusercontent.com/408412/57371602-6f1fd880-7193-11e9-8ae2-653f949b731d.png))
+| method | container | non-container | nothing |
+|---------|-----------|---------------|--------|
+| getMembers |  | NotContainer | NotFound |
+| getResource | IsContainer |  | NotFound |
 
-
-### Entry point
-The entry point is src/server.ts, which instantiates a http server, a BlobTree storage, and the core app. This is not drawn in the diagram above.
-
-### Storage
-The BlobTree storage exposes a carefully tuned interface to the persistence layer, which is similar to the well-known "key-value store" concept, where opaque Blobs can be stored and retrieved, using arbitrary strings as keys. But the BlobTree interface differs from a key-value store interface in that it not only allows writing and reading blobs of data, but also querying 'Containers', which is similar to doing `ls` on a folder on a unix file system: it gives you a list of the directly contained blobs and containers.
-This means that if we store all LDP resources inside BlobTree blobs, using the resource path from the http level as the blob's path at the BlobTree level, then implementing LDP GET requests on containers becomes very easy out of the box.
-
-The interface looks as follows (`BlobTree` in the diagram):
+If there's a container, you can call getMembers
+If there's a non-container, you can call getResource
 ```ts
-interface BlobTree extends events.EventEmitter {
-  getContainer (path: Path): Container
-  getBlob (path: Path): Blob
-}
-interface Node {
-  exists (): Promise<boolean>,
-  delete (): Promise<void>
-}
-interface Blob extends Node {
-  getData (): Promise<ReadableStream | undefined>
-  setData (data: ReadableStream): Promise<void>
-}
-interface Container extends Node {
-  getMembers (): Promise<Array<Member>>
-}
-interface Member {
+export interface Member {
   name: string
   isContainer: boolean
 }
-interface Path {
-  constructor (segments: Array<string>)
-  toParent (): Path
-  toChild (segment: string): Path
-  isRoot (): boolean
-  toString (): string
-  toContainerPathPrefix (): string
-  hasSuffix (suffix: string): boolean
-  removeSuffix (suffix: string): Path
-  appendSuffix (suffix: string): Path
+
+export interface Resource {
+  getBodyStream (): ReadableStream<Buffer>
+  getMetaData (): { [i: string]: Buffer }
+  replace (newVersion: Resource): Promise<void>
+}
+
+export interface BufferTree {
+  getMembers (path: Array<string>): Promise<Array<Member>> throws NotContainer, NotFound
+  getResource (path: Array<string>): Promise<Resource> throws IsContainer, NotFound
 }
 ```
-
-### Execute Task
-The core application code is in src/lib/core/executeTask.ts and given a `WacLdpTask` (see below), it deals with:
-* calling the functions from src/lib/authorization/ to determine whether the request is authorized to begin with
-* calling the functions from the 'operations on content' component (currently only 'RDF').
-* fetching the main resource from storage
-* in the case of Glob, checking authorization to read each of the contained resources, and fetching those
-* in the case of POST to a container, picking a name for the new resource and fetching a handle to that
-* check the ETag of the resource in case an If-Match or If-None-Match header was present on the request
-* given the necessary handle(s) to BlobTree node(s), execute the desired operation from src/lib/core/basicOperations.ts (in the case of PATCH, adding a parameter whether it should be executed append-only)
-* in case of success, producing the `WacLdpResult` (see below) result for src/lib/api/http/HttpResponder
-* in case of an exception, throwing the appropriate `ErrorResult`, to be cast to `WacLdpResult`
-
-### Auth
-The auth code is in src/lib/authorization/ and deals with:
-* determining the webId from the bearer token, and checking the signature, expiry, and audience on the there
-* fetching the apprioriate ACL document from storage and loading that into an in-memory RDF graph
-* based on the webId, find out which access modes should be allowed
-* based on the origin, find out whether at least one of the resource owner has that origin as a trusted app
-* decide if the required access mode is authorized (with a special case for append-only approval of a PATCH)
-
-The Auth Interface looks as follows:
+## 2. StoreManager
 ```ts
-async function determineWebId (bearerToken: string, audience: string): Promise<string | undefined>
-async function readAcl (resourcePath: Path, resourceIsContainer: boolean, storage: BlobTree)
-async function determineAllowedAgentsForModes (task: ModesCheckTask): Promise<AccessModes>
-interface ModesCheckTask {
-  aclGraph: any,
-  isAdjacent: boolean,
-  resourcePath: string
+export interface RdfJsTerm {
+  termType: string
+  value: string
+  equals: (other: RdfJsTerm) => boolean
 }
-interface AccessModes {
-  read: Array<string>
-  write: Array<string>
-  append: Array<string>
-  control: Array<string>
+export interface Pattern {
+  subject?: RdfJsTerm | Array<RdfJsTerm>
+  predicate?: RdfJsTerm | Array<RdfJsTerm>
+  object?: RdfJsTerm | Array<RdfJsTerm>
+  graph: RdfJsTerm
 }
-async function appIsTrustedForMode (task: OriginCheckTask): Promise<boolean>
-interface OriginCheckTask {
-  origin: string,
-  mode: string,
-  resourceOwners: Array<string>
+export interface Quad {
+  subject: RdfJsTerm
+  predicate: RdfJsTerm
+  object: RdfJsTerm
+  graph: RdfJsTerm
+}
+export interface DataSet { // see also https://rdf.js.org/dataset-spec/
+  add (quad: Quad): void
+  delete (quad: Quad): void
+  match (pattern: Pattern): Array<Quad>
+  has (pattern: Pattern): boolean
+  deleteMatches (pattern: Pattern): void
+  subjectsMatching (pattern: Pattern): Promise<Array<RdfJsTerm>>
+  predicatesMatching (pattern: Pattern): Promise<Array<RdfJsTerm>>
+  objectsMatching (pattern: Pattern): Promise<Array<RdfJsTerm>>
+  patch (sparqlUpdateQuery: string, appendOnly: boolean): void
+}
+
+export interface StoreManager {
+  load (url: URL): Promise<void>
+  save (url: URL): Promise<void>
+  flush (url: URL): Promise<void>
+  getDataSet (url: URL): Promise<DataSet>
 }
 ```
-
-### HTTP
-In src/lib/api/http/ are two important classes, one for parsing an incoming http request, and one for constructing an outgoing http response. Although each step they do, like setting a numeric http response status code, or extracting a bearer token string from an authorization header, is computationally simple, a lot of the correctness of this module (looking at https://github.com/w3c/ldp-testsuite and the WAC test suite that is under development) depends on the details in these two files.
+## 3. WacLdp
 ```ts
-interface WacLdpTask {
-  isContainer: boolean
-  omitBody: boolean
-  parsedContentType: ParsedContentType | undefined
-  origin: string | undefined
-  contentType: string | undefined
-  ifMatch: string | undefined
-  ifNoneMatchStar: boolean
-  ifNoneMatchList: Array<string> | undefined
-  bearerToken: string | undefined
-  wacLdpTaskType: TaskType
-  path: Path
-  requestBody: string | undefined
-}
-enum TaskType {
-  containerRead,
-  containerMemberAdd,
-  containerDelete,
-  globRead,
-  blobRead,
-  blobWrite,
-  blobUpdate,
-  blobDelete,
-  getOptions,
-  unknown
-}
-enum ParsedContentType {
-  RdfJsonLd,
-  RdfTurtle
-}
-interface WacLdpResponse {
-  resultType: ResultType
-  resourceData: ResourceData | undefined
-  createdLocation: string | undefined
-  isContainer: boolean
+export interface WacLdp extends EventEmitter {
+  setRootAcl (storageRoot: URL, owner: URL): Promise<void>
+  setPublicAcl (containerUrl: URL, owner: URL, modeName: string): Promise<void>
+  createLocalDocument (url: URL, contentType: string, body: ReadableStream<Buffer>): Promise<void>
+  containerExists (url: URL): Promise<boolean>
+  handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void>
+  getTrustedAppModes (webId: URL, origin: string): Promise<Array<URL>>
+  setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>): Promise<void>
+  hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean>
 }
 ```
-
-### RDF
-The following operations are available:
-* readFromBlob (looks at the content-type and the body and reads these into an in-memory RDF graph object)
-* readFromContainer (looks at the container member list and reads that into an in-memory RDF graph object)
-* writeToBlob (serializes an RDF graph object to the requested representation)
-* applyPatch
-* applyFilter
-
-Currently supported representations for RDF are Turtle and JSON-LD. The only currently allowed patch type for RDF are `SPARQL-update (any)` and `SPARQL-update (appendOnly)`. The currently allowed filter types for RDF are `SPARQL-SELECT`, `ldp-paging`, and `prefer-minimal-container`.
-In the future, we might add similar modules for e.g. HTML/RDFa or partial updates to binary blobs, and when that happens we will turn this component into an abstract 'content operations' component, of which RDF, HTML/RDFa and Binary are instantiations.
 
 Published under an MIT license by inrupt, Inc.
 
 Contributors:
 * Michiel de Jong
 * Ruben Verborgh
+* Aaron Coburn
 * Kjetil Kjernsmo
 * Jackson Morgan
 * Pat McBennett
