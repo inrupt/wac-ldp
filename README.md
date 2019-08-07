@@ -80,7 +80,7 @@ export interface StoreManager {
 ```
 ## 3. AclManager
 ```ts
-export interface WacLdp extends EventEmitter {
+export interface AclManager {
   setRootAcl (storageRoot: URL, owner: URL): Promise<void>
   setPublicAcl (containerUrl: URL, owner: URL, modeName: string): Promise<void>
   getTrustedAppModes (webId: URL, origin: string): Promise<Array<URL>>
