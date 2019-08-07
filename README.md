@@ -5,30 +5,39 @@
 A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.
 
 ## 1. BufferTree
-At each path there is either a container, a non-container, or nothing; errors that will be thrown:
+At each path there is either a `'content'` node (must be a leaf), a `'container'` node (may be internal or leaf), `'missing'` when the path extends the path of a container leaf (extending the path of a content node is illegal).
 
-| method | container | non-container | nothing |
-|---------|-----------|---------------|--------|
-| getMembers |  | NotContainer | NotFound |
-| getResource | IsContainer |  | NotFound |
+Errors that will be thrown:
 
-If there's a container, you can call getMembers
-If there's a non-container, you can call getResource
+| TreeNode method | container (internal) | container (leaf) | content | missing | illegal |
+|-----------------|----------------------|------------------|---------|--------|----------|
+| getChildren     |                      |                  | IsContentNode | IsMissingNode |
+| getBodyStream   | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
+| getMetaData     | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
+| replace         | NotEmpty             |                  |         |               |
+
 ```ts
-export interface Member {
+export interface Child {
   name: string
   isContainer: boolean
 }
 
-export interface Resource {
-  getBodyStream (): ReadableStream<Buffer>
-  getMetaData (): { [i: string]: Buffer }
-  replace (newVersion: Resource): Promise<void>
+export interface TreeNode {
+  nodeType: enum NodeType {
+    InternalContainerNode = 'internal-container-node',
+    EmptyContainerNode = 'empty-container-node',
+    ContentNode = 'content-node',
+    MissingNode = 'missing-node',
+  }
+  version: string // determined by implementation, read-only
+  getChildren (): Promise<Array<Child>> // works for InternalContainerNode and EmptyContainerNode
+  getBodyStream (): ReadableStream<Buffer> // works for ContentNode
+  getMetaData (): { [i: string]: Buffer } // works for ContentNode. special entry is 'contentType'
+  replace (metaData: { [i: string]: Buffer }, bodyStream: ReadableStream<Buffer>): Promise<void> // fails for InternalContainerNode and if the node already changed or became illegal
 }
 
 export interface BufferTree {
-  getMembers (path: Array<string>): Promise<Array<Member>> throws NotContainer, NotFound
-  getResource (path: Array<string>): Promise<Resource> throws IsContainer, NotFound
+  getNode (path: Array<string>): Promise<TreeNode> // fails for illegal nodes. Sets a watch on the path to track if it changes
 }
 ```
 ## 2. StoreManager
