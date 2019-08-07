@@ -9,11 +9,11 @@ export interface Resource {
 }
 
 export interface BufferTree {
-  getMembers (url: URL): Promise<Array<Member> | undefined>
-  getResource (url: URL): Promise<Resource>
+  getMembers (path: Array<string>): Promise<Array<Member> | undefined>
+  getResource (path: Array<string>): Promise<Resource>
 }
 
-function urlToPath (url: URL, contentType: string): string {
+function urlToPath (path: Array<string>, contentType: string): string {
   return url.pathname
 }
 
@@ -21,7 +21,7 @@ function memberPath (folderPath: string, name: string) {
   return path.join(folderPath, name)
 }
 export class BufferTreeFs implements BufferTree {
-  async getMembers (url: URL): Promise<Array<Member> | undefined> {
+  async getMembers (path: Array<string>): Promise<Array<Member> | undefined> {
     const folderPath = urlToPath(url)
     const files: Array<string> = await fs.promises.readdir(folderPath)
     const results: Array<Member> = []
@@ -34,10 +34,10 @@ export class BufferTreeFs implements BufferTree {
     }))
     return results
   }
-  getResource (url: URL): Promise<ReadableResource> {
+  getResource (path: Array<string>): Promise<ReadableResource> {
     // try without $.
     // try with $.
 
   }
-  setResource (url: URL, data: ReadableResource): Promise<void>
+  setResource (path: Array<string>, data: ReadableResource): Promise<void>
 }
