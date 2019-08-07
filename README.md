@@ -4,43 +4,23 @@
 
 A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.
 
-## 1. BufferTree
-At each path there is either a `'content'` node (must be a leaf), a `'container'` node (may be internal or leaf), `'missing'` when the path extends the path of a container leaf (extending the path of a content node is illegal).
-
-Errors that will be thrown:
-
-| TreeNode method | container (internal) | container (leaf) | content | missing | illegal |
-|-----------------|----------------------|------------------|---------|--------|----------|
-| getChildren     |                      |                  | IsContentNode | IsMissingNode |
-| getBodyStream   | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
-| getMetaData     | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
-| replace         | NotEmpty             |                  |         |               |
-
+## 1. WacLdp
 ```ts
-export interface Child {
-  name: string
-  isContainer: boolean
-}
-
-export interface TreeNode {
-  nodeType: enum NodeType {
-    InternalContainerNode = 'internal-container-node',
-    EmptyContainerNode = 'empty-container-node',
-    ContentNode = 'content-node',
-    MissingNode = 'missing-node',
-  }
-  version: string // determined by implementation, read-only
-  getChildren (): Promise<Array<Child>> // works for InternalContainerNode and EmptyContainerNode
-  getBodyStream (): ReadableStream<Buffer> // works for ContentNode
-  getMetaData (): { [i: string]: Buffer } // works for ContentNode. special entry is 'contentType'
-  replace (metaData: { [i: string]: Buffer }, bodyStream: ReadableStream<Buffer>): Promise<void> // fails for InternalContainerNode and if the node already changed or became illegal
-}
-
-export interface BufferTree {
-  getNode (path: Array<string>): Promise<TreeNode> // fails for illegal nodes. Sets a watch on the path to track if it changes
+export interface WacLdp extends EventEmitter {
+  handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void>
 }
 ```
-## 2. StoreManager
+## 2. AclManager
+```ts
+export interface AclManager {
+  setRootAcl (storageRoot: URL, owner: URL): Promise<void>
+  setPublicAcl (containerUrl: URL, owner: URL, modeName: string): Promise<void>
+  getTrustedAppModes (webId: URL, origin: string): Promise<Array<URL>>
+  setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>): Promise<void>
+  hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean>
+}
+```
+## 3. StoreManager
 ```ts
 export interface RdfJsTerm {
   termType: string
@@ -78,20 +58,39 @@ export interface StoreManager {
   getDataSet (url: URL): Promise<DataSet>
 }
 ```
-## 3. AclManager
+## 4. BufferTree
+At each path there is either a `'content'` node (must be a leaf), a `'container'` node (may be internal or leaf), `'missing'` when the path extends the path of a container leaf (extending the path of a content node is illegal).
+
+Errors that will be thrown:
+
+| TreeNode method | container (internal) | container (leaf) | content | missing | illegal |
+|-----------------|----------------------|------------------|---------|--------|----------|
+| getChildren     |                      |                  | IsContentNode | IsMissingNode |
+| getBodyStream   | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
+| getMetaData     | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
+| replace         | NotEmpty             |                  |         |               |
+
 ```ts
-export interface AclManager {
-  setRootAcl (storageRoot: URL, owner: URL): Promise<void>
-  setPublicAcl (containerUrl: URL, owner: URL, modeName: string): Promise<void>
-  getTrustedAppModes (webId: URL, origin: string): Promise<Array<URL>>
-  setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>): Promise<void>
-  hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean>
+export interface Child {
+  name: string
+  isContainer: boolean
 }
-```
-## 4. WacLdp
-```ts
-export interface WacLdp extends EventEmitter {
-  handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void>
+
+export interface TreeNode {
+  nodeType: enum NodeType {
+    InternalContainerNode = 'internal-container-node',
+    EmptyContainerNode = 'empty-container-node',
+    ContentNode = 'content-node',
+    MissingNode = 'missing-node',
+  }
+  version: string // determined by implementation, read-only
+  getChildren (): Promise<Array<Child>> // works for InternalContainerNode and EmptyContainerNode
+  getBodyStream (): ReadableStream<Buffer> // works for ContentNode
+  getMetaData (): { [i: string]: Buffer } // works for ContentNode. special entry is 'contentType'
+  replace (metaData: { [i: string]: Buffer }, bodyStream: ReadableStream<Buffer>): Promise<void> // fails for InternalContainerNode and if the node already changed or became illegal
+}
+export interface BufferTree {
+  getNode (path: Array<string>): Promise<TreeNode> // fails for illegal nodes. Sets a watch on the path to track if it changes
 }
 ```
 
