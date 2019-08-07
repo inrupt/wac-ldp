@@ -78,17 +78,20 @@ export interface StoreManager {
   getDataSet (url: URL): Promise<DataSet>
 }
 ```
-## 3. WacLdp
+## 3. AclManager
 ```ts
 export interface WacLdp extends EventEmitter {
   setRootAcl (storageRoot: URL, owner: URL): Promise<void>
   setPublicAcl (containerUrl: URL, owner: URL, modeName: string): Promise<void>
-  createLocalDocument (url: URL, contentType: string, body: ReadableStream<Buffer>): Promise<void>
-  containerExists (url: URL): Promise<boolean>
-  handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void>
   getTrustedAppModes (webId: URL, origin: string): Promise<Array<URL>>
   setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>): Promise<void>
   hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean>
+}
+```
+## 4. WacLdp
+```ts
+export interface WacLdp extends EventEmitter {
+  handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void>
 }
 ```
 
