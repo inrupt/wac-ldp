@@ -99,10 +99,10 @@ Published under an MIT license by inrupt, Inc.
 
 Contributors:
 * Michiel de Jong
+* Jackson Morgan
 * Ruben Verborgh
 * Aaron Coburn
 * Kjetil Kjernsmo
-* Jackson Morgan
 * Pat McBennett
 * Justin Bingham
 * Sebastien Dubois
