@@ -4,8 +4,7 @@ import * as path from 'path'
 
 export interface ReadableResource {
   body: ReadableStream<Buffer>
-  contentType: Buffer
-  eTag: Buffer
+  metaData: { [i: string]: Buffer }
 }
 
 export interface BufferTree {
