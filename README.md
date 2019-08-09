@@ -34,7 +34,7 @@ Whether translating, caching or persisting, the triple store exposes the `StoreM
 
 The ACL manager implements the 'wac' in 'wac-ldp'. It has direct query access to the quads in the triple store, so that it doesn't need to be aware of any RDF serializations or indexing. This is a nice separation of concerns that other Solid pod server architectures like https://github.com/solid/node-solid-server and https://github.com/rubenverborgh/solid-server-architecture lack (the latter does support accesssing a quad stream, but even there, there is no way to query those quads in the way you would query an rdf.js `DataSet`, so then the AclManager basically needs to implement a second in-memory triple store, which is not so nice in terms of code architecture, and probably also error-prone).
 
-Likewise, as noted earlier, the StoreManager (which is the queriable interface of the triple store) also implements sparql-update operations. This means that the operation handler for PATCH does not need to know anything about the representation of the update - apart from the fact that the triple store will try to apply it to its authoritative copy of the LDP-RS's triples. We considered representing a Patch object as a Representation (not a representation of the resource, but of a change that's being made to that resource), but then the http parser and/or the PATCH operation would need to get involve in parsing the sparql-update query string. It's much cleaner to pass the query around as an unparsed string, and leave its interpretation to the last minute, in the context where it makes sense and where it is being applied.
+Likewise, as noted earlier, the StoreManager (which is the queriable interface of the triple store) also implements sparql-update operations. This means that the operation handler for PATCH does not need to know anything about the representation of the update - apart from the fact that the triple store will try to apply it to its authoritative copy of the LDP-RS's triples. We considered representing a Patch object as a Representation (not a representation of the resource, but of a change that's being made to that resource), but then the http parser and/or the operation handler for PATCH would need to get involve in parsing the sparql-update query string. It's much cleaner to pass the query around as an unparsed string, and leave its details private to the last minute, and only open it up in the context where its internals make sense and where it is being applied.
 
 ## Operation handlers
 
@@ -110,9 +110,8 @@ Errors that will be thrown:
 | TreeNode method | container (internal) | container (leaf) | content | missing | illegal |
 |-----------------|----------------------|------------------|---------|--------|----------|
 | getChildren     |                      |                  | IsContentNode | IsMissingNode |
-| getBodyStream   | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
-| getMetaData     | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
-| replace         | NotEmpty             |                  |         |               |
+| getResourceData | IsContainerNode      | IsContainerNode  |         | IsMissingNode |
+| setResourceData | NotEmpty             |                  |         |               |
 
 ```ts
 export interface Child {
