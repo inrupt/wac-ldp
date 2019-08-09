@@ -10,6 +10,7 @@ export enum ResultType {
   CouldNotParse,
   AccessDenied,
   PreconditionFailed,
+  PreconditionRequired,
   NotModified,
   NotFound,
   QuotaExceeded,
@@ -61,6 +62,11 @@ const responses: Responses = {
     responseStatus: 412,
     responseBody: 'Precondition failed',
     constrainedBy: 'conflict'
+  },
+  [ResultType.PreconditionFailed]: {
+    responseStatus: 428,
+    responseBody: 'Precondition required',
+    constrainedBy: 'precondition-required'
   },
   [ResultType.NotFound]: {
     responseStatus: 404,
