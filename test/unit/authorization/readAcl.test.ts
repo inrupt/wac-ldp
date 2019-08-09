@@ -4,7 +4,7 @@ import { AclManager } from '../../../src/lib/authorization/AclManager'
 import { urlToPath } from '../../../src/lib/storage/BlobTree'
 import { toChunkStream } from '../helpers/toChunkStream'
 import { RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
-import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
+import { BufferTree } from '../../../src/lib/storage/BufferTree'
 
 const aclDoc1Turtle = fs.readFileSync('test/fixtures/aclDoc-from-NSS-1.ttl')
 const aclDoc2Turtle = fs.readFileSync('test/fixtures/aclDoc-from-NSS-2.ttl')
@@ -36,7 +36,7 @@ const storage = {
     }
   })
 }
-const storeManager = new StoreManager('localhost:8080', storage as unknown as QuadAndBlobStore)
+const storeManager = new StoreManager('localhost:8080', storage as unknown as BufferTree)
 const aclManager = new AclManager(storeManager)
 
 const quadsExpected = {

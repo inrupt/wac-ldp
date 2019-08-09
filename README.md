@@ -56,6 +56,8 @@ export interface StoreManager {
   save (url: URL): Promise<void>
   flush (url: URL): Promise<void>
   getDataSet (url: URL): Promise<DataSet>
+  getResourceData (): ResourceData
+  setResourceData (newVersion: ResourceData): Promise<void> 
 }
 ```
 ## 4. BufferTree
@@ -76,18 +78,24 @@ export interface Child {
   isContainer: boolean
 }
 
+export interface ResourceData {
+  getBodyStream (): ReadableStream<Buffer>
+  getMetaData (): { [i: string]: Buffer } // special entry is 'contentType'
+}
+
+export enum NodeType {
+  InternalContainerNode = 'internal-container-node',
+  EmptyContainerNode = 'empty-container-node',
+  ContentNode = 'content-node',
+  MissingNode = 'missing-node',
+}
+
 export interface TreeNode {
-  nodeType: enum NodeType {
-    InternalContainerNode = 'internal-container-node',
-    EmptyContainerNode = 'empty-container-node',
-    ContentNode = 'content-node',
-    MissingNode = 'missing-node',
-  }
+  nodeType: NodeType
   version: string // determined by implementation, read-only
   getChildren (): Promise<Array<Child>> // works for InternalContainerNode and EmptyContainerNode
-  getBodyStream (): ReadableStream<Buffer> // works for ContentNode
-  getMetaData (): { [i: string]: Buffer } // works for ContentNode. special entry is 'contentType'
-  replace (metaData: { [i: string]: Buffer }, bodyStream: ReadableStream<Buffer>): Promise<void> // fails for InternalContainerNode and if the node already changed or became illegal
+  getResourceData (): ResourceData // works for ContentNode
+  setResourceData (newVersion: ResourceData): Promise<void> // fails for InternalContainerNode and if the node already changed or became illegal
 }
 export interface BufferTree {
   getNode (path: Array<string>): Promise<TreeNode> // fails for illegal nodes. Sets a watch on the path to track if it changes

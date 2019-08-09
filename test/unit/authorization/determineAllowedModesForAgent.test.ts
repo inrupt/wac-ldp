@@ -5,7 +5,7 @@ import { determineAllowedModes, ModesCheckTask } from '../../../src/lib/authoriz
 import { StoreManager } from '../../../src/lib/rdf/StoreManager'
 import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
-import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
+import { BufferTree } from '../../../src/lib/storage/BufferTree'
 
 test('finds acl:accessTo modes', async () => {
   const bodyStream = fs.createReadStream('test/fixtures/aclDoc-from-NSS-1.ttl')
@@ -20,7 +20,7 @@ test('finds acl:accessTo modes', async () => {
     targetUrl: new URL('https://example.com'),
     webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
     origin: '',
-    storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
+    storeManager: new StoreManager('example.com', new BufferTree(new BlobTreeInMem()))
   }
   const result = await determineAllowedModes(task)
   expect(result).toEqual({
@@ -44,7 +44,7 @@ test('finds acl:default modes', async () => {
     resourceIsTarget: true,
     webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
     origin: '',
-    storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
+    storeManager: new StoreManager('example.com', new BufferTree(new BlobTreeInMem()))
   }
   const result = await determineAllowedModes(task)
   expect(result).toEqual({
@@ -72,7 +72,7 @@ function testUrlFormat (format: string, target: string, resourceIsTarget: boolea
       contextUrl: new URL(target + '.acl'),
       webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
       origin: '',
-      storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
+      storeManager: new StoreManager('example.com', new BufferTree(new BlobTreeInMem()))
     }
     const result = await determineAllowedModes(task)
     expect(result).toEqual({
@@ -110,7 +110,7 @@ test(`acl:default does not imply acl:accessTo`, async () => {
     contextUrl: new URL('https://example.org/foo/.acl'),
     webId: new URL('https://michielbdejong.inrupt.net/profile/card#me'),
     origin: '',
-    storeManager: new StoreManager('example.com', new QuadAndBlobStore(new BlobTreeInMem()))
+    storeManager: new StoreManager('example.com', new BufferTree(new BlobTreeInMem()))
   }
   const result = await determineAllowedModes(task)
   expect(result).toEqual({

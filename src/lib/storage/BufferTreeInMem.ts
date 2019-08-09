@@ -1,7 +1,7 @@
 import * as events from 'events'
 import Debug from 'debug'
 import { ResourceNode } from './ResourceNode'
-import { BufferTree, Path, Member } from './BufferTree'
+import { BufferTree, Path, Child } from './BufferTree'
 import { bufferToStream, streamToBuffer } from '../rdf/ResourceDataUtils'
 import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 
@@ -47,7 +47,7 @@ class ContainerInMem extends NodeInMem {
       return {
         name,
         isContainer: memberMap[name]
-      } as Member
+      } as Child
     })
     debug('getMembers', this.path, Object.keys(this.tree.kv), listAbsolutePaths, listRelativePaths, memberMap, members)
     return Promise.resolve(members)
@@ -125,7 +125,7 @@ export class BufferTreeInMem extends events.EventEmitter implements BufferTree {
     const container = new ContainerInMem(path, this)
     return container.getMembers()
   }
-  getResourceNode (path: Path) {
+  getNode (path: Path) {
     return new BlobInMem(path, this)
   }
 }

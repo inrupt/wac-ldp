@@ -1,6 +1,5 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { ResourceData } from '../../rdf/ResourceDataUtils'
 import { LDP } from '../../rdf/rdf-constants'
 const Link = require('http-link-header')
 

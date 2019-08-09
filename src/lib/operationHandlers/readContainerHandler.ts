@@ -1,13 +1,13 @@
-import { ResourceNode } from '../storage/ResourceNode'
+// import { ResourceNode } from '../storage/ResourceNode'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
 
-import { streamToObject, ResourceData } from '../rdf/ResourceDataUtils'
+// import { streamToObject, ResourceData } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
-import { Member } from '../storage/BufferTree'
+import { Child } from '../storage/BufferTree'
 import { membersListAsResourceData } from '../storage/membersListAsResourceData'
 import { ACL } from '../rdf/rdf-constants'
 
@@ -17,13 +17,14 @@ export const readContainerHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
   requiredAccessModes: [ ACL.Read ],
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
-    const resourceData: ResourceData | undefined = await storeManager.getRepresentation(task.fullUrl(), {
-      preferMinimalContainer: task.preferMinimalContainer()
-    })
-    return {
-      resultType: (task.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
-      resourceData,
-      isContainer: true
-    } as WacLdpResponse
+    throw new Error('TODO: use StoreManager')
+    // const resourceData: ResourceData | undefined = await storeManager.getResourceData(task.fullUrl(), {
+    //   preferMinimalContainer: task.preferMinimalContainer()
+    // })
+    // return {
+    //   resultType: (task.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
+    //   resourceData,
+    //   isContainer: true
+    // } as WacLdpResponse
   }
 }

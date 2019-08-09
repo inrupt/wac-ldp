@@ -1,6 +1,5 @@
 import * as events from 'events'
 import Debug from 'debug'
-import { ResourceNode } from './ResourceNode'
 
 const debug = Debug('BlobTree')
 
@@ -33,98 +32,33 @@ export function urlToPath (url: URL) {
   const segments = urlPath.split('/')
   segments[0] = url.host
   segments.unshift(STORAGE_FORMAT)
-  return new Path(segments, isContainer)
+  return segments
 }
 
-export interface Member {
+export interface Child {
   name: string
   isContainer: boolean
 }
 
-export class Path {
-  segments: Array<string>
-  isContainer: boolean
-  constructor (segments: Array<string>, isContainer: boolean) {
-    if (!segments.length || segments[0] !== STORAGE_FORMAT) {
-      throw new Error('Path should start with the current hard-coded storage format')
-    }
-    segments.map(segment => {
-      if (segment.indexOf('/') !== -1) {
-        throw new Error('No slashes allowed in path segments!')
-      }
-    })
-    this.segments = segments
-    this.isContainer = isContainer
-  }
-  toStringMeta (): string {
-    return this.segments.join('/') + (this.isContainer ? '/' : '')
-  }
-  toStringBody (): string {
-    return 'bodies/' + this.segments.join('/') + (this.isContainer ? '/' : '')
-  }
-  toName (): string {
-    // last segment is the name
-    return this.segments[this.segments.length - 1]
-  }
-  toUrl (): URL {
-    const host: string = this.segments[1]
-    let pathnameWithoutLeadingSlash = this.segments.slice(2).join('/') + (this.isContainer ? '/' : '')
-    if (pathnameWithoutLeadingSlash === '/') { // site root
-      pathnameWithoutLeadingSlash = ''
-    }
-    debug('Path#toUrl', this.segments, host, pathnameWithoutLeadingSlash)
-    return new URL(`https://${host}/${pathnameWithoutLeadingSlash}`)
-  }
-  toChild (segment: string, childIsContainer: boolean): Path {
-    const childSegments = copyStringArray(this.segments)
-    childSegments.push(segment)
-    return new Path(childSegments, childIsContainer)
-  }
-  isRoot (): boolean {
-    return (this.segments.length <= 1)
-  }
-  toParent (): Path {
-    if (this.isRoot()) {
-      throw new Error('root has no parent!')
-    }
-    const parentSegments = copyStringArray(this.segments)
-    parentSegments.pop()
-    return new Path(parentSegments, true)
-  }
-  hasSuffix (suffix: string): boolean {
-    const lastSegment = this.segments[this.segments.length - 1]
-    return (lastSegment.substr(-suffix.length) === suffix)
-  }
-  removeSuffix (suffix: string): Path {
-    const withoutSuffixSegments: Array<string> = copyStringArray(this.segments)
-    const remainingLength: number = withoutSuffixSegments[withoutSuffixSegments.length - 1].length - suffix.length
-    debug(withoutSuffixSegments, remainingLength, suffix)
-    if (remainingLength < 0) {
-      throw new Error('no suffix match (last segment name shorter than suffix)')
-    }
-    if (withoutSuffixSegments[withoutSuffixSegments.length - 1].substring(remainingLength) !== suffix) {
-      throw new Error('no suffix match')
-    }
-    const withoutSuffix: string = withoutSuffixSegments[withoutSuffixSegments.length - 1].substring(0, remainingLength)
-    withoutSuffixSegments[withoutSuffixSegments.length - 1] = withoutSuffix
-    return new Path(withoutSuffixSegments, this.isContainer)
-  }
-  appendSuffix (suffix: string): Path {
-    const withSuffixSegments: Array<string> = copyStringArray(this.segments)
-    withSuffixSegments[withSuffixSegments.length - 1] += suffix
-    return new Path(withSuffixSegments, this.isContainer)
-  }
-  equals (other: Path): boolean {
-    return (this.toString() === other.toString())
-  }
+export interface ResourceData {
+  getBodyStream (): ReadableStream<Buffer>
+  getMetaData (): { [i: string]: Buffer } // special entry is 'contentType'
 }
 
-// throws:
-// sub-blob attempt
-// getData/setData when doesn't exist
-// containers always exist, unless there is a blob at their filename
-// creating a path ignores the trailing slash
-export interface BufferTree extends events.EventEmitter {
-  getMembers (path: Path): Promise<Array<Member> | undefined>
-  getResourceNode (path: Path): ResourceNode
+export enum NodeType {
+  InternalContainerNode = 'internal-container-node',
+  EmptyContainerNode = 'empty-container-node',
+  ContentNode = 'content-node',
+  MissingNode = 'missing-node'
+}
+
+export interface TreeNode {
+  nodeType: NodeType
+  version: string // determined by implementation, read-only
+  getChildren (): Promise<Array<Child>> // works for InternalContainerNode and EmptyContainerNode
+  getResourceData (): ResourceData // works for ContentNode
+  replace (newVersion: ResourceData): Promise<void> // fails for InternalContainerNode and if the node already changed or became illegal
+}
+export interface BufferTree {
+  getNode (path: Array<string>): Promise<TreeNode> // fails for illegal nodes. Sets a watch on the path to track if it changes
 }

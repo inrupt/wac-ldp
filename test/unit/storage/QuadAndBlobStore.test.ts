@@ -1,8 +1,8 @@
 import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
-import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
+import { BufferTree } from '../../../src/lib/storage/BufferTree'
 
-test('QuadAndBlobStore', async () => {
-  const store = new QuadAndBlobStore(new BlobTreeInMem())
+test('BufferTree', async () => {
+  const store = new BufferTree(new BlobTreeInMem())
   // store.getBlob(new URL('http://example.com/asdf'))
   await store.getQuadStream(new URL('http://example.com/asdf'))
 })

@@ -4,7 +4,7 @@ import { WacLdpResponse, ResultType } from '../../../src/lib/api/http/HttpRespon
 import { toChunkStream } from '../helpers/toChunkStream'
 import { makeResourceData, RdfType, bufferToStream } from '../../../src/lib/rdf/ResourceDataUtils'
 import { readContainerHandler } from '../../../src/lib/operationHandlers/readContainerHandler'
-import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
+import { BufferTree } from '../../../src/lib/storage/BufferTree'
 import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler'
 import { readBlobHandler } from '../../../src/lib/operationHandlers/readBlobHandler'
 import { deleteBlobHandler } from '../../../src/lib/operationHandlers/deleteBlobHandler'
@@ -35,7 +35,7 @@ test('delete blob', async () => {
     method: 'DELETE',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   const result: WacLdpResponse = await deleteBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect(storage.delete.mock.calls).toEqual([
     [new URL('https://example.com/foo')]
@@ -88,7 +88,7 @@ test('delete container', async () => {
     method: 'GET',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   const result: WacLdpResponse = await deleteContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect(storage.delete.mock.calls).toEqual([
     [new URL('https://example.com/foo/')]
@@ -105,7 +105,7 @@ test('read blob (omit body)', async () => {
     url: '/foo',
     method: 'HEAD'
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   const result: WacLdpResponse = await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
 
   expect(storage.getResourceData.mock.calls).toEqual([
@@ -129,7 +129,7 @@ test('read blob (with body)', async () => {
     url: '/foo',
     method: 'GET'
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   const result: WacLdpResponse = await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
 
   expect(storage.getResourceData.mock.calls).toEqual([
@@ -158,7 +158,7 @@ test('read blob (if-none-match 304)', async () => {
       'if-none-match': '"Eo7PVCo1rFJwqH3HQJGEBA=="'
     }
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   expect.assertions(2)
   await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
     expect(e.resultType).toEqual(ResultType.NotModified)
@@ -177,7 +177,7 @@ test('write blob (if-none-match 412)', async () => {
       'if-none-match': '"Eo7PVCo1rFJwqH3HQJGEBA=="'
     }
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   expect.assertions(2)
   await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
     expect(e.resultType).toEqual(ResultType.PreconditionFailed)
@@ -194,7 +194,7 @@ test('read container (omit body)', async () => {
     method: 'HEAD',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   const result: WacLdpResponse = await readContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect(storage.getMembers.mock.calls).toEqual([
     []
@@ -222,7 +222,7 @@ test('read container (with body)', async () => {
     method: 'GET',
     headers: {}
   } as http.IncomingMessage, true)
-  const storeManager = new RdfLibStoreManager('example.com', storage as QuadAndBlobStore)
+  const storeManager = new RdfLibStoreManager('example.com', storage as BufferTree)
   const result: WacLdpResponse = await readContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
   expect(storage.getMembers.mock.calls).toEqual([
     []

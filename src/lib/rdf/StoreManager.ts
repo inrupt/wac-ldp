@@ -1,4 +1,6 @@
-import { ResourceData } from './ResourceDataUtils'
+import { ResourceData } from '../storage/BufferTree'
+
+// import { ResourceData } from './ResourceDataUtils'
 
 // TODO: think about if/how we want to add RdfJsTerm#equals from http://rdf.js.org/data-model-spec/#term-interface
 export interface RdfJsTerm {
@@ -24,9 +26,6 @@ export interface Quad {
 }
 
 export interface StoreManager {
-  delete (url: URL): Promise<void>
-  exists (url: URL): Promise<boolean>
-  getResourceData (url: URL): Promise<ResourceData>
   addQuad (quad: Quad): Promise<void> // note: this method is called 'add' in rdf.js
   deleteMatches (pattern: Pattern): Promise<void> // note: rdf.js uses separate s,p,o,g here instead of our Pattern
   match (pattern: Pattern): Promise<Array<Quad>>
@@ -40,8 +39,8 @@ export interface StoreManager {
   // 3. container
   // 4. translate
   // 5. stream
-  getRepresentation (url: URL, options?: any): Promise<ResourceData>
-  setRepresentation (url: URL, metaData: ResourceData): Promise<void>
+  getResourceData (url: URL, options?: any): Promise<ResourceData>
+  setResourceData (url: URL, resourceData: ResourceData): Promise<void>
   load (url: URL): Promise<void>
   save (url: URL): Promise<void>
   patch (url: URL, sparqlQuery: string, appendOnly: boolean): Promise<void>

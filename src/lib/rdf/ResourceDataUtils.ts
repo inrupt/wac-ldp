@@ -2,7 +2,7 @@ import convert from 'buffer-to-stream'
 import { calculateETag } from '../util/calculateETag'
 import MIMEType from 'whatwg-mimetype'
 import Debug from 'debug'
-import { Member } from '../storage/BufferTree'
+import { Child, ResourceData } from '../storage/BufferTree'
 import { Quad } from './StoreManager'
 
 const debug = Debug('ResourceDataUtils')
@@ -20,60 +20,6 @@ export enum RdfType {
 // LDP-BC     true  true        true        |             | yes        yes      no      no       no
 // LDP-RS     true  false       true        |             |            yes      yes     yes      yes
 // LDP-NC     true  false       false       | yes         |                     yes     yes      yes
-
-export enum ResourceType {
-  Missing,
-  LdpBc,
-  LdpRsNonContainer,
-  LdpNr
-}
-export function exists (resourceData: ResourceData) {
-  return (resourceData.resourceType !== ResourceType.Missing)
-}
-export function hasContentType (resourceData: ResourceData) {
-  return (resourceData.resourceType === ResourceType.LdpNr)
-}
-export function hasEtag (resourceData: ResourceData) {
-  return exists(resourceData)
-}
-export function canGetMembers (resourceData: ResourceData) {
-  return (resourceData.resourceType === ResourceType.LdpBc)
-}
-export function canGetQuads (resourceData: ResourceData) {
-  return ([ResourceType.LdpRsNonContainer, ResourceType.LdpBc].indexOf(resourceData.resourceType) !== -1)
-}
-export function canGetBody (resourceData: ResourceData) {
-  return hasContentType(resourceData)
-}
-
-export interface ResourceData {
-  resourceType: ResourceType
-  contentType?: string
-  etag?: string
-  getMembers?: () => Promise<Array<Member>>
-  getQuads?: (preferMinimalContainer?: boolean) => ReadableStream<Quad>
-  getBody?: () => ReadableStream<Buffer>
-}
-export interface ResourceDataMissing {
-  resourceType: ResourceType
-}
-export interface ResourceDataLdpBc extends ResourceData {
-  resourceType: ResourceType
-  etag: string
-  getMembers: () => Promise<Array<Member>>
-  getQuads: (preferMinimalContainer?: boolean) => ReadableStream<Quad>
-}
-export interface ResourceDataLdpRsNonContainer extends ResourceData {
-  resourceType: ResourceType
-  etag: string
-  getQuads: () => ReadableStream<Quad>
-}
-export interface ResourceDataLdpNr extends ResourceData {
-  resourceType: ResourceType
-  contentType: string
-  etag: string
-  getBody: () => ReadableStream<Buffer>
-}
 
 export function determineRdfType (contentType: string | undefined): RdfType {
   if (!contentType) {
@@ -102,12 +48,12 @@ export function determineRdfType (contentType: string | undefined): RdfType {
 
 export function makeResourceData (contentType: string, body: string): ResourceData {
   const bodyStream: ReadableStream<Buffer> = bufferToStream(Buffer.from(body))
-  return {
-    resourceType: ResourceType.LdpRsNonContainer,
-    contentType,
-    getBody: () => bodyStream,
-    etag: calculateETag(body)
-  }
+  return {} as ResourceData
+  //   resourceType: ResourceType.LdpRsNonContainer,
+  //   contentType,
+  //   getBody: () => bodyStream,
+  //   etag: calculateETag(body)
+  // }
 }
 
 // Generic stream conversion functions, not really related to ResourceData specifically, but included here for convenience

@@ -1,6 +1,6 @@
 import * as http from 'http'
 import Debug from 'debug'
-import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
+import { BufferTree } from '../storage/BufferTree'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
@@ -18,7 +18,6 @@ import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationC
 import { checkAccess, AccessCheckTask } from '../authorization/checkAccess'
 import { getAppModes } from '../authorization/appIsTrustedForMode'
 import { setAppModes } from '../rdf/setAppModes'
-import { BufferTree } from '../storage/BufferTree'
 import { AclManager } from '../authorization/AclManager'
 import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
 import { RdfLibStoreManager } from '../rdf/RdfLibStoreManager'
@@ -42,7 +41,7 @@ interface OperationHandler {
 }
 
 export interface WacLdpOptions {
-  storage: QuadAndBlobStore
+  storage: BufferTree
   aud: string
   updatesViaUrl: URL,
   skipWac: boolean,
@@ -82,18 +81,6 @@ export class WacLdpImpl extends EventEmitter implements WacLdp {
       deleteBlobHandler,
       unknownOperationCatchAll
     ]
-  }
-  setRootAcl (storageRoot: URL, owner: URL) {
-    return this.aclManager.setRootAcl(storageRoot, owner)
-  }
-  setPublicAcl (inboxUrl: URL, owner: URL, modeName: string) {
-    return this.aclManager.setPublicAcl(inboxUrl, owner, modeName)
-  }
-  createLocalDocument (url: URL, contentType: string, body: string) {
-    return this.storeManager.setRepresentation(url, objectToStream(makeResourceData(contentType, body)))
-  }
-  containerExists (url: URL) {
-    return this.storeManager.exists(url)
   }
   async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
     for (let i = 0; i < this.operationHandlers.length; i++) {
@@ -156,35 +143,6 @@ export class WacLdpImpl extends EventEmitter implements WacLdp {
       }, httpRes)
     } catch (error) {
       debug('errored while responding', error)
-    }
-  }
-  getTrustedAppModes (webId: URL, origin: string) {
-    return getAppModes(webId, origin, this.storeManager)
-  }
-  setTrustedAppModes (webId: URL, origin: string, modes: Array<URL>) {
-    return setAppModes(webId, origin, modes, this.storeManager)
-  }
-  async hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean> {
-    debug('hasAccess calls checkAccess', {
-      url,
-      webId,
-      origin,
-      requiredAccessModes: [ mode ],
-      storeManager: 'this.storeManager'
-    })
-    try {
-      const appendOnly = await checkAccess({
-        url,
-        webId,
-        origin,
-        requiredAccessModes: [ mode ],
-        storeManager: this.storeManager
-      })
-      debug({ appendOnly })
-      return !appendOnly
-    } catch (e) {
-      debug('access check error was thrown, so returning no to hasAccess question')
-      return false
     }
   }
 }

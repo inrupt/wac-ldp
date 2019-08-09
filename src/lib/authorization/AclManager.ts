@@ -1,6 +1,6 @@
 import Debug from 'debug'
 import { StoreManager } from '../rdf/StoreManager'
-import { makeResourceData, bufferToStream, ResourceData, ResourceType } from '../rdf/ResourceDataUtils'
+import { ResourceData } from '../storage/BufferTree'
 
 // Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
 
@@ -85,77 +85,81 @@ export class AclManager {
     this.storeManager = storeManager
   }
   async readAcl (resourceUrl: URL): Promise<{ targetUrl: URL, contextUrl: URL }> {
-    debug('readAcl', resourceUrl.toString())
-    let currentGuessUrlStr: string = resourceUrl.toString()
-    let resourceData: ResourceData = await this.storeManager.getResourceData(new URL(currentGuessUrlStr))
-    let currentIsContainer = (resourceData.resourceType === ResourceType.LdpBc)
-    let aclDocUrlStr: string = (currentIsContainer ? toChild(currentGuessUrlStr, ACL_SUFFIX, false) : appendSuffix(currentGuessUrlStr, ACL_SUFFIX))
-    debug('aclDocPath from resourcePath', resourceUrl.toString(), aclDocUrlStr)
-    let isAdjacent = true
-    let currentGuessBlobExists = (resourceData.resourceType !== ResourceType.Missing)
-    debug('aclDocPath', aclDocUrlStr, resourceData)
-    while (!currentGuessBlobExists) {
-      // if (/* metaData.isRoot() */ false) {
-      //   // root ACL, nobody has access:
-      //   return { aclGraph: getEmptyGraph(), targetUrl: currentGuessPath.toUrl(), contextUrl: aclDocPath.toUrl() }
-      // }
-      currentGuessUrlStr = toParent(currentGuessUrlStr)
-      isAdjacent = false
-      currentIsContainer = true
-      aclDocUrlStr = (currentIsContainer ? toChild(currentGuessUrlStr, ACL_SUFFIX, false) : appendSuffix(currentGuessUrlStr, ACL_SUFFIX))
-      debug('aclDocPath', aclDocUrlStr.toString(), resourceData)
-    }
-    return {
-      targetUrl: new URL(currentGuessUrlStr),
-      contextUrl: new URL(aclDocUrlStr)
-    }
+    throw new Error('TODO: rewrite')
+    // debug('readAcl', resourceUrl.toString())
+    // let currentGuessUrlStr: string = resourceUrl.toString()
+    // let resourceData: ResourceData = await this.storeManager.getResourceData(new URL(currentGuessUrlStr))
+    // let currentIsContainer = (resourceData.nodeType === ResourceType.LdpBc)
+    // let aclDocUrlStr: string = (currentIsContainer ? toChild(currentGuessUrlStr, ACL_SUFFIX, false) : appendSuffix(currentGuessUrlStr, ACL_SUFFIX))
+    // debug('aclDocPath from resourcePath', resourceUrl.toString(), aclDocUrlStr)
+    // let isAdjacent = true
+    // let currentGuessBlobExists = (resourceData.resourceType !== ResourceType.Missing)
+    // debug('aclDocPath', aclDocUrlStr, resourceData)
+    // while (!currentGuessBlobExists) {
+    //   // if (/* metaData.isRoot() */ false) {
+    //   //   // root ACL, nobody has access:
+    //   //   return { aclGraph: getEmptyGraph(), targetUrl: currentGuessPath.toUrl(), contextUrl: aclDocPath.toUrl() }
+    //   // }
+    //   currentGuessUrlStr = toParent(currentGuessUrlStr)
+    //   isAdjacent = false
+    //   currentIsContainer = true
+    //   aclDocUrlStr = (currentIsContainer ? toChild(currentGuessUrlStr, ACL_SUFFIX, false) : appendSuffix(currentGuessUrlStr, ACL_SUFFIX))
+    //   debug('aclDocPath', aclDocUrlStr.toString(), resourceData)
+    // }
+    // return {
+    //   targetUrl: new URL(currentGuessUrlStr),
+    //   contextUrl: new URL(aclDocUrlStr)
+    // }
   }
   setRootAcl (storageRoot: URL, owner: URL): Promise<void> {
-    let rootString = storageRoot.toString()
-    if (rootString.substr(-1) !== '/') {
-      rootString += '/'
-    }
-    const rootAclUrl = new URL(rootString + ACL_SUFFIX)
+    throw new Error('TODO: rewrite')
+    // let rootString = storageRoot.toString()
+    // if (rootString.substr(-1) !== '/') {
+    //   rootString += '/'
+    // }
+    // const rootAclUrl = new URL(rootString + ACL_SUFFIX)
 
-    const obj = makeResourceData('text/turtle', [
-      `@prefix acl: <http://www.w3.org/ns/auth/acl#>.`,
-      `<#owner>`,
-      `  a acl:Authorization;`,
-      `  acl:agent <${owner.toString()}>;`,
-      `  acl:accessTo </>;`,
-      `  acl:default </>;`,
-      `  acl:mode`,
-      `    acl:Read, acl:Write, acl:Control.`
-    ].join('\n'))
-    const buffer = Buffer.from(JSON.stringify(obj))
-    return this.storeManager.setRepresentation(rootAclUrl, bufferToStream(buffer))
+    // const obj = makeResourceData('text/turtle', [
+    //   `@prefix acl: <http://www.w3.org/ns/auth/acl#>.`,
+    //   `<#owner>`,
+    //   `  a acl:Authorization;`,
+    //   `  acl:agent <${owner.toString()}>;`,
+    //   `  acl:accessTo </>;`,
+    //   `  acl:default </>;`,
+    //   `  acl:mode`,
+    //   `    acl:Read, acl:Write, acl:Control.`
+    // ].join('\n'))
+    // const buffer = Buffer.from(JSON.stringify(obj))
+    // return this.storeManager.setResourceData(rootAclUrl, bufferToStream(buffer))
   }
   setPublicAcl (containerUrl: URL, owner: URL, modeName: string): Promise<void> {
-    let containerUrlStr = containerUrl.toString()
-    if (containerUrlStr.substr(-1) !== '/') {
-      containerUrlStr += '/'
-    }
-    const containerAclUrl = new URL(containerUrlStr + ACL_SUFFIX)
+    throw new Error('TODO: rewrite')
 
-    const obj = makeResourceData('text/turtle', [
-      `@prefix acl: <http://www.w3.org/ns/auth/acl#>.`,
-      `@prefix  foaf:  <http://xmlns.com/foaf/0.1/>.`,
-      `<#owner>`,
-      `  a acl:Authorization;`,
-      `  acl:agent <${owner.toString()}>;`,
-      `  acl:accessTo <./>;`,
-      `  acl:default <./>;`,
-      `  acl:mode`,
-      `    acl:Read, acl:Write, acl:Control.`,
-      `<#public>`,
-      `  a acl:Authorization;`,
-      `  acl:agent foaf:Agent;`,
-      `  acl:accessTo <./>;`,
-      `  acl:default <./>;`,
-      `  acl:mode`,
-      `    acl:${modeName}.`
-    ].join('\n'))
-    const buffer = Buffer.from(JSON.stringify(obj))
-    return this.storeManager.setRepresentation(containerAclUrl, bufferToStream(buffer))
+  //   let containerUrlStr = containerUrl.toString()
+  //   if (containerUrlStr.substr(-1) !== '/') {
+  //     containerUrlStr += '/'
+  //   }
+  //   const containerAclUrl = new URL(containerUrlStr + ACL_SUFFIX)
+
+  //   const obj = makeResourceData('text/turtle', [
+  //     `@prefix acl: <http://www.w3.org/ns/auth/acl#>.`,
+  //     `@prefix  foaf:  <http://xmlns.com/foaf/0.1/>.`,
+  //     `<#owner>`,
+  //     `  a acl:Authorization;`,
+  //     `  acl:agent <${owner.toString()}>;`,
+  //     `  acl:accessTo <./>;`,
+  //     `  acl:default <./>;`,
+  //     `  acl:mode`,
+  //     `    acl:Read, acl:Write, acl:Control.`,
+  //     `<#public>`,
+  //     `  a acl:Authorization;`,
+  //     `  acl:agent foaf:Agent;`,
+  //     `  acl:accessTo <./>;`,
+  //     `  acl:default <./>;`,
+  //     `  acl:mode`,
+  //     `    acl:${modeName}.`
+  //   ].join('\n'))
+  //   const buffer = Buffer.from(JSON.stringify(obj))
+  //   return this.storeManager.setResourceData(containerAclUrl, bufferToStream(buffer))
   }
 }

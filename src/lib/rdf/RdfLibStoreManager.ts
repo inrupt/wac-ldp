@@ -5,11 +5,13 @@ import N3Parser from 'rdf-parser-n3'
 import JsonLdParser from 'rdf-parser-jsonld'
 import * as rdflib from 'rdflib'
 
-import { ResourceNode } from '../storage/ResourceNode'
-import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer, ResourceDataLdpRsNonContainer, ResourceDataLdpNr, ResourceType, ResourceDataLdpBc, exists } from './ResourceDataUtils'
+// import { ResourceNode } from '../storage/ResourceNode'
+// import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceData, objectToStream, streamToBuffer, ResourceDataLdpRsNonContainer, ResourceDataLdpNr, ResourceType, ResourceDataLdpBc, exists } from './ResourceDataUtils'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
-import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
+import { BufferTree, urlToPath, NodeType, TreeNode, ResourceData } from '../storage/BufferTree'
 import { StoreManager, Quad, Pattern, RdfJsTerm } from './StoreManager'
+import { membersListAsQuadStream } from '../storage/membersListAsResourceData'
+import { streamToBuffer } from './ResourceDataUtils'
 
 const debug = Debug('StoreManager')
 
@@ -44,46 +46,46 @@ export function rdfNodeToUrl (rdfTerm: RdfJsTerm): URL {
   return new URL(rdfNodeToString(rdfTerm))
 }
 
-function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
-  let parser
-  switch (rdfType) {
-    case RdfType.JsonLd:
-      debug('RdfType JSON-LD')
-      parser = new JsonLdParser({
-        factory: rdf
-      })
-      break
-    case RdfType.Turtle:
-    default:
-      debug('RdfType N3')
-      parser = new N3Parser({
-        factory: rdf
-      })
-      break
-  }
-  debug('importing bodystream')
-  return parser.import(bodyStream)
-}
+// function readRdf (rdfType: RdfType | undefined, bodyStream: ReadableStream) {
+//   let parser
+//   switch (rdfType) {
+//     case RdfType.JsonLd:
+//       debug('RdfType JSON-LD')
+//       parser = new JsonLdParser({
+//         factory: rdf
+//       })
+//       break
+//     case RdfType.Turtle:
+//     default:
+//       debug('RdfType N3')
+//       parser = new N3Parser({
+//         factory: rdf
+//       })
+//       break
+//   }
+//   debug('importing bodystream')
+//   return parser.import(bodyStream)
+// }
 
-export async function quadStreamFromBlob (blob: ResourceNode, rdfType: RdfType): Promise<ReadableStream<Quad>> {
-  const stream = await blob.getData()
-  debug('stream', typeof stream)
-  let resourceData
-  if (stream) {
-    resourceData = await streamToObject(stream) as ResourceDataLdpRsNonContainer
-  } else {
-    return getEmptyGraph()
-  }
-  debug('got ACL ResourceData', resourceData)
+// export async function quadStreamFromBlob (blob: ResourceNode, rdfType: RdfType): Promise<ReadableStream<Quad>> {
+//   const stream = await blob.getData()
+//   debug('stream', typeof stream)
+//   let resourceData
+//   if (stream) {
+//     resourceData = await streamToObject(stream) as ResourceDataLdpRsNonContainer
+//   } else {
+//     return getEmptyGraph()
+//   }
+//   debug('got ACL ResourceData', resourceData)
 
-  return resourceData.getQuads()
-}
+//   return resourceData.getQuads()
+// }
 
-export async function getGraphLocal (blob: ResourceNode): Promise<any> {
-  const resourceData: ResourceData = await streamToObject(blob.getData())
-  const quadStream = await quadStreamFromBlob(blob, determineRdfType(resourceData.contentType))
-  return rdf.dataset().import(quadStream)
-}
+// export async function getGraphLocal (blob: ResourceNode): Promise<any> {
+//   const resourceData: ResourceData = await streamToObject(blob.getData())
+//   const quadStream = await quadStreamFromBlob(blob, determineRdfType(resourceData.contentType))
+//   return rdf.dataset().import(quadStream)
+// }
 
 function requiresTranslation (metaData: any, options: any) {
   return false
@@ -91,26 +93,16 @@ function requiresTranslation (metaData: any, options: any) {
 
 export class RdfLibStoreManager implements StoreManager {
   serverRootDomain: string
-  storage: QuadAndBlobStore
+  storage: BufferTree
   stores: { [url: string]: any }
 
-  constructor (serverRootDomain: string, storage: QuadAndBlobStore) {
+  constructor (serverRootDomain: string, storage: BufferTree) {
     if (serverRootDomain.indexOf('/') !== -1) {
       throw new Error('serverRootDomain should be just the FQDN, no https:// in front')
     }
     this.serverRootDomain = serverRootDomain
     this.storage = storage
     this.stores = {}
-  }
-  delete (url: URL): Promise<void> {
-    return this.storage.delete(url)
-  }
-  async exists (url: URL): Promise<boolean> {
-    const resourceData = await this.storage.read(url)
-    return exists(resourceData)
-  }
-  getResourceData (url: URL): Promise<ResourceData> {
-    return this.storage.read(url)
   }
   async addQuad (quad: Quad) {
     const docUrl: URL = rdfNodeToUrl(quad.graph)
@@ -177,32 +169,33 @@ export class RdfLibStoreManager implements StoreManager {
     const statements = await this.match(pattern)
     return statements.map((quad: Quad) => quad.object)
   }
-  getRepresentationFromStore (url: URL): ResourceData {
-    const body = rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
-    // const body = this.stores[url.toString()].toNT()
-    return makeResourceData('text/turtle', body)
-  }
+  // getRepresentationFromStore (url: URL): ResourceData {
+  //   const body = rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
+  //   // const body = this.stores[url.toString()].toNT()
+  //   return makeResourceData('text/turtle', body)
+  // }
 
-  async getRepresentationFromRemote (url: URL): Promise<ResourceDataLdpNr> {
-    debug('calling node-fetch', url.toString())
-    const response: any = await fetch(url.toString())
-    const contentType = response.headers.get('content-type')
-    const etag = response.headers.get('etag')
-    const rdfType = determineRdfType(contentType)
-    const body = (await streamToBuffer(response as unknown as ReadableStream)).toString()
-    return {
-      contentType,
-      etag,
-      getBody: () => response
-    } as ResourceDataLdpNr
-  }
+  // async getRepresentationFromRemote (url: URL): Promise<ResourceDataLdpNr> {
+  //   debug('calling node-fetch', url.toString())
+  //   const response: any = await fetch(url.toString())
+  //   const contentType = response.headers.get('content-type')
+  //   const etag = response.headers.get('etag')
+  //   const rdfType = determineRdfType(contentType)
+  //   const body = (await streamToBuffer(response as unknown as ReadableStream)).toString()
+  //   return {
+  //     contentType,
+  //     etag,
+  //     getBody: () => response
+  //   } as ResourceDataLdpNr
+  // }
   // cases:
   // 1. from cache
   // 2. remote
   // 3. container
   // 4. translate
   // 5. stream
-  async getRepresentation (url: URL, options?: any): Promise<ResourceData> {
+  // FIXME:
+  async getResourceData (url: URL, options?: any): Promise<ResourceData> {
     // if cache miss, fetch metadata
     // if container, serialize quads without caching (we currently don't cache local containers)
     // if non-container LDP-RS, and requires translation, load and serialize
@@ -210,35 +203,16 @@ export class RdfLibStoreManager implements StoreManager {
 
     // 1. check the cache
     if (this.stores[url.toString()]) {
-      return this.getRepresentationFromStore(url)
+      // return this.getRepresentationFromStore(url)
     }
-
-    // 2. check remote
-    debug('getResourceData - local?', url.host, this.serverRootDomain)
-    if (!url.host.endsWith(this.serverRootDomain)) {
-      return this.getRepresentationFromRemote(url)
-    }
-
-    // 3. container
-    const resourceData = await this.storage.read(url)
-    if (resourceData.resourceType === ResourceType.LdpBc) {
-      const quadStream = (resourceData as ResourceDataLdpBc).getQuads((options && options.preferMinimalContainer))
-      const data = rdflib.serialize(undefined, rdflib.graph(), url, 'text/turtle')
-      return makeResourceData('text/turtle', data)
-    }
-
-    // 4. translate
-    if (requiresTranslation(resourceData, options)) {
-      await this.load(url)
-      return this.getRepresentationFromStore(url)
-    }
-
-    // 5. stream
-    debug('streaming', resourceData)
-    return makeResourceData(resourceData.contentType as string, (await streamToBuffer((resourceData as ResourceDataLdpNr).getBody())).toString())
+    throw new Error('cache miss')
   }
-  setRepresentation (url: URL, resourceData: ResourceData) {
-    return this.storage.write(url, resourceData)
+  async setResourceData (url: URL, resourceData: ResourceData): Promise<void> {
+    // this.stores[url.toString()] = resourceDataToStore(resourceData)
+    this.stores[url.toString()] = rdflib.graph()
+    const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
+    parse((await streamToBuffer(resourceData.getBodyStream())).toString(), this.stores[url.toString()], url.toString(), resourceData.getMetaData().contentType.toString())
+
   }
   async load (url: URL) {
     if (this.stores[url.toString()]) {
@@ -248,17 +222,17 @@ export class RdfLibStoreManager implements StoreManager {
     if (url.host.endsWith(this.serverRootDomain)) {
       // const resourceData: ResourceDataLdpRsNonContainer = await this.getRepresentationFromStore(url)
     } else {
-      const resourceData: ResourceDataLdpNr = await this.getRepresentationFromRemote(url)
+      // const resourceData: ResourceDataLdpNr = await this.getRepresentationFromRemote(url)
       this.stores[url.toString()] = rdflib.graph()
-      if (resourceData) {
-        const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
-        parse((await streamToBuffer(resourceData.getBody())).toString(), this.stores[url.toString()], url.toString(), resourceData.contentType)
-      }
+      // if (resourceData) {
+      //   this.setResourceData(url, resourceData)
+      // }
     }
   }
-  save (url: URL) {
-    const resourceData = this.getRepresentationFromStore(url)
-    return this.storage.write(url, objectToStream(resourceData))
+  save (url: URL): Promise<void> {
+    return Promise.resolve()
+    // const resourceData = this.getRepresentationFromStore(url)
+    // return this.storage.write(url, objectToStream(resourceData))
   }
 
   async patch (url: URL, sparqlQuery: string, appendOnly: boolean) {

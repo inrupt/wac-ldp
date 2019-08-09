@@ -6,7 +6,7 @@ import { setAppModes } from '../../../src/lib/rdf/setAppModes'
 import { StoreManager } from '../../../src/lib/rdf/StoreManager'
 import { ACL } from '../../../src/lib/rdf/rdf-constants'
 import { objectToStream, makeResourceData, streamToObject } from '../../../src/lib/rdf/ResourceDataUtils'
-import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
+import { BufferTree } from '../../../src/lib/storage/BufferTree'
 
 const OWNER_PROFILE_FIXTURE = 'test/fixtures/owner-profile.ttl'
 
@@ -67,7 +67,7 @@ test('setTrustedAppModes existing', async () => {
     new URL('http://www.w3.org/ns/auth/acl#Append'),
     new URL('http://www.w3.org/ns/auth/acl#Control')
   ]
-  await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', modes, storage as QuadAndBlobStore)
+  await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://pheyvaer.github.io', modes, storage as BufferTree)
 
   expect(stored).toEqual({
     body: [
@@ -113,7 +113,7 @@ test('setTrustedAppModes new', async () => {
     new URL('http://www.w3.org/ns/auth/acl#Append'),
     new URL('http://www.w3.org/ns/auth/acl#Control')
   ]
-  await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://other.com', modes, storage as QuadAndBlobStore)
+  await setAppModes(new URL('https://michielbdejong.com/profile/card#me'), 'https://other.com', modes, storage as BufferTree)
   expect(stored).toEqual({
     body: [
       '@prefix : <#>.',

@@ -3,10 +3,10 @@ import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { urlToPath } from '../../../src/lib/storage/BlobTree'
 import * as fs from 'fs'
 import { makeResourceData, objectToStream } from '../../../src/lib/rdf/ResourceDataUtils'
-import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
+import { BufferTree } from '../../../src/lib/storage/BufferTree'
 
 test('can fetch a local graph', async () => {
-  const storage = new QuadAndBlobStore(new BlobTreeInMem())
+  const storage = new BufferTree(new BlobTreeInMem())
   const body: Buffer = await new Promise(resolve => fs.readFile('./test/fixtures/profile-card.ttl', (err, data) => {
     if (err) throw new Error('failed to read fixture')
     resolve(data)
@@ -33,7 +33,7 @@ test('can fetch a local graph', async () => {
 })
 
 test('can fetch a remote graph', async () => {
-  const storage = new QuadAndBlobStore(new BlobTreeInMem())
+  const storage = new BufferTree(new BlobTreeInMem())
   const storeManager = new StoreManager('example.com', storage)
   const representation = await storeManager.getRepresentation(new URL('https://michielbdejong.com/profile/card'))
   expect(representation).toEqual({
