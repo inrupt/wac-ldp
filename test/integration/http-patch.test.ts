@@ -42,15 +42,16 @@ test('handles an append-only PATCH request with Write permissions', async () => 
     [
       204,
       expectedResponseHeaders({
-        originToAllow: 'https://pheyvaer.github.io',
+        originToAllow: '*',
         idp: 'https://localhost:8443',
-        contentType: 'text/turtle',
-        etag: 'TmBqjXO24ygE+uQdtQuiOA==',
-        isContainer: true,
-        updatesVia: 'wss://localhost:8080/'
+        contentType: 'text/plain',
+        // etag: 'TmBqjXO24ygE+uQdtQuiOA=',
+        isContainer: false,
+        updatesVia: 'ws://localhost:8080/'
       })
     ]
   ])
+
   expect(httpRes.end.mock.calls).toEqual([
     [ 'No Content' ]
   ])
