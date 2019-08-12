@@ -3,16 +3,27 @@ import { BlobTree, Path } from '../../../src/lib/storage/BlobTree'
 import { Blob } from '../../../src/lib/storage/Blob'
 import { Container } from '../../../src/lib/storage/Container'
 import { streamToBuffer, bufferToStream } from '../../../src/lib/rdf/ResourceDataUtils'
+import rimraf = require('rimraf')
 
 let storage: BlobTree // | undefined
 
-describe('BlobTreeInMem', () => {
+const TEST_DATA_DIR = './please-delete-me-after-npm-test'
+
+describe('BlobTreeNssCompat', () => {
   beforeEach(function () {
     // FIXME: find out how to set type restrictions on mocha-context variables
-    storage = new BlobTreeNssCompat('./please-delete-me-after-npm-test')
+    storage = new BlobTreeNssCompat(TEST_DATA_DIR)
   })
   afterEach(function () {
     // storage = undefined
+    return new Promise((resolve, reject) => {
+      rimraf(TEST_DATA_DIR, (err => {
+        if (err) {
+          reject(err)
+        }
+        resolve()
+      }))
+    })
   })
   it('adds a blob', async function () {
     // non-existing blob
@@ -94,6 +105,13 @@ describe('BlobTreeInMem', () => {
     it('correctly deletes containers', async function () {
       const containerFooBaz: Container = storage.getContainer(new Path(['v1', 'foo', 'baz'], true))
 
+      // delete /foo/baz/1
+      const blobFooBaz1: Blob = storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false))
+      await blobFooBaz1.delete()
+      // delete /foo/baz/2
+      const blobFooBaz2: Blob = storage.getBlob(new Path(['v1', 'foo', 'baz', '2'], false))
+      await blobFooBaz2.delete()
+
       // delete foo/baz/
       expect(await containerFooBaz.exists()).toEqual(true)
       await containerFooBaz.delete()
@@ -104,8 +122,6 @@ describe('BlobTreeInMem', () => {
       expect(membersFoo).toEqual([
         { name: 'bar', isContainer: false }
       ])
-      const membersBaz = await containerFooBaz.getMembers()
-      expect(membersBaz).toEqual([])
     })
   })
 })
