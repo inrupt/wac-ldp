@@ -4,12 +4,30 @@ import { Node } from './Node'
 import { Container, Member } from './Container'
 import { Blob } from './Blob'
 import { BlobTree, Path } from './BlobTree'
-import { bufferToStream, streamToBuffer } from '../rdf/ResourceDataUtils'
+import { bufferToStream, streamToBuffer, streamToObject, ResourceData, objectToStream, RdfType } from '../rdf/ResourceDataUtils'
 import { promises as fsPromises, Dirent } from 'fs'
 import { join as pathJoin } from 'path'
 
 const debug = Debug('AtomicTreeInMem')
 
+function contentTypeMatches (filePath: string, contentType: string): boolean {
+  // TODO: implement
+  return true
+}
+function contentTypeToExtension (contentType: string): string {
+  // TODO: implement
+  return ''
+}
+function filePathForContentType (filePath: string, contentType: string) {
+  if (contentTypeMatches(filePath, contentType)) {
+    return filePath
+  } else {
+    return `${filePath}$${contentTypeToExtension(contentType)}`
+  }
+}
+function filePathToContentType (filePath: string) {
+  return 'content/type'
+}
 class NodeNssCompat {
   path: Path
   tree: BlobTreeNssCompat
@@ -48,13 +66,21 @@ class BlobNssCompat extends NodeNssCompat implements Blob {
     // instead of ReadableStream, and it seems the two are different?
 
     const buffer = await fsPromises.readFile(this.filePath)
-    return bufferToStream(buffer)
+    const resourceData: ResourceData = {
+      body: buffer.toString(),
+      contentType: filePathToContentType(this.filePath),
+      etag: 'fs.getMTimeMS(this.filePath',
+      rdfType: RdfType.Unknown
+    }
+    return objectToStream(resourceData)
   }
   async setData (data: ReadableStream) {
     const relativeContainerPath = pathJoin.apply(undefined, this.path.toParent().segments)
     const containerPath = pathJoin(this.tree.dataDir, relativeContainerPath)
     await fsPromises.mkdir(containerPath, { recursive: true })
-    return fsPromises.writeFile(this.filePath, await streamToBuffer(data))
+    const resourceData: ResourceData = await streamToObject(data)
+    const filePath = filePathForContentType(this.filePath, resourceData.contentType)
+    return fsPromises.writeFile(this.filePath, resourceData.body)
   }
   delete (): Promise<void> {
     return fsPromises.unlink(this.filePath)
