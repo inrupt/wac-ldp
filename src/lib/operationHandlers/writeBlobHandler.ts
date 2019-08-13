@@ -23,7 +23,7 @@ export const writeBlobHandler = {
     debug('checking If-Match presence', ifMatchHeaderPresent, task.ifMatch(), task.ifNoneMatchStar(), task.ifMatchRequired, blobExists)
     if (blobExists || (task.ifMatchRequired && !ifMatchHeaderPresent)) {
       debug('attempt to overwrite existing resource')
-      throw new ErrorResult(ResultType.PreconditionFailed)
+      throw new ErrorResult(ResultType.PreconditionRequired)
     }
     const resultType = (blobExists ? ResultType.OkayWithoutBody : ResultType.Created)
     const contentType: string | undefined = task.contentType()

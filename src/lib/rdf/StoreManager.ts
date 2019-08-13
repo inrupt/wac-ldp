@@ -155,6 +155,8 @@ export class StoreManager {
       // to do: check if cache needs to be refreshed once in a while
       return
     }
+
+    //   const resourceData = await streamToObject(await blob.getData()) as ResourceData
     const resourceData = await this.getRepresentation(url)
     this.stores[url.toString()] = rdflib.graph()
     if (resourceData) {
@@ -167,6 +169,7 @@ export class StoreManager {
     await this.load(url)
     debug('before patch', this.stores[url.toString()].toNT())
 
+    //  const patchObject = sparqlUpdateParser(task.requestBody || '', rdflib.graph(), task.fullUrl)
     const sparqlUpdateParser = rdflib.sparqlUpdateParser as unknown as (patch: string, store: any, url: string) => any
     const patchObject = sparqlUpdateParser(sparqlQuery, rdflib.graph(), url.toString())
     debug('patchObject', patchObject)
@@ -175,7 +178,7 @@ export class StoreManager {
       throw new ErrorResult(ResultType.AccessDenied)
     }
     await new Promise((resolve, reject) => {
-      this.stores[url.toString()].applyPatch(patchObject, this.stores[url.toString()].sym(url), (err: Error) => {
+      this.stores[url.toString()].applyPatch(patchObject, this.stores[url.toString()].sym(url.toString()), (err: Error) => {
         if (err) {
           reject(err)
         } else {
@@ -184,8 +187,9 @@ export class StoreManager {
       })
     })
     debug('after patch', this.stores[url.toString()].toNT())
-    return rdflib.serialize(undefined, this.stores[url.toString()], url, 'text/turtle')
+    return rdflib.serialize(undefined, this.stores[url.toString()], url.toString(), 'text/turtle')
   }
+
   flushCache (url: URL) {
     delete this.stores[url.toString()]
   }
