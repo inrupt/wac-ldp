@@ -7,27 +7,33 @@ import { BlobTree, Path } from './BlobTree'
 import { bufferToStream, streamToBuffer, streamToObject, ResourceData, objectToStream, RdfType } from '../rdf/ResourceDataUtils'
 import { promises as fsPromises, Dirent } from 'fs'
 import { join as pathJoin } from 'path'
+import * as mime from 'mime-types'
+import glob from 'glob'
 
 const debug = Debug('AtomicTreeInMem')
 
+// ResourceMapper compat, see
+// https://github.com/solid/node-solid-server/blob/master/lib/resource-mapper.js
+function filePathToContentType (filePath: string): string {
+  return mime.lookup(filePath) || 'application/octet-stream'
+}
 function contentTypeMatches (filePath: string, contentType: string): boolean {
-  // TODO: implement
-  return true
+  return (filePathToContentType(filePath) === contentType)
 }
 function contentTypeToExtension (contentType: string): string {
-  // TODO: implement
-  return ''
+  return mime.extension(contentType) || ''
 }
 function filePathForContentType (filePath: string, contentType: string) {
   if (contentTypeMatches(filePath, contentType)) {
     return filePath
   } else {
-    return `${filePath}$${contentTypeToExtension(contentType)}`
+    return `${filePath}$.${contentTypeToExtension(contentType)}`
   }
 }
-function filePathToContentType (filePath: string) {
-  return 'content/type'
+function withoutDollar (fileName: string) {
+  return fileName.split('$')[0]
 }
+
 class NodeNssCompat {
   path: Path
   tree: BlobTreeNssCompat
@@ -45,7 +51,7 @@ class ContainerNssCompat extends NodeNssCompat implements Container {
     const dirents = await fsPromises.readdir(this.filePath, { withFileTypes: true })
     return dirents.map((dirent: Dirent) => {
       return {
-        name: dirent.name,
+        name: withoutDollar(dirent.name),
         isContainer: dirent.isDirectory() }
     })
   }
@@ -65,10 +71,14 @@ class BlobNssCompat extends NodeNssCompat implements Blob {
     // which returns a https://nodejs.org/dist/latest-v10.x/docs/api/stream.html#stream_class_stream_readable
     // instead of ReadableStream, and it seems the two are different?
 
-    const buffer = await fsPromises.readFile(this.filePath)
+    const existsAs = await this.existsAs()
+    if (!existsAs) {
+      throw new Error('not found')
+    }
+    const buffer: Buffer = await fsPromises.readFile(existsAs)
     const resourceData: ResourceData = {
       body: buffer.toString(),
-      contentType: filePathToContentType(this.filePath),
+      contentType: filePathToContentType(existsAs),
       etag: 'fs.getMTimeMS(this.filePath',
       rdfType: RdfType.Unknown
     }
@@ -80,15 +90,39 @@ class BlobNssCompat extends NodeNssCompat implements Blob {
     await fsPromises.mkdir(containerPath, { recursive: true })
     const resourceData: ResourceData = await streamToObject(data)
     const filePath = filePathForContentType(this.filePath, resourceData.contentType)
-    return fsPromises.writeFile(this.filePath, resourceData.body)
+    return fsPromises.writeFile(filePath, resourceData.body)
   }
-  delete (): Promise<void> {
-    return fsPromises.unlink(this.filePath)
+  async delete (): Promise<void> {
+    const existsAs = await this.existsAs()
+    if (existsAs) {
+      return fsPromises.unlink(existsAs)
+    }
   }
-  exists (): Promise<boolean> {
+  existsWithoutDollar (): Promise<boolean> {
     return fsPromises.access(this.filePath)
       .then(() => true)
       .catch(() => false)
+  }
+  async existsAs (): Promise<string | undefined> {
+    const existsWithoutDollar = await this.existsWithoutDollar()
+    if (existsWithoutDollar) {
+      return this.filePath
+    }
+    return new Promise((resolve, reject) => {
+      glob(`${this.filePath}\$.*`, (err: Error | null, matches: Array<string>) => {
+        if (err) {
+          reject(err)
+        }
+        if (matches.length === 0) {
+          resolve(undefined)
+        }
+        resolve(matches[0])
+      })
+    })
+  }
+  async exists (): Promise<boolean> {
+    const existsAs: string | undefined = await this.existsAs()
+    return (typeof existsAs === 'string')
   }
 }
 

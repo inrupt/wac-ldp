@@ -2,7 +2,7 @@ import { BlobTreeNssCompat } from '../../../src/lib/storage/BlobTreeNssCompat'
 import { BlobTree, Path } from '../../../src/lib/storage/BlobTree'
 import { Blob } from '../../../src/lib/storage/Blob'
 import { Container } from '../../../src/lib/storage/Container'
-import { streamToBuffer, bufferToStream } from '../../../src/lib/rdf/ResourceDataUtils'
+import { streamToBuffer, bufferToStream, RdfType, objectToStream, streamToObject, ResourceData, makeResourceData } from '../../../src/lib/rdf/ResourceDataUtils'
 import rimraf = require('rimraf')
 
 let storage: BlobTree // | undefined
@@ -30,12 +30,20 @@ describe('BlobTreeNssCompat', () => {
     const blob = storage.getBlob(new Path(['v1', 'foo'], false))
     expect(await blob.exists()).toEqual(false)
 
+    const testData: ResourceData = {
+      body: 'bar',
+      contentType: 'text/plain',
+      etag: 'etag-bar',
+      rdfType: RdfType.Unknown
+    }
     // put data into it
-    await blob.setData(bufferToStream(Buffer.from('bar')))
+    await blob.setData(objectToStream(testData))
+
     expect(await blob.exists()).toEqual(true)
     const stream = await blob.getData()
-    const readBack2 = await streamToBuffer(stream)
-    expect(readBack2.toString()).toEqual('bar')
+    const readBack2 = await streamToObject(stream)
+    expect(readBack2.body).toEqual(testData.body)
+    expect(readBack2.contentType).toEqual(testData.contentType)
   })
 
   it('adds a container', async function () {
@@ -45,7 +53,14 @@ describe('BlobTreeNssCompat', () => {
 
     // add a member
     const blob = storage.getBlob(new Path(['v1', 'foo', 'bar'], false))
-    await blob.setData(bufferToStream(Buffer.from('contents of foo/bar')))
+    const testData: ResourceData = {
+      body: 'contents of foo/bar',
+      contentType: 'text/plain',
+      etag: 'etag-bar',
+      rdfType: RdfType.Unknown
+    }
+
+    await blob.setData(objectToStream(testData))
     expect(await container.exists()).toEqual(true)
 
     const members = await container.getMembers()
@@ -56,9 +71,9 @@ describe('BlobTreeNssCompat', () => {
 
   describe('after adding some data', () => {
     beforeEach(async () => {
-      await storage.getBlob(new Path(['v1', 'foo', 'bar'], false)).setData(bufferToStream(Buffer.from('I am foo/bar')))
-      await storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false)).setData(bufferToStream(Buffer.from('I am foo/baz/1')))
-      await storage.getBlob(new Path(['v1', 'foo', 'baz', '2'], false)).setData(bufferToStream(Buffer.from('I am foo/baz/2')))
+      await storage.getBlob(new Path(['v1', 'foo', 'bar'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/bar')))
+      await storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/baz/1')))
+      await storage.getBlob(new Path(['v1', 'foo', 'baz', '2'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/baz/2')))
     })
 
     it('correctly reports the container member listings', async function () {
