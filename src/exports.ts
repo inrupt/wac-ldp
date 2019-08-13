@@ -1,4 +1,4 @@
-export { WacLdp, BEARER_PARAM_NAME } from './lib/core/WacLdp'
+export { WacLdp, WacLdpOptions, BEARER_PARAM_NAME } from './lib/core/WacLdp'
 export { determineWebIdAndOrigin } from './lib/api/authentication/determineWebIdAndOrigin'
 export { BlobTree, Path } from './lib/storage/BlobTree'
 export { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
