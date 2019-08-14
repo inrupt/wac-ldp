@@ -34,6 +34,13 @@ function withoutDollar (fileName: string) {
   return fileName.split('$')[0]
 }
 
+function treePathToFsPath (treePath: Path, dataDir: string) {
+  const hostname = treePath.segments[1].split(':')[0]
+  const rest = treePath.segments.slice(2)
+  const relativePath = pathJoin.apply(undefined, rest)
+  return pathJoin(dataDir, hostname, relativePath)
+}
+
 class NodeNssCompat {
   path: Path
   tree: BlobTreeNssCompat
@@ -41,8 +48,7 @@ class NodeNssCompat {
   constructor (path: Path, tree: BlobTreeNssCompat) {
     this.path = path
     this.tree = tree
-    const relativePath = pathJoin.apply(undefined, this.path.segments)
-    this.filePath = pathJoin(this.tree.dataDir, relativePath)
+    this.filePath = treePathToFsPath(this.path, this.tree.dataDir)
   }
 }
 
@@ -85,8 +91,7 @@ class BlobNssCompat extends NodeNssCompat implements Blob {
     return objectToStream(resourceData)
   }
   async setData (data: ReadableStream) {
-    const relativeContainerPath = pathJoin.apply(undefined, this.path.toParent().segments)
-    const containerPath = pathJoin(this.tree.dataDir, relativeContainerPath)
+    const containerPath = treePathToFsPath(this.path.toParent(), this.tree.dataDir)
     await fsPromises.mkdir(containerPath, { recursive: true })
     const resourceData: ResourceData = await streamToObject(data)
     const filePath = filePathForContentType(this.filePath, resourceData.contentType)
