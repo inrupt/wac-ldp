@@ -1,6 +1,6 @@
 {
   "name": "wac-ldp",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "description": "A central component for Solid servers, handles Web Access Control and Linked Data Platform concerns.",
   "main": "dist/exports.js",
   "dependencies": {
@@ -29,7 +29,7 @@
     "rdf-formats-common": "^1.4.0",
     "rdf-parser-jsonld": "^1.1.0",
     "rdf-parser-n3": "^1.1.1",
-    "rdflib": "^0.20.1",
+    "rdflib": "^0.21.1",
     "sparqljs": "^2.2.3",
     "uuid": "^3.3.2",
     "whatwg-mimetype": "^2.3.0"
@@ -47,7 +47,7 @@
     "ts-node-dev": "^1.0.0-pre.40",
     "tslint": "^5.15.0",
     "tslint-config-standard": "^8.0.1",
-    "typedoc": "^0.14.2",
+    "typedoc": "^0.15.0",
     "typescript": "^3.5.3"
   },
   "scripts": {
