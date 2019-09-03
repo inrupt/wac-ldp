@@ -45,7 +45,7 @@ export class AclBasedAuthorizer implements IAuthorizer {
   constructor (resourceStore: IResourceStore) {
     this.resourceStore = resourceStore
   }
-  async ensurePermissions(agent: ICredentials,
+  async ensurePermissions (agent: ICredentials,
     target: IResourceIdentifier,
     requiredPermissions: PermissionSet
   ): Promise<boolean> {
