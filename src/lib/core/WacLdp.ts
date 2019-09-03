@@ -60,7 +60,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
   operationHandlers: Array<OperationHandler>
   idpHost: string
   usesHttps: boolean
-  constructor (/* operationFactory: IOperationFactory, authorizer: IAuthorizer, */ options: WacLdpOptions) {
+  constructor (operationFactory: IOperationFactory, authorizer: IAuthorizer, options: WacLdpOptions) {
     super()
     const serverRootDomain: string = new URL(options.aud).host
     debug({ serverRootDomain })
