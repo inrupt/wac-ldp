@@ -22,6 +22,8 @@ import { BlobTree } from '../storage/BlobTree'
 import { AclManager } from '../authorization/AclManager'
 import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
 import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
+import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory';
+import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer';
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -58,7 +60,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
   operationHandlers: Array<OperationHandler>
   idpHost: string
   usesHttps: boolean
-  constructor (options: WacLdpOptions) {
+  constructor (/* operationFactory: IOperationFactory, authorizer: IAuthorizer, */ options: WacLdpOptions) {
     super()
     const serverRootDomain: string = new URL(options.aud).host
     debug({ serverRootDomain })
