@@ -20,18 +20,29 @@ import { BlobTreeNssCompat } from './lib/storage/BlobTreeNssCompat'
 import { WacLdp } from './lib/core/WacLdp'
 import { BlobTree, Path } from './lib/storage/BlobTree'
 import { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
+import { NssCompatResourceStore, DefaultOperationFactory, AclBasedAuthorizer } from './exports'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
+import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
 
 const debug = Debug('server')
 
 const dataDir = process.env.PORT || './data'
 
 class Server {
+  resourceStore: IResourceStore
+  operationFactory: IOperationFactory
+  authorizer: IAuthorizer
   server: http.Server
   port: number
   wacLdp: WacLdp
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
-    this.wacLdp = new WacLdp({
+    this.resourceStore = new NssCompatResourceStore()
+    this.operationFactory = new DefaultOperationFactory(this.resourceStore)
+    this.authorizer = new AclBasedAuthorizer(this.resourceStore)
+
+    this.wacLdp = new WacLdp(this.operationFactory, this.authorizer, {
       storage: new QuadAndBlobStore(new BlobTreeNssCompat(dataDir)), // singleton in-memory storage
       aud,
       updatesViaUrl: new URL('wss://localhost:8443'),

@@ -21,6 +21,9 @@ import { setAppModes } from '../rdf/setAppModes'
 import { BlobTree } from '../storage/BlobTree'
 import { AclManager } from '../authorization/AclManager'
 import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
+import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
+import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
+import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -48,7 +51,7 @@ export interface WacLdpOptions {
   usesHttps: boolean
 }
 
-export class WacLdp extends EventEmitter {
+export class WacLdp extends EventEmitter implements IHttpHandler {
   aud: string
   storeManager: StoreManager
   aclManager: AclManager
@@ -57,7 +60,7 @@ export class WacLdp extends EventEmitter {
   operationHandlers: Array<OperationHandler>
   idpHost: string
   usesHttps: boolean
-  constructor (options: WacLdpOptions) {
+  constructor (operationFactory: IOperationFactory, authorizer: IAuthorizer, options: WacLdpOptions) {
     super()
     const serverRootDomain: string = new URL(options.aud).host
     debug({ serverRootDomain })
@@ -114,7 +117,16 @@ export class WacLdp extends EventEmitter {
     throw new ErrorResult(ResultType.InternalServerError)
   }
 
+  async canHandle (httpReq: http.IncomingMessage): Promise<boolean> {
+    return true
+  }
+
+  // legacy synonym:
   async handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
+    return this.handle(httpReq, httpRes)
+  }
+
+  async handle (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
     let response: WacLdpResponse

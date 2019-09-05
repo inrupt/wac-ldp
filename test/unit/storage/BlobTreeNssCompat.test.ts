@@ -27,7 +27,7 @@ describe('BlobTreeNssCompat', () => {
   })
   it('adds a blob', async function () {
     // non-existing blob
-    const blob = storage.getBlob(new Path(['v1', 'foo'], false))
+    const blob = storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo'], false))
     expect(await blob.exists()).toEqual(false)
 
     const testData: ResourceData = {
@@ -48,11 +48,11 @@ describe('BlobTreeNssCompat', () => {
 
   it('adds a container', async function () {
     // non-existing container
-    const container = storage.getContainer(new Path(['v1', 'foo'], true))
+    const container = storage.getContainer(new Path(['v1', 'michielbdejong.localhost:8080', 'foo'], true))
     expect(await container.exists()).toEqual(false)
 
     // add a member
-    const blob = storage.getBlob(new Path(['v1', 'foo', 'bar'], false))
+    const blob = storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'bar'], false))
     const testData: ResourceData = {
       body: 'contents of foo/bar',
       contentType: 'text/plain',
@@ -71,14 +71,14 @@ describe('BlobTreeNssCompat', () => {
 
   describe('after adding some data', () => {
     beforeEach(async () => {
-      await storage.getBlob(new Path(['v1', 'foo', 'bar'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/bar')))
-      await storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/baz/1')))
-      await storage.getBlob(new Path(['v1', 'foo', 'baz', '2'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/baz/2')))
+      await storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'bar'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/bar')))
+      await storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz', '1'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/baz/1')))
+      await storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz', '2'], false)).setData(objectToStream(makeResourceData('text/plain', 'I am foo/baz/2')))
     })
 
     it('correctly reports the container member listings', async function () {
-      const containerFoo: Container = storage.getContainer(new Path(['v1', 'foo'], true))
-      const containerBaz: Container = storage.getContainer(new Path(['v1', 'foo', 'baz'], true))
+      const containerFoo: Container = storage.getContainer(new Path(['v1', 'michielbdejong.localhost:8080', 'foo'], true))
+      const containerBaz: Container = storage.getContainer(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz'], true))
       const membersFoo = await containerFoo.getMembers()
       expect(membersFoo).toEqual([
         { name: 'bar', isContainer: false },
@@ -92,8 +92,8 @@ describe('BlobTreeNssCompat', () => {
     })
 
     it('correctly deletes blobs', async function () {
-      const blobFooBar: Blob = storage.getBlob(new Path(['v1', 'foo', 'bar'], false))
-      const blobFooBaz1: Blob = storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false))
+      const blobFooBar: Blob = storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'bar'], false))
+      const blobFooBaz1: Blob = storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz', '1'], false))
 
       // delete foo/bar
       expect(await blobFooBar.exists()).toEqual(true)
@@ -105,8 +105,8 @@ describe('BlobTreeNssCompat', () => {
       await blobFooBaz1.delete()
       expect(await blobFooBaz1.exists()).toEqual(false)
 
-      const containerFoo: Container = storage.getContainer(new Path(['v1', 'foo'], true))
-      const containerBaz: Container = storage.getContainer(new Path(['v1', 'foo', 'baz'], true))
+      const containerFoo: Container = storage.getContainer(new Path(['v1', 'michielbdejong.localhost:8080', 'foo'], true))
+      const containerBaz: Container = storage.getContainer(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz'], true))
       const membersFoo = await containerFoo.getMembers()
       expect(membersFoo).toEqual([
         { name: 'baz', isContainer: true }
@@ -118,13 +118,13 @@ describe('BlobTreeNssCompat', () => {
     })
 
     it('correctly deletes containers', async function () {
-      const containerFooBaz: Container = storage.getContainer(new Path(['v1', 'foo', 'baz'], true))
+      const containerFooBaz: Container = storage.getContainer(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz'], true))
 
       // delete /foo/baz/1
-      const blobFooBaz1: Blob = storage.getBlob(new Path(['v1', 'foo', 'baz', '1'], false))
+      const blobFooBaz1: Blob = storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz', '1'], false))
       await blobFooBaz1.delete()
       // delete /foo/baz/2
-      const blobFooBaz2: Blob = storage.getBlob(new Path(['v1', 'foo', 'baz', '2'], false))
+      const blobFooBaz2: Blob = storage.getBlob(new Path(['v1', 'michielbdejong.localhost:8080', 'foo', 'baz', '2'], false))
       await blobFooBaz2.delete()
 
       // delete foo/baz/
@@ -132,7 +132,7 @@ describe('BlobTreeNssCompat', () => {
       await containerFooBaz.delete()
       expect(await containerFooBaz.exists()).toEqual(false)
 
-      const containerFoo: Container = storage.getContainer(new Path(['v1', 'foo'], true))
+      const containerFoo: Container = storage.getContainer(new Path(['v1', 'michielbdejong.localhost:8080', 'foo'], true))
       const membersFoo = await containerFoo.getMembers()
       expect(membersFoo).toEqual([
         { name: 'bar', isContainer: false }

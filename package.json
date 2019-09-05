@@ -30,6 +30,7 @@
     "rdf-parser-jsonld": "^1.1.0",
     "rdf-parser-n3": "^1.1.1",
     "rdflib": "^0.21.1",
+    "solid-server-ts": "github:inrupt/solid-server-ts#dev",
     "sparqljs": "^2.2.3",
     "uuid": "^3.3.2",
     "whatwg-mimetype": "^2.3.0"
