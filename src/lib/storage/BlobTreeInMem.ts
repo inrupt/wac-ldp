@@ -4,7 +4,7 @@ import { Node } from './Node'
 import { Container, Member } from './Container'
 import { Blob } from './Blob'
 import { BlobTree, Path, urlToPath } from './BlobTree'
-import { bufferToStream, streamToBuffer, ResourceData, streamToObject, objectToStream } from '../rdf/ResourceDataUtils'
+import { bufferToStream, streamToBuffer, ResourceData, streamToObject, objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
 import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
 import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
@@ -117,15 +117,16 @@ export class BlobTreeInMem extends events.EventEmitter {
   async getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
     const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
     const resourceData = await streamToObject(await blob.getData())
+    console.log('get', resourceData)
     const metadata: IRepresentationMetadata = {
       raw: [],
       contentType: resourceData.contentType,
       profiles: []
     } as IRepresentationMetadata
     return {
-      identifier: resourceIdentifier,
+      // identifier: resourceIdentifier,
       metadata,
-      data: bufferToStream(Buffer.from(resourceData.body)),
+      data: await bufferToStream(Buffer.from(resourceData.body)),
       dataType: 'default'
     } as IRepresentation
   }
@@ -147,11 +148,9 @@ export class BlobTreeInMem extends events.EventEmitter {
   }
   async setRepresentation (resourceIdentifier: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
     const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
-    return blob.setData(await objectToStream({
-      contentType: representation.metadata.contentType,
-      body: streamToBuffer(representation.data),
-      etag: 'hm'
-    }))
+    const resourceData = makeResourceData(representation.metadata.contentType || 'application/octet-stream', streamToBuffer(representation.data).toString())
+    console.log('set', resourceData)
+    return blob.setData(await objectToStream(resourceData))
   }
   async deleteResource (resourceIdentifier: IResourceIdentifier, conditions: Conditions) {
     if (resourceIdentifier.path.substr(-1) === '/') {
