@@ -53,7 +53,7 @@ function removeUrlSuffix (url: URL, suffix: string): URL {
   if (remainingLength < 0) {
     throw new Error('no suffix match (URL shorter than suffix)')
   }
-  if (urlStr[urlStr.length - 1].substring(remainingLength) !== suffix) {
+  if (urlStr.substring(remainingLength) !== suffix) {
     throw new Error('no suffix match')
   }
   return new URL(urlStr.substring(0, remainingLength))
