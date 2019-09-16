@@ -15,7 +15,7 @@ test('can fetch a local graph', async () => {
   const resourceData = makeResourceData('text/turtle', body.toString())
   await blob.setData(await objectToStream(resourceData))
   const storeManager = new StoreManager('example.com', storage)
-  const representation = await storeManager.getRepresentation(new URL('https://example.com/profile/card'))
+  const representation = await storeManager.getResourceData(new URL('https://example.com/profile/card'))
   expect(representation).toEqual({
     body: `\n\
 @prefix : <https://michielbdejong.com/profile/card#>.\n\
@@ -36,7 +36,7 @@ test('can fetch a local graph', async () => {
 test('can fetch a remote graph', async () => {
   const storage = new QuadAndBlobStore(new BlobTreeInMem())
   const storeManager = new StoreManager('example.com', storage)
-  const representation = await storeManager.getRepresentation(new URL('https://michielbdejong.com/profile/card'))
+  const representation = await storeManager.getResourceData(new URL('https://michielbdejong.com/profile/card'))
   expect(representation).toEqual({
     body: `\n\
 @prefix : <https://michielbdejong.com/profile/card#>.\n\

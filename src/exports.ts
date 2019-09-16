@@ -5,6 +5,9 @@ import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import ICredentials from 'solid-server-ts/src/auth/ICredentials'
 import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import Conditions from 'solid-server-ts/src/ldp/Conditions'
+import IPatch from 'solid-server-ts/src/ldp/IPatch'
 
 export { WacLdp, WacLdpOptions, BEARER_PARAM_NAME } from './lib/core/WacLdp'
 export { determineWebIdAndOrigin } from './lib/api/authentication/determineWebIdAndOrigin'
@@ -15,19 +18,19 @@ export { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
 export { ACL } from './lib/rdf/rdf-constants'
 
 export class NssCompatResourceStore implements IResourceStore {
-  async getRepresentation () {
+  async getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
     return {} as IRepresentation
   }
-  async setRepresentation () {
-    // ...
-  }
-  async addResource () {
+  async addResource (container: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
     return {} as IResourceIdentifier
   }
-  async modifyResource () {
+  async setRepresentation (resourceIdentifier: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
     // ...
   }
-  async deleteResource () {
+  async deleteResource (resourceIdentifier: IResourceIdentifier, conditions: Conditions) {
+    // ...
+  }
+  async modifyResource (resourceIdentifier: IResourceIdentifier, patch: IPatch, conditions: Conditions) {
     // ...
   }
 }

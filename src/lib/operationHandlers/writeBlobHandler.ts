@@ -29,7 +29,7 @@ export const writeBlobHandler = {
     const contentType: string | undefined = task.contentType()
     debug('contentType', contentType)
     const resourceData = makeResourceData(contentType ? contentType : '', await task.requestBody())
-    await storeManager.setRepresentation(task.fullUrl(), objectToStream(resourceData))
+    await storeManager.setResourceData(task.fullUrl(), objectToStream(resourceData))
     debug('write blob handler changed a resource', task.fullUrl())
     return {
       resultType,

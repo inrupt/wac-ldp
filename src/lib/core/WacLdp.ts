@@ -91,7 +91,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
     return this.aclManager.setPublicAcl(inboxUrl, owner, modeName)
   }
   createLocalDocument (url: URL, contentType: string, body: string) {
-    return this.storeManager.setRepresentation(url, objectToStream(makeResourceData(contentType, body)))
+    return this.storeManager.setResourceData(url, objectToStream(makeResourceData(contentType, body)))
   }
   containerExists (url: URL) {
     return this.storeManager.getLocalContainer(url).exists()
