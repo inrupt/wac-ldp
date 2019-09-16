@@ -17,23 +17,7 @@ export { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
 export { ACL } from './lib/rdf/rdf-constants'
 export { DefaultOperationFactory } from './lib/core/DefaultOperationFactory'
 
-export class NssCompatResourceStore implements IResourceStore {
-  async getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
-    return {} as IRepresentation
-  }
-  async addResource (container: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
-    return {} as IResourceIdentifier
-  }
-  async setRepresentation (resourceIdentifier: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
-    // ...
-  }
-  async deleteResource (resourceIdentifier: IResourceIdentifier, conditions: Conditions) {
-    // ...
-  }
-  async modifyResource (resourceIdentifier: IResourceIdentifier, patch: IPatch, conditions: Conditions) {
-    // ...
-  }
-}
+export { BlobTreeNssCompat as NssCompatResourceStore } from './lib/storage/BlobTreeNssCompat'
 
 export class AclBasedAuthorizer implements IAuthorizer {
   resourceStore: IResourceStore

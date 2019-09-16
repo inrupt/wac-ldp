@@ -38,12 +38,12 @@ class Server {
   wacLdp: WacLdp
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
-    this.resourceStore = new NssCompatResourceStore()
+    this.resourceStore = new NssCompatResourceStore(dataDir)
     this.operationFactory = new DefaultOperationFactory(this.resourceStore)
     this.authorizer = new AclBasedAuthorizer(this.resourceStore)
 
     this.wacLdp = new WacLdp(this.operationFactory, this.authorizer, {
-      storage: new QuadAndBlobStore(new BlobTreeNssCompat(dataDir)), // singleton in-memory storage
+      storage: new QuadAndBlobStore(this.resourceStore as BlobTree), // singleton on-disk storage
       aud,
       updatesViaUrl: new URL('wss://localhost:8443'),
       skipWac,

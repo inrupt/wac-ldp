@@ -140,3 +140,16 @@ export class AclManager {
     return this.storeManager.setResourceData(containerAclUrl, bufferToStream(buffer))
   }
 }
+
+// export class AclBasedAuthorizer implements IAuthorizer {
+//   resourceStore: IResourceStore
+//   constructor (resourceStore: IResourceStore) {
+//     this.resourceStore = resourceStore
+//   }
+//   async ensurePermissions (agent: ICredentials,
+//     target: IResourceIdentifier,
+//     requiredPermissions: PermissionSet
+//   ): Promise<boolean> {
+//     return false
+//   }
+// }
