@@ -20,9 +20,10 @@ for (let [storeName, store] of Object.entries(stores)) {
         contentType: 'text/plain',
         profiles: []
       } as IRepresentationMetadata
+      const original = Buffer.from('hello body')
       const representation = {
         metadata,
-        data: await bufferToStream(Buffer.from('hello body')),
+        data: await bufferToStream(original),
         dataType: 'default'
       } as IRepresentation
       const conditions = {
@@ -34,8 +35,9 @@ for (let [storeName, store] of Object.entries(stores)) {
         path: 'yes/it.does'
       } as IResourceIdentifier
       await store.setRepresentation(resourceIdentifier, representation, conditions)
-      const readBack = await store.getRepresentation(resourceIdentifier, {} as IRepresentationPreferences, {} as Conditions)
-      expect(await streamToBuffer(readBack)).toEqual(await streamToBuffer(representation))
+      const readBackRepresentation = await store.getRepresentation(resourceIdentifier, {} as IRepresentationPreferences, {} as Conditions)
+      const readBack = await streamToBuffer(readBackRepresentation.data)
+      expect(readBack).toEqual(original)
     })
   })
 }
