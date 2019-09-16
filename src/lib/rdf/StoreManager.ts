@@ -12,6 +12,12 @@ import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceDa
 import { Container } from '../storage/Container'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import Conditions from 'solid-server-ts/src/ldp/Conditions'
+import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
+import IPatch from 'solid-server-ts/src/ldp/IPatch'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('StoreManager')
 
@@ -96,7 +102,7 @@ export async function getGraphLocal (blob: Blob): Promise<any> {
   return rdf.dataset().import(quadStream)
 }
 
-export class StoreManager {
+export class StoreManager implements IResourceStore {
   serverRootDomain: string
   storage: QuadAndBlobStore
   stores: { [url: string]: any }
@@ -127,7 +133,7 @@ export class StoreManager {
     debug(ret)
     return ret
   }
-  async getRepresentation (url: URL): Promise<ResourceData | undefined> {
+  async getResourceData (url: URL): Promise<ResourceData | undefined> {
     debug('getResourceData - local?', url.host, this.serverRootDomain)
     if (url.host.endsWith(this.serverRootDomain)) {
       debug('getResourceData local!', url.toString())
@@ -146,7 +152,7 @@ export class StoreManager {
       return { contentType, body, etag, rdfType }
     }
   }
-  setRepresentation (url: URL, stream: ReadableStream) {
+  setResourceData (url: URL, stream: ReadableStream) {
     const blob: Blob = this.getLocalBlob(url)
     return blob.setData(stream)
   }
@@ -157,7 +163,7 @@ export class StoreManager {
     }
 
     //   const resourceData = await streamToObject(await blob.getData()) as ResourceData
-    const resourceData = await this.getRepresentation(url)
+    const resourceData = await this.getResourceData(url)
     this.stores[url.toString()] = rdflib.graph()
     if (resourceData) {
       const parse = rdflib.parse as (body: string, store: any, url: string, contentType: string) => void
@@ -193,4 +199,21 @@ export class StoreManager {
   flushCache (url: URL) {
     delete this.stores[url.toString()]
   }
+
+  getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
+    return this.storage.getRepresentation(resourceIdentifier, representationPreferences, conditions)
+  }
+  addResource (container: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
+    return this.storage.addResource(container, representation, conditions)
+  }
+  setRepresentation (resourceIdentifier: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
+    return this.storage.setRepresentation(resourceIdentifier, representation, conditions)
+  }
+  deleteResource (resourceIdentifier: IResourceIdentifier, conditions: Conditions) {
+    return this.storage.deleteResource(resourceIdentifier, conditions)
+  }
+  modifyResource (resourceIdentifier: IResourceIdentifier, patch: IPatch, conditions: Conditions) {
+    return this.storage.modifyResource(resourceIdentifier, patch, conditions)
+  }
+
 }

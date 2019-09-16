@@ -4,11 +4,19 @@ import { Member } from './Container'
 import { membersListAsQuadStream } from './membersListAsResourceData'
 import { quadStreamFromBlob } from '../rdf/StoreManager'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
-import { RdfType, objectToStream } from '../rdf/ResourceDataUtils'
+import { RdfType, objectToStream, streamToBuffer, makeResourceData, streamToObject } from '../rdf/ResourceDataUtils'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import Conditions from 'solid-server-ts/src/ldp/Conditions'
+import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
+import uuid from 'uuid'
+import IPatch from 'solid-server-ts/src/ldp/IPatch'
+import applyPatch from '../rdf/applyPatch'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('quad-and-blob-store')
 
-export class QuadAndBlobStore {
+export class QuadAndBlobStore implements IResourceStore {
   storage: BlobTree
   constructor (storage: BlobTree) {
     this.storage = storage
@@ -51,5 +59,21 @@ export class QuadAndBlobStore {
       const resourceData = rdfToResourceData(quadStream, RdfType.Turtle)
       return blob.setData(objectToStream(resourceData))
     }
+  }
+
+  getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
+    return this.storage.getRepresentation(resourceIdentifier, representationPreferences, conditions)
+  }
+  addResource (container: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
+    return this.storage.addResource(container, representation, conditions)
+  }
+  setRepresentation (resourceIdentifier: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
+    return this.storage.setRepresentation(resourceIdentifier, representation, conditions)
+  }
+  deleteResource (resourceIdentifier: IResourceIdentifier, conditions: Conditions) {
+    return this.storage.deleteResource(resourceIdentifier, conditions)
+  }
+  modifyResource (resourceIdentifier: IResourceIdentifier, patch: IPatch, conditions: Conditions) {
+    return this.storage.modifyResource(resourceIdentifier, patch, conditions)
   }
 }

@@ -2,6 +2,7 @@ import * as events from 'events'
 import Debug from 'debug'
 import { Container } from './Container'
 import { Blob } from './Blob'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('BlobTree')
 
@@ -117,7 +118,7 @@ export class Path {
 // getData/setData when doesn't exist
 // containers always exist, unless there is a blob at their filename
 // creating a path ignores the trailing slash
-export interface BlobTree extends events.EventEmitter {
+export interface BlobTree extends events.EventEmitter, IResourceStore {
   getContainer (path: Path): Container
   getBlob (path: Path): Blob
 }

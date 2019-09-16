@@ -4,7 +4,7 @@ import { StoreManager } from '../rdf/StoreManager'
 import { ResourceData } from '../rdf/ResourceDataUtils'
 
 export async function getResourceDataAndCheckETag (wacLdpTask: WacLdpTask, storeManager: StoreManager): Promise<ResourceData | undefined> {
-  const resourceData = await storeManager.getRepresentation(wacLdpTask.fullUrl())
+  const resourceData = await storeManager.getResourceData(wacLdpTask.fullUrl())
   // See https://github.com/inrupt/wac-ldp/issues/114
   const resultTypeToUse = (wacLdpTask.isReadOperation() ? ResultType.NotModified : ResultType.PreconditionFailed)
   if (resourceData) { // resource exists

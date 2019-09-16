@@ -109,7 +109,7 @@ export class AclManager {
       `    acl:Read, acl:Write, acl:Control.`
     ].join('\n'))
     const buffer = Buffer.from(JSON.stringify(obj))
-    return this.storeManager.setRepresentation(rootAclUrl, bufferToStream(buffer))
+    return this.storeManager.setResourceData(rootAclUrl, bufferToStream(buffer))
   }
   setPublicAcl (containerUrl: URL, owner: URL, modeName: string): Promise<void> {
     let containerUrlStr = containerUrl.toString()
@@ -137,6 +137,6 @@ export class AclManager {
       `    acl:${modeName}.`
     ].join('\n'))
     const buffer = Buffer.from(JSON.stringify(obj))
-    return this.storeManager.setRepresentation(containerAclUrl, bufferToStream(buffer))
+    return this.storeManager.setResourceData(containerAclUrl, bufferToStream(buffer))
   }
 }
