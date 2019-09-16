@@ -1,5 +1,4 @@
 import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
-import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
 import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
 import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import ICredentials from 'solid-server-ts/src/auth/ICredentials'
@@ -16,6 +15,7 @@ export { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
 export { BlobTreeNssCompat } from './lib/storage/BlobTreeNssCompat'
 export { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
 export { ACL } from './lib/rdf/rdf-constants'
+export { DefaultOperationFactory } from './lib/core/DefaultOperationFactory'
 
 export class NssCompatResourceStore implements IResourceStore {
   async getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
@@ -33,14 +33,6 @@ export class NssCompatResourceStore implements IResourceStore {
   async modifyResource (resourceIdentifier: IResourceIdentifier, patch: IPatch, conditions: Conditions) {
     // ...
   }
-}
-
-export class DefaultOperationFactory implements IOperationFactory {
-  resourceStore: IResourceStore
-  constructor (resourceStore: IResourceStore) {
-    this.resourceStore = resourceStore
-  }
-  // ...
 }
 
 export class AclBasedAuthorizer implements IAuthorizer {
