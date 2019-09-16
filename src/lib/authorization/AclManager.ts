@@ -2,6 +2,10 @@ import Debug from 'debug'
 import { urlToPath } from '../storage/BlobTree'
 import { StoreManager, getEmptyGraph, getGraphLocal } from '../rdf/StoreManager'
 import { makeResourceData, bufferToStream } from '../rdf/ResourceDataUtils'
+import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
+import ICredentials from 'solid-server-ts/src/auth/ICredentials'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 
 // Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
 
@@ -56,7 +60,7 @@ export const ACL_SUFFIX = '.acl'
   // from there on.
   // you could argue that readAcl should fetch ACL docs through graph fetcher and not directly
   // from storage
-export class AclManager {
+export class AclManager implements IAuthorizer {
   storeManager: StoreManager
   constructor (storeManager: StoreManager) {
     this.storeManager = storeManager
@@ -139,17 +143,12 @@ export class AclManager {
     const buffer = Buffer.from(JSON.stringify(obj))
     return this.storeManager.setResourceData(containerAclUrl, bufferToStream(buffer))
   }
-}
 
-// export class AclBasedAuthorizer implements IAuthorizer {
-//   resourceStore: IResourceStore
-//   constructor (resourceStore: IResourceStore) {
-//     this.resourceStore = resourceStore
-//   }
-//   async ensurePermissions (agent: ICredentials,
-//     target: IResourceIdentifier,
-//     requiredPermissions: PermissionSet
-//   ): Promise<boolean> {
-//     return false
-//   }
-// }
+  async ensurePermissions (agent: ICredentials,
+    target: IResourceIdentifier,
+    requiredPermissions: PermissionSet
+  ): Promise<boolean> {
+    // TODO: implement!!
+    return false
+  }
+}

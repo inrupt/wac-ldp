@@ -44,7 +44,7 @@ class Server {
     const serverRootDomain: string = new URL(aud).host
     this.highLevelResourceStore = new StoreManager(serverRootDomain, midLevelResourceStore)
     this.operationFactory = new DefaultOperationFactory(this.highLevelResourceStore)
-    this.authorizer = new AclBasedAuthorizer(this.highLevelResourceStore)
+    this.authorizer = new AclBasedAuthorizer(this.highLevelResourceStore as StoreManager)
 
     this.wacLdp = new WacLdp(this.operationFactory, this.authorizer, {
       storage: midLevelResourceStore,
