@@ -6,11 +6,16 @@ import { bufferToStream, streamToBuffer } from '../../../src/lib/rdf/ResourceDat
 import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import Conditions from 'solid-server-ts/src/ldp/Conditions'
 import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import rimraf = require('rimraf')
 
 const stores = {
   'in-mem': new BlobTreeInMem(),
-  // 'nss-compat': new BlobTreeNssCompat('./tmp-data/')
+  'nss-compat': new BlobTreeNssCompat('./tmp-data/')
 }
+
+afterAll((done) => {
+  rimraf('./tmp-data', done)
+})
 
 for (let [storeName, store] of Object.entries(stores)) {
   describe(storeName, () => {

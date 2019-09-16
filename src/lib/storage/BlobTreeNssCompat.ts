@@ -3,12 +3,20 @@ import Debug from 'debug'
 import { Node } from './Node'
 import { Container, Member } from './Container'
 import { Blob } from './Blob'
-import { BlobTree, Path } from './BlobTree'
-import { bufferToStream, streamToBuffer, streamToObject, ResourceData, objectToStream, RdfType } from '../rdf/ResourceDataUtils'
+import { BlobTree, Path, urlToPath } from './BlobTree'
+import { bufferToStream, streamToBuffer, streamToObject, ResourceData, objectToStream, RdfType, makeResourceData } from '../rdf/ResourceDataUtils'
 import { promises as fsPromises, Dirent } from 'fs'
 import { join as pathJoin } from 'path'
 import * as mime from 'mime-types'
 import glob from 'glob'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import Conditions from 'solid-server-ts/src/ldp/Conditions'
+import IRepresentationMetadata from 'solid-server-ts/src/ldp/IRepresentationMetadata'
+import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
+import uuid from 'uuid'
+import IPatch from 'solid-server-ts/src/ldp/IPatch'
+import applyPatch from '../rdf/applyPatch'
 
 const debug = Debug('AtomicTreeInMem')
 
@@ -144,4 +152,59 @@ export class BlobTreeNssCompat extends events.EventEmitter {
   getBlob (path: Path) {
     return new BlobNssCompat(path, this)
   }
+
+  async getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
+    const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
+    const resourceData = await streamToObject(await blob.getData())
+    // console.log('get', resourceData)
+    const metadata: IRepresentationMetadata = {
+      raw: [],
+      contentType: resourceData.contentType,
+      profiles: []
+    } as IRepresentationMetadata
+    return {
+      // identifier: resourceIdentifier,
+      metadata,
+      data: await bufferToStream(Buffer.from(resourceData.body)),
+      dataType: 'default'
+    } as IRepresentation
+  }
+  async addResource (container: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
+    const childPath = container.path + uuid()
+    const childUrl = new URL(childPath, container.domain)
+    const blob = this.getBlob(urlToPath(childUrl))
+    await blob.setData(await objectToStream({
+      contentType: representation.metadata.contentType,
+      body: await streamToBuffer(representation.data),
+      etag: 'hm'
+    }))
+    return {
+      domain: container.domain,
+      isAcl: false,
+      path: childPath
+    } as IResourceIdentifier
+
+  }
+  async setRepresentation (resourceIdentifier: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
+    const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
+    const resourceData = makeResourceData(representation.metadata.contentType || 'application/octet-stream', (await streamToBuffer(representation.data)).toString())
+    // console.log('set', resourceData)
+    return blob.setData(await objectToStream(resourceData))
+  }
+  async deleteResource (resourceIdentifier: IResourceIdentifier, conditions: Conditions) {
+    if (resourceIdentifier.path.substr(-1) === '/') {
+      const container = this.getContainer(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
+      return container.delete()
+    } else {
+      const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
+      return blob.delete()
+    }
+  }
+  async modifyResource (resourceIdentifier: IResourceIdentifier, patch: IPatch, conditions: Conditions) {
+    const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
+    const resourceData = await streamToObject(await blob.getData())
+    const newResourceData = applyPatch(patch, resourceData)
+    return blob.setData(await objectToStream(newResourceData))
+  }
+
 }

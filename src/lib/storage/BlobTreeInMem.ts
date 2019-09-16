@@ -117,7 +117,7 @@ export class BlobTreeInMem extends events.EventEmitter {
   async getRepresentation (resourceIdentifier: IResourceIdentifier, representationPreferences: IRepresentationPreferences, conditions: Conditions) {
     const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
     const resourceData = await streamToObject(await blob.getData())
-    console.log('get', resourceData)
+    // console.klog('get', resourceData)
     const metadata: IRepresentationMetadata = {
       raw: [],
       contentType: resourceData.contentType,
@@ -149,7 +149,7 @@ export class BlobTreeInMem extends events.EventEmitter {
   async setRepresentation (resourceIdentifier: IResourceIdentifier, representation: IRepresentation, conditions: Conditions) {
     const blob = this.getBlob(urlToPath(new URL(resourceIdentifier.path, resourceIdentifier.domain)))
     const resourceData = makeResourceData(representation.metadata.contentType || 'application/octet-stream', (await streamToBuffer(representation.data)).toString())
-    console.log('set', resourceData)
+    // console.log('set', resourceData)
     return blob.setData(await objectToStream(resourceData))
   }
   async deleteResource (resourceIdentifier: IResourceIdentifier, conditions: Conditions) {
