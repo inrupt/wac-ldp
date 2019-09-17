@@ -12,15 +12,20 @@ import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationP
 import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
 import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('glob-read-handler')
 
 export class GlobReadHandler implements IOperation {
   preferences: IRepresentationPreferences
   target: IResourceIdentifier
-  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager) {
+  resourceStore: IResourceStore
+  operationOptions: any
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager, operationOptions: any) {
     this.preferences = representationPreferences
     this.target = target
+    this.resourceStore = resourceStore
+    this.operationOptions = operationOptions
   }
   canHandle = () => {
     return ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.globRead)

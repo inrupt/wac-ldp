@@ -26,18 +26,18 @@ export class DefaultOperationFactory implements IOperationFactory {
   constructor (resourceStore: IResourceStore) {
     this.resourceStore = resourceStore
   }
-  createOperation (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences): IOperation {
+  createOperation (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, operationOptions: any): IOperation {
     const operationHandlers = [
-      new OptionsHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new GlobReadHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new ContainerMemberAddHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new ReadContainerHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new DeleteContainerHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new ReadBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new WriteBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new UpdateBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new DeleteBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager),
-      new UnknownOperationCatchAll(method, target, representationPreferences, this.resourceStore as StoreManager)
+      new OptionsHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new GlobReadHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new ContainerMemberAddHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new ReadContainerHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new DeleteContainerHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new ReadBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new WriteBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new UpdateBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new DeleteBlobHandler(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions),
+      new UnknownOperationCatchAll(method, target, representationPreferences, this.resourceStore as StoreManager, operationOptions)
     ]
     for (let i = 0; i < operationHandlers.length; i++) {
       if (operationHandlers[i].canHandle()) {
@@ -45,23 +45,5 @@ export class DefaultOperationFactory implements IOperationFactory {
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)
-  }
-
-  async handleOperation (task: WacLdpTask, skipWac: boolean, aud: string): Promise<WacLdpResponse> {
-    const handler = this.createOperation(task.method, task.target, task)
-    let appendOnly = false
-    if (!skipWac) {
-      appendOnly = await checkAccess({
-        url: task.fullUrl(),
-        isContainer: task.isContainer(),
-        webId: await task.webId(),
-        origin: await task.origin(),
-        requiredPermissions: [], // FIXME: permissionSetToUrlArray(handler.requiredPermissions),
-        storeManager: this.resourceStore as StoreManager
-      } as AccessCheckTask) // may throw if access is denied
-    }
-    // debug('calling operation handler', i, task, this.aud, skipWac, appendOnly)
-    const responseDescription = await handler.execute()
-    return responseDescription as WacLdpResponse
   }
 }

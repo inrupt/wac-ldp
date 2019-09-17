@@ -83,6 +83,35 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
     return this.handle(httpReq, httpRes)
   }
 
+  async handleOperation (task: WacLdpTask, skipWac: boolean, aud: string): Promise<WacLdpResponse> {
+    let handler = (this.operationFactory as DefaultOperationFactory).createOperation(task.method, task.target, task, {
+      aud: this.aud,
+      appendOnly: false,
+      skipWac: this.skipWac
+    })
+    let appendOnly = false
+    if (!skipWac) {
+      appendOnly = await checkAccess({
+        url: task.fullUrl(),
+        isContainer: task.isContainer(),
+        webId: await task.webId(),
+        origin: await task.origin(),
+        requiredPermissions: [], // FIXME: permissionSetToUrlArray(handler.requiredPermissions),
+        storeManager: this.storeManager
+      } as AccessCheckTask) // may throw if access is denied
+    }
+    if (appendOnly) {
+      handler = (this.operationFactory as DefaultOperationFactory).createOperation(task.method, task.target, task, {
+        aud: this.aud,
+        appendOnly: true,
+        skipWac: this.skipWac
+      })
+    }
+    // debug('calling operation handler', i, task, this.aud, skipWac, appendOnly)
+    const responseDescription = await handler.execute()
+    return responseDescription as WacLdpResponse
+  }
+
   async handle (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
     debug(`\n\n`, httpReq.method, httpReq.url, httpReq.headers)
 
@@ -95,7 +124,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
       storageOrigin = wacLdpTask.storageOrigin()
       requestOrigin = await wacLdpTask.origin()
       bearerToken = wacLdpTask.bearerToken()
-      response = await (this.operationFactory as DefaultOperationFactory).handleOperation(wacLdpTask, this.skipWac, this.aud)
+      response = await this.handleOperation(wacLdpTask, this.skipWac, this.aud)
       debug('resourcesChanged', response.resourceData)
       if (response.resourcesChanged) {
         response.resourcesChanged.forEach((url: URL) => {

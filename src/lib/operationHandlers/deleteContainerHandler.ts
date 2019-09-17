@@ -15,19 +15,25 @@ import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationP
 import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
 import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('delete-container-handler')
 
 export class DeleteContainerHandler implements IOperation {
   preferences: IRepresentationPreferences
   target: IResourceIdentifier
+  resourceStore: IResourceStore
+  operationOptions: any
   async execute (): Promise<ResponseDescription> {
-    return {}
+    return this.handle(this.preferences as WacLdpTask, this.resourceStore as StoreManager,
+      this.operationOptions.aud, this.operationOptions.skipWac, this.operationOptions.appendOnly)
   }
 
-  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager) {
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager, operationOptions: any) {
     this.preferences = representationPreferences
     this.target = target
+    this.resourceStore = resourceStore
+    this.operationOptions = operationOptions
   }
   canHandle = () => ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.containerDelete)
   requiredPermissions = new PermissionSet({ write: true })
