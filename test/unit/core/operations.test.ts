@@ -31,7 +31,7 @@ test('delete blob', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await (new DeleteBlobHandler()).handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new DeleteBlobHandler('', {} as IResourceIdentifier, {}, {} as WacLdpTask, {})).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])

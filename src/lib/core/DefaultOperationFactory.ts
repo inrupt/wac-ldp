@@ -16,46 +16,51 @@ import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpRespond
 import { checkAccess, AccessCheckTask } from '../authorization/checkAccess'
 import debug from 'debug'
 import OperationHandler from '../operationHandlers/OperationHandler'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 
 export class DefaultOperationFactory implements IOperationFactory {
   resourceStore: IResourceStore
-  operationHandlers: Array<OperationHandler>
-
   constructor (resourceStore: IResourceStore) {
     this.resourceStore = resourceStore
-
-    this.operationHandlers = [
-      new OptionsHandler(),
-      new GlobReadHandler(),
-      new ContainerMemberAddHandler(),
-      new ReadContainerHandler(),
-      new DeleteContainerHandler(),
-      new ReadBlobHandler(),
-      new WriteBlobHandler(),
-      new UpdateBlobHandler(),
-      new DeleteBlobHandler(),
-      new UnknownOperationCatchAll()
-    ]
   }
-
-  async handleOperation (task: WacLdpTask, skipWac: boolean, aud: string): Promise<WacLdpResponse> {
-    for (let i = 0; i < this.operationHandlers.length; i++) {
-      if (this.operationHandlers[i].canHandle(task)) {
-        let appendOnly = false
-        if (!skipWac) {
-          appendOnly = await checkAccess({
-            url: task.fullUrl(),
-            isContainer: task.isContainer(),
-            webId: await task.webId(),
-            origin: await task.origin(),
-            requiredPermissions: this.operationHandlers[i].requiredPermissions,
-            storeManager: this.resourceStore as StoreManager
-          } as AccessCheckTask) // may throw if access is denied
-        }
-        // debug('calling operation handler', i, task, this.aud, skipWac, appendOnly)
-        return this.operationHandlers[i].handle(task, this.resourceStore as StoreManager, aud, skipWac, appendOnly)
+  createOperation (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences): IOperation {
+    const operationHandlers = [
+      new OptionsHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new GlobReadHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new ContainerMemberAddHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new ReadContainerHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new DeleteContainerHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new ReadBlobHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new WriteBlobHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new UpdateBlobHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new DeleteBlobHandler(method, target, representationPreferences, task, this.resourceStore as StoreManager),
+      new UnknownOperationCatchAll(method, target, representationPreferences, task, this.resourceStore as StoreManager)
+    ]
+    for (let i = 0; i < operationHandlers.length; i++) {
+      if (operationHandlers[i].canHandle()) {
+        return operationHandlers[i]
       }
     }
     throw new ErrorResult(ResultType.InternalServerError)
+  }
+
+  async handleOperation (task: WacLdpTask, skipWac: boolean, aud: string): Promise<WacLdpResponse> {
+    const handler = this.createOperation(task.method, task.target, task.representationPreferences)
+    let appendOnly = false
+    if (!skipWac) {
+      appendOnly = await checkAccess({
+        url: task.fullUrl(),
+        isContainer: task.isContainer(),
+        webId: await task.webId(),
+        origin: await task.origin(),
+        requiredPermissions: [], // FIXME: permissionSetToUrlArray(handler.requiredPermissions),
+        storeManager: this.resourceStore as StoreManager
+      } as AccessCheckTask) // may throw if access is denied
+    }
+    // debug('calling operation handler', i, task, this.aud, skipWac, appendOnly)
+    return handler.execute(aud, skipWac, appendOnly)
   }
 }

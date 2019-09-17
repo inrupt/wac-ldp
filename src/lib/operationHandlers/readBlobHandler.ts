@@ -14,6 +14,8 @@ import { Store } from 'n3'
 
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
 
 const debug = Debug('read-blob-handler')
 
@@ -63,6 +65,7 @@ async function applyQuery (dataset: any, sparqlQuery: string): Promise<string> {
 }
 
 export class ReadBlobHandler {
+  constructor(method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {}
   canHandle = (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead)
   requiredPermissions = [ ACL.Read ]
   handle = async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {

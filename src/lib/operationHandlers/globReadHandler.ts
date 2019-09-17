@@ -7,10 +7,13 @@ import { AccessCheckTask, checkAccess } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
 import { ACL } from '../rdf/rdf-constants'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
 
 const debug = Debug('glob-read-handler')
 
 export class GlobReadHandler {
+  constructor(method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {}
   canHandle = (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
   }

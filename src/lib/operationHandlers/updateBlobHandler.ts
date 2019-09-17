@@ -9,10 +9,13 @@ import { makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
 
 const debug = Debug('update-blob-handler')
 
 export class UpdateBlobHandler {
+  constructor(method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {}
   canHandle = (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate)
   requiredPermissions = [ ACL.Read, ACL.Write ]
   handle = async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {

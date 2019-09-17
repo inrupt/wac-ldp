@@ -10,10 +10,13 @@ import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
 import OperationHandler from './OperationHandler'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
 
 const debug = Debug('delete-blob-handler')
 
 export class DeleteBlobHandler implements OperationHandler {
+  constructor(method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {}
   canHandle (wacLdpTask: WacLdpTask) {
     return (wacLdpTask.wacLdpTaskType() === TaskType.blobDelete)
   }

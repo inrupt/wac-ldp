@@ -10,6 +10,8 @@ import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { WriteBlobHandler } from './WriteBlobHandler'
 import { ACL } from '../rdf/rdf-constants'
 import OperationHandler from './OperationHandler'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
 
 const debug = Debug('container-member-add-handler')
 
@@ -18,7 +20,7 @@ export class ContainerMemberAddHandler implements OperationHandler {
     return (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd)
   }
   requiredPermissions: Array < URL >
-  constructor () {
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {
     this.requiredPermissions = [ ACL.Append ]
   }
   async handle (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {

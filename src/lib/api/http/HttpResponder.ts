@@ -96,7 +96,7 @@ const responses: Responses = {
   }
 } as unknown as Responses
 
-export async function sendHttpResponse (task: WacLdpResponse, options: { updatesVia: URL, storageOrigin: string | undefined, idpHost: string, originToAllow: string }, httpRes: http.ServerResponse) {
+export async function sendHttpResponse (task: WacLdpTask, options: { updatesVia: URL, storageOrigin: string | undefined, idpHost: string, originToAllow: string }, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!', task)
 
   debug(responses[task.resultType])
