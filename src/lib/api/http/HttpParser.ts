@@ -30,6 +30,7 @@ function determineOriginFromHeaders (headers: http.IncomingHttpHeaders): string 
 }
 
 export class WacLdpTask {
+  method: string
   cache: {
     bearerToken?: { value: string | undefined },
     isContainer?: { value: boolean },
@@ -54,6 +55,7 @@ export class WacLdpTask {
 
   httpReq: http.IncomingMessage
   constructor (defaultHost: string, httpReq: http.IncomingMessage, usesHttps: boolean) {
+    this.method = httpReq.method || 'UNDEFINED'
     this.defaultHost = defaultHost
     this.httpReq = httpReq
     this.cache = {}
