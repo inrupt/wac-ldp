@@ -28,11 +28,13 @@ export class GlobReadHandler implements IOperation {
     this.operationOptions = operationOptions
   }
   canHandle = () => {
+    debug('canHandle called for glob read handler', (this.preferences as WacLdpTask).wacLdpTaskType(), TaskType)
     return ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.globRead)
   }
   requiredPermissions = PermissionSet.READ_ONLY
   async execute (): Promise<ResponseDescription> {
-    return {}
+    return this.handle(this.preferences as WacLdpTask, this.resourceStore as StoreManager,
+      this.operationOptions.aud, this.operationOptions.skipWac, this.operationOptions.appendOnly)
   }
   handle = async function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // At this point will have checked read access over the
@@ -75,11 +77,13 @@ export class GlobReadHandler implements IOperation {
       }
     }))
 
-    return {
+    const ret: WacLdpResponse = {
       resultType: (wacLdpTask.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
       resourceData: await mergeRdfSources(rdfSources, wacLdpTask.rdfType()),
       createdLocation: undefined,
       isContainer: true
-    } as WacLdpResponse
+    }
+    debug('glob-read returns', ret)
+    return ret
   }
 }

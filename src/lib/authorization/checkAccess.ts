@@ -82,7 +82,7 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
   }
 
   debug('AccessCheckTask', task.url.toString(), task.webId ? task.webId.toString() : undefined, task.origin)
-  debug(permissionSetUrlArr.map(url => url.toString()))
+  debug(permissionSetUrlArr.map(url => url.toString()), task.requiredPermissions)
   let baseResourceUrl: URL
   let resourceIsAclDocument
   if (urlHasSuffix(task.url, ACL_SUFFIX)) {
