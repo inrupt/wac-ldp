@@ -9,13 +9,16 @@ import { streamToObject, makeResourceData, objectToStream, ResourceData } from '
 import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
+import OperationHandler from './OperationHandler'
 
 const debug = Debug('delete-blob-handler')
 
-export const deleteBlobHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobDelete),
-  requiredPermissions: [ ACL.Write ],
-  handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class DeleteBlobHandler implements OperationHandler {
+  canHandle (wacLdpTask: WacLdpTask) {
+    return (wacLdpTask.wacLdpTaskType() === TaskType.blobDelete)
+  }
+  requiredPermissions = [ ACL.Write ]
+  async handle (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceDataBefore = await getResourceDataAndCheckETag(task, storeManager)
     debug('operation deleteBlob!')
     const blob = storeManager.getLocalBlob(task.fullUrl())

@@ -8,7 +8,7 @@ import { deleteContainerHandler } from '../operationHandlers/deleteContainerHand
 import { readBlobHandler } from '../operationHandlers/readBlobHandler'
 import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
 import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
-import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
+import { DeleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
 import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { StoreManager } from '../rdf/StoreManager'
@@ -33,7 +33,7 @@ export class DefaultOperationFactory implements IOperationFactory {
       readBlobHandler,
       writeBlobHandler,
       updateBlobHandler,
-      deleteBlobHandler,
+      new DeleteBlobHandler(),
       unknownOperationCatchAll
     ]
   }

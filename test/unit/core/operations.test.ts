@@ -10,7 +10,7 @@ import { StoreManager } from '../../../src/lib/rdf/StoreManager'
 import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
 import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler'
 import { readBlobHandler } from '../../../src/lib/operationHandlers/readBlobHandler'
-import { deleteBlobHandler } from '../../../src/lib/operationHandlers/deleteBlobHandler'
+import { DeleteBlobHandler } from '../../../src/lib/operationHandlers/deleteBlobHandler'
 
 test('delete blob', async () => {
   const node: Blob = {
@@ -31,7 +31,7 @@ test('delete blob', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await deleteBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new DeleteBlobHandler()).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
