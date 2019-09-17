@@ -9,13 +9,19 @@ import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { writeBlobHandler } from './writeBlobHandler'
 import { ACL } from '../rdf/rdf-constants'
+import OperationHandler from './OperationHandler'
 
 const debug = Debug('container-member-add-handler')
 
-export const containerMemberAddHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
-  requiredPermissions: [ ACL.Append ],
-  handle: async function executeTask (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class ContainerMemberAddHandler implements OperationHandler {
+  canHandle (wacLdpTask: WacLdpTask) {
+    return (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd)
+  }
+  requiredPermissions: Array < URL >
+  constructor () {
+    this.requiredPermissions = [ ACL.Append ]
+  }
+  async handle (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
     // but notice that access check for this is append on the container,
     // write access on the Blob is not required!

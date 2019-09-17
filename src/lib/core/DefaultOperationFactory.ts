@@ -2,7 +2,7 @@ import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFact
 import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { globReadHandler } from '../operationHandlers/globReadHandler'
-import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
+import { ContainerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
 import { readContainerHandler } from '../operationHandlers/readContainerHandler'
 import { deleteContainerHandler } from '../operationHandlers/deleteContainerHandler'
 import { readBlobHandler } from '../operationHandlers/readBlobHandler'
@@ -15,12 +15,7 @@ import { StoreManager } from '../rdf/StoreManager'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { checkAccess, AccessCheckTask } from '../authorization/checkAccess'
 import debug from 'debug'
-
-interface OperationHandler {
-  canHandle: (wacLdpTask: WacLdpTask) => boolean
-  requiredPermissions: Array<URL>
-  handle: (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
-}
+import OperationHandler from '../operationHandlers/OperationHandler'
 
 export class DefaultOperationFactory implements IOperationFactory {
   resourceStore: IResourceStore
@@ -32,7 +27,7 @@ export class DefaultOperationFactory implements IOperationFactory {
     this.operationHandlers = [
       optionsHandler,
       globReadHandler,
-      containerMemberAddHandler,
+      new ContainerMemberAddHandler(),
       readContainerHandler,
       deleteContainerHandler,
       readBlobHandler,
