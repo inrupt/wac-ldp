@@ -8,7 +8,7 @@ const debug = Debug('unknown-operation-catch-all')
 
 export const unknownOperationCatchAll = {
   canHandle: (wacLdpTask: WacLdpTask) => true,
-  requiredAccessModes: [],
+  requiredPermissions: [],
   handle: function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     debug('operation unknownOperation!')
     throw new ErrorResult(ResultType.MethodNotAllowed)

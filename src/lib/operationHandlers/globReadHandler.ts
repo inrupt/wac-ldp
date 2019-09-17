@@ -14,7 +14,7 @@ export const globReadHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
   },
-  requiredAccessModes: [ ACL.Read ],
+  requiredPermissions: [ ACL.Read ],
   handle: async function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // At this point will have checked read access over the
     // container, but need to collect all RDF sources, filter on access, and then
@@ -41,7 +41,7 @@ export const globReadHandler = {
             isContainer: false,
             webId,
             origin: await wacLdpTask.origin(),
-            requiredAccessModes: [ ACL.Read ],
+            requiredPermissions: [ ACL.Read ],
             storeManager
           } as AccessCheckTask) // may throw if access is denied
         }

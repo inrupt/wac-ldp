@@ -64,7 +64,7 @@ async function applyQuery (dataset: any, sparqlQuery: string): Promise<string> {
 
 export const readBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead),
-  requiredAccessModes: [ ACL.Read ],
+  requiredPermissions: [ ACL.Read ],
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, storeManager)
     debug('operation readBlob!', task.rdfType())

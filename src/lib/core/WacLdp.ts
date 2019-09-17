@@ -146,7 +146,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
       url,
       webId,
       origin,
-      requiredAccessModes: [ mode ],
+      requiredPermissions: [ mode ],
       storeManager: 'this.storeManager'
     })
     try {
@@ -154,7 +154,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
         url,
         webId,
         origin,
-        requiredAccessModes: [ mode ],
+        requiredPermissions: [ mode ],
         storeManager: this.storeManager
       })
       debug({ appendOnly })

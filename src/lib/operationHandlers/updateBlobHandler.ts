@@ -14,7 +14,7 @@ const debug = Debug('update-blob-handler')
 
 export const updateBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate),
-  requiredAccessModes: [ ACL.Read, ACL.Write ],
+  requiredPermissions: [ ACL.Read, ACL.Write ],
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, storeManager)
     if (!resourceData) {

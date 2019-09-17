@@ -18,7 +18,7 @@ import debug from 'debug'
 
 interface OperationHandler {
   canHandle: (wacLdpTask: WacLdpTask) => boolean
-  requiredAccessModes: Array<URL>
+  requiredPermissions: Array<URL>
   handle: (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
 }
 
@@ -53,7 +53,7 @@ export class DefaultOperationFactory implements IOperationFactory {
             isContainer: task.isContainer(),
             webId: await task.webId(),
             origin: await task.origin(),
-            requiredAccessModes: this.operationHandlers[i].requiredAccessModes,
+            requiredPermissions: this.operationHandlers[i].requiredPermissions,
             storeManager: this.resourceStore as StoreManager
           } as AccessCheckTask) // may throw if access is denied
         }

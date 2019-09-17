@@ -10,7 +10,7 @@ export const optionsHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.getOptions)
   },
-  requiredAccessModes: [],
+  requiredPermissions: [],
   handle: function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     return Promise.resolve({
       resultType: ResultType.OkayWithoutBody,

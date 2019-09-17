@@ -39,7 +39,7 @@ export interface AccessCheckTask {
   url: URL
   webId: URL | undefined
   origin: string
-  requiredAccessModes: Array<URL>
+  requiredPermissions: Array<URL>
   storeManager: StoreManager
 }
 
@@ -64,7 +64,7 @@ function urlEquals (one: URL, two: URL) {
 }
 export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
   debug('AccessCheckTask', task.url.toString(), task.webId ? task.webId.toString() : undefined, task.origin)
-  debug(task.requiredAccessModes.map(url => url.toString()))
+  debug(task.requiredPermissions.map(url => url.toString()))
   let baseResourceUrl: URL
   let resourceIsAclDocument
   if (urlHasSuffix(task.url, ACL_SUFFIX)) {
@@ -87,16 +87,16 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
     contextUrl
   } as ModesCheckTask)
   debug('allowedAgentsForModes')
-  let requiredAccessModes
+  let requiredPermissions
   if (resourceIsAclDocument) {
-    requiredAccessModes = [ ACL.Control ]
+    requiredPermissions = [ ACL.Control ]
   } else {
-    requiredAccessModes = task.requiredAccessModes
+    requiredPermissions = task.requiredPermissions
   }
   let appendOnly = false
 
   // throw if agent or origin does not have access
-  await Promise.all(requiredAccessModes.map(async (mode: URL) => {
+  await Promise.all(requiredPermissions.map(async (mode: URL) => {
     debug('required mode', mode.toString())
     if (await modeAllowed(mode, allowedAgentsForModes, task.webId, task.origin, task.storeManager)) {
       debug(mode, 'is allowed!')

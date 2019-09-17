@@ -15,7 +15,7 @@ const debug = Debug('read-container-handler')
 
 export const readContainerHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
-  requiredAccessModes: [ ACL.Read ],
+  requiredPermissions: [ ACL.Read ],
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     let container: any
     container = storeManager.getLocalContainer(task.fullUrl())

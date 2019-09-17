@@ -14,7 +14,7 @@ const debug = Debug('delete-blob-handler')
 
 export const deleteBlobHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobDelete),
-  requiredAccessModes: [ ACL.Write ],
+  requiredPermissions: [ ACL.Write ],
   handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceDataBefore = await getResourceDataAndCheckETag(task, storeManager)
     debug('operation deleteBlob!')

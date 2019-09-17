@@ -14,7 +14,7 @@ const debug = Debug('container-member-add-handler')
 
 export const containerMemberAddHandler = {
   canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
-  requiredAccessModes: [ ACL.Append ],
+  requiredPermissions: [ ACL.Append ],
   handle: async function executeTask (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
     // but notice that access check for this is append on the container,
