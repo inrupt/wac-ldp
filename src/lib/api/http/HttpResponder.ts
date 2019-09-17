@@ -2,6 +2,7 @@ import * as http from 'http'
 import Debug from 'debug'
 import { ResourceData } from '../../rdf/ResourceDataUtils'
 import { LDP } from '../../rdf/rdf-constants'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
 const Link = require('http-link-header')
 
 const debug = Debug('HttpResponder')
@@ -28,7 +29,7 @@ export class ErrorResult extends Error {
     this.resultType = resultType
   }
 }
-export interface WacLdpResponse {
+export interface WacLdpResponse extends ResponseDescription {
   resourcesChanged?: Array<URL>
   resultType: ResultType
   resourceData?: ResourceData
@@ -96,7 +97,7 @@ const responses: Responses = {
   }
 } as unknown as Responses
 
-export async function sendHttpResponse (task: WacLdpTask, options: { updatesVia: URL, storageOrigin: string | undefined, idpHost: string, originToAllow: string }, httpRes: http.ServerResponse) {
+export async function sendHttpResponse (task: WacLdpResponse, options: { updatesVia: URL, storageOrigin: string | undefined, idpHost: string, originToAllow: string }, httpRes: http.ServerResponse) {
   debug('sendHttpResponse!', task)
 
   debug(responses[task.resultType])

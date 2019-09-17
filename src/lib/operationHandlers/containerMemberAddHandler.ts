@@ -12,16 +12,30 @@ import { ACL } from '../rdf/rdf-constants'
 import OperationHandler from './OperationHandler'
 import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
 
 const debug = Debug('container-member-add-handler')
 
-export class ContainerMemberAddHandler implements OperationHandler {
-  canHandle (wacLdpTask: WacLdpTask) {
-    return (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd)
+export class ContainerMemberAddHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  method: string
+  resourceStore: StoreManager
+  async execute (): Promise<ResponseDescription> {
+    return {}
   }
-  requiredPermissions: Array < URL >
-  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {
-    this.requiredPermissions = [ ACL.Append ]
+  canHandle () {
+    return ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.containerMemberAdd)
+  }
+  requiredPermissions: PermissionSet
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager) {
+    this.preferences = representationPreferences
+    this.requiredPermissions = new PermissionSet({ append: true })
+    this.target = target
+    this.method = method
+    this.resourceStore = resourceStore
   }
   async handle (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
@@ -30,6 +44,6 @@ export class ContainerMemberAddHandler implements OperationHandler {
     // See https://github.com/solid/web-access-control-spec#aclappend
 
     wacLdpTask.convertToBlobWrite(wacLdpTask.childNameToCreate())
-    return (new WriteBlobHandler()).handle(wacLdpTask, storeManager, aud, skipWac, appendOnly)
+    return (new WriteBlobHandler(this.method, this.target, this.preferences, this.resourceStore)).handle(wacLdpTask, storeManager, aud, skipWac, appendOnly)
   }
 }

@@ -12,13 +12,25 @@ import { membersListAsResourceData } from '../storage/membersListAsResourceData'
 import { ACL } from '../rdf/rdf-constants'
 import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
 
 const debug = Debug('delete-container-handler')
 
-export class DeleteContainerHandler {
-  constructor(method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {}
-  canHandle = (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerDelete)
-  requiredPermissions = [ ACL.Write ]
+export class DeleteContainerHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  async execute (): Promise<ResponseDescription> {
+    return {}
+  }
+
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager) {
+    this.preferences = representationPreferences
+    this.target = target
+  }
+  canHandle = () => ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.containerDelete)
+  requiredPermissions = new PermissionSet({ write: true })
   async handle (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     let container: any
     container = storeManager.getLocalContainer(task.fullUrl())

@@ -16,6 +16,9 @@ import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
 import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
 
 const debug = Debug('read-blob-handler')
 
@@ -64,10 +67,18 @@ async function applyQuery (dataset: any, sparqlQuery: string): Promise<string> {
   })
 }
 
-export class ReadBlobHandler {
-  constructor(method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {}
-  canHandle = (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead)
-  requiredPermissions = [ ACL.Read ]
+export class ReadBlobHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  async execute (): Promise<ResponseDescription> {
+    return {}
+  }
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager) {
+    this.preferences = representationPreferences
+    this.target = target
+  }
+  canHandle = () => ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.blobRead)
+  requiredPermissions = new PermissionSet({ read: true })
   handle = async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, storeManager)
     debug('operation readBlob!', task.rdfType())

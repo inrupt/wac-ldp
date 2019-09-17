@@ -11,13 +11,24 @@ import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
 import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
 import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 
 const debug = Debug('update-blob-handler')
 
-export class UpdateBlobHandler {
-  constructor(method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, task: WacLdpTask, resourceStore: StoreManager) {}
-  canHandle = (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobUpdate)
-  requiredPermissions = [ ACL.Read, ACL.Write ]
+export class UpdateBlobHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  async execute (): Promise<ResponseDescription> {
+    return {}
+  }
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager) {
+    this.preferences = representationPreferences
+    this.target = target
+  }
+  canHandle = () => ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.blobUpdate)
+  requiredPermissions = new PermissionSet({ read: true, write: true })
   handle = async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, storeManager)
     if (!resourceData) {
