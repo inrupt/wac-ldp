@@ -10,12 +10,12 @@ import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('glob-read-handler')
 
-export const globReadHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => {
+export class GlobReadHandler {
+  canHandle = (wacLdpTask: WacLdpTask) => {
     return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
-  },
-  requiredPermissions: [ ACL.Read ],
-  handle: async function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+  }
+  requiredPermissions = [ ACL.Read ]
+  handle = async function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // At this point will have checked read access over the
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.

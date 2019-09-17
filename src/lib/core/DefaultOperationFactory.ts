@@ -1,15 +1,15 @@
 import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
 import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
-import { optionsHandler } from '../operationHandlers/optionsHandler'
-import { globReadHandler } from '../operationHandlers/globReadHandler'
-import { ContainerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
-import { readContainerHandler } from '../operationHandlers/readContainerHandler'
-import { deleteContainerHandler } from '../operationHandlers/deleteContainerHandler'
-import { readBlobHandler } from '../operationHandlers/readBlobHandler'
-import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
-import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
-import { DeleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
-import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
+import { OptionsHandler } from '../operationHandlers/OptionsHandler'
+import { GlobReadHandler } from '../operationHandlers/GlobReadHandler'
+import { ContainerMemberAddHandler } from '../operationHandlers/ContainerMemberAddHandler'
+import { ReadContainerHandler } from '../operationHandlers/ReadContainerHandler'
+import { DeleteContainerHandler } from '../operationHandlers/DeleteContainerHandler'
+import { ReadBlobHandler } from '../operationHandlers/ReadBlobHandler'
+import { WriteBlobHandler } from '../operationHandlers/WriteBlobHandler'
+import { UpdateBlobHandler } from '../operationHandlers/UpdateBlobHandler'
+import { DeleteBlobHandler } from '../operationHandlers/DeleteBlobHandler'
+import { UnknownOperationCatchAll } from '../operationHandlers/UnknownOperationCatchAll'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { StoreManager } from '../rdf/StoreManager'
 import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
@@ -25,16 +25,16 @@ export class DefaultOperationFactory implements IOperationFactory {
     this.resourceStore = resourceStore
 
     this.operationHandlers = [
-      optionsHandler,
-      globReadHandler,
+      new OptionsHandler(),
+      new GlobReadHandler(),
       new ContainerMemberAddHandler(),
-      readContainerHandler,
-      deleteContainerHandler,
-      readBlobHandler,
-      writeBlobHandler,
-      updateBlobHandler,
+      new ReadContainerHandler(),
+      new DeleteContainerHandler(),
+      new ReadBlobHandler(),
+      new WriteBlobHandler(),
+      new UpdateBlobHandler(),
       new DeleteBlobHandler(),
-      unknownOperationCatchAll
+      new UnknownOperationCatchAll()
     ]
   }
 

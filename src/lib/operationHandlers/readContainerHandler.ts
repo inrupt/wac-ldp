@@ -13,10 +13,10 @@ import { ACL } from '../rdf/rdf-constants'
 
 const debug = Debug('read-container-handler')
 
-export const readContainerHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead),
-  requiredPermissions: [ ACL.Read ],
-  handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class ReadContainerHandler {
+  canHandle = (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerRead)
+  requiredPermissions = [ ACL.Read ]
+  handle = async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     let container: any
     container = storeManager.getLocalContainer(task.fullUrl())
 

@@ -5,12 +5,12 @@ import { WacLdpResponse, ResultType } from '../../../src/lib/api/http/HttpRespon
 import { toChunkStream } from '../helpers/toChunkStream'
 import { makeResourceData, RdfType } from '../../../src/lib/rdf/ResourceDataUtils'
 import { Container } from '../../../src/lib/storage/Container'
-import { readContainerHandler } from '../../../src/lib/operationHandlers/readContainerHandler'
+import { ReadContainerHandler } from '../../../src/lib/operationHandlers/ReadContainerHandler'
 import { StoreManager } from '../../../src/lib/rdf/StoreManager'
 import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
-import { deleteContainerHandler } from '../../../src/lib/operationHandlers/deleteContainerHandler'
-import { readBlobHandler } from '../../../src/lib/operationHandlers/readBlobHandler'
-import { DeleteBlobHandler } from '../../../src/lib/operationHandlers/deleteBlobHandler'
+import { DeleteContainerHandler } from '../../../src/lib/operationHandlers/DeleteContainerHandler'
+import { ReadBlobHandler } from '../../../src/lib/operationHandlers/ReadBlobHandler'
+import { DeleteBlobHandler } from '../../../src/lib/operationHandlers/DeleteBlobHandler'
 
 test('delete blob', async () => {
   const node: Blob = {
@@ -93,7 +93,7 @@ test('delete container', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await deleteContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new DeleteContainerHandler()).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -118,7 +118,7 @@ test('read blob (omit body)', async () => {
     method: 'HEAD'
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new ReadBlobHandler()).handle(task, storeManager, 'https://example.com', false, false)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
     []
@@ -149,7 +149,7 @@ test('read blob (with body)', async () => {
     method: 'GET'
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new ReadBlobHandler()).handle(task, storeManager, 'https://example.com', false, false)
   // FIXME: Why does it call getData twice?
   expect((node as any).getData.mock.calls).toEqual([
     []
@@ -185,7 +185,7 @@ test('read blob (if-none-match 304)', async () => {
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   expect.assertions(2)
-  await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
+  await (new ReadBlobHandler()).handle(task, storeManager, 'https://example.com', false, false).catch(e => {
     expect(e.resultType).toEqual(ResultType.NotModified)
   })
 
@@ -215,7 +215,7 @@ test('write blob (if-none-match 412)', async () => {
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
   expect.assertions(2)
-  await readBlobHandler.handle(task, storeManager, 'https://example.com', false, false).catch(e => {
+  await (new ReadBlobHandler()).handle(task, storeManager, 'https://example.com', false, false).catch(e => {
     expect(e.resultType).toEqual(ResultType.PreconditionFailed)
   })
 
@@ -241,7 +241,7 @@ test('read container (omit body)', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await readContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new ReadContainerHandler()).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
@@ -278,7 +278,7 @@ test('read container (with body)', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await readContainerHandler.handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new ReadContainerHandler()).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])

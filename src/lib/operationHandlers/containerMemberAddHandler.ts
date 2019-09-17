@@ -7,7 +7,7 @@ import Debug from 'debug'
 import { streamToObject, makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
-import { writeBlobHandler } from './writeBlobHandler'
+import { WriteBlobHandler } from './WriteBlobHandler'
 import { ACL } from '../rdf/rdf-constants'
 import OperationHandler from './OperationHandler'
 
@@ -28,6 +28,6 @@ export class ContainerMemberAddHandler implements OperationHandler {
     // See https://github.com/solid/web-access-control-spec#aclappend
 
     wacLdpTask.convertToBlobWrite(wacLdpTask.childNameToCreate())
-    return writeBlobHandler.handle(wacLdpTask, storeManager, aud, skipWac, appendOnly)
+    return (new WriteBlobHandler()).handle(wacLdpTask, storeManager, aud, skipWac, appendOnly)
   }
 }

@@ -6,10 +6,10 @@ import { StoreManager } from '../rdf/StoreManager'
 
 const debug = Debug('unknown-operation-catch-all')
 
-export const unknownOperationCatchAll = {
-  canHandle: (wacLdpTask: WacLdpTask) => true,
-  requiredPermissions: [],
-  handle: function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class UnknownOperationCatchAll {
+  canHandle = (wacLdpTask: WacLdpTask) => true
+  requiredPermissions = []
+  handle = function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     debug('operation unknownOperation!')
     throw new ErrorResult(ResultType.MethodNotAllowed)
   }
