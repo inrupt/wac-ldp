@@ -15,6 +15,8 @@ import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
 import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
 import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
 import { DefaultOperationFactory } from './DefaultOperationFactory'
+import { ACL } from '../rdf/rdf-constants'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -96,7 +98,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
         isContainer: task.isContainer(),
         webId: await task.webId(),
         origin: await task.origin(),
-        requiredPermissions: [], // FIXME: permissionSetToUrlArray(handler.requiredPermissions),
+        requiredPermissions: handler.requiredPermissions,
         storeManager: this.storeManager
       } as AccessCheckTask) // may throw if access is denied
     }
@@ -161,11 +163,24 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
     return setAppModes(webId, origin, modes, this.storeManager.storage)
   }
   async hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean> {
+    let requiredPermissions: PermissionSet
+    if (url === ACL.Read) {
+      requiredPermissions = new PermissionSet({ read: true })
+    } else if (url === ACL.Append) {
+      requiredPermissions = new PermissionSet({ append: true })
+    } else if (url === ACL.Write) {
+      requiredPermissions = new PermissionSet({ write: true })
+    } else if (url === ACL.Control) {
+      requiredPermissions = new PermissionSet({ control: true })
+    } else {
+      debug('mode not recognized!')
+      return false
+    }
     debug('hasAccess calls checkAccess', {
       url,
       webId,
       origin,
-      requiredPermissions: [ mode ],
+      requiredPermissions,
       storeManager: 'this.storeManager'
     })
     try {
@@ -173,7 +188,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
         url,
         webId,
         origin,
-        requiredPermissions: [ mode ],
+        requiredPermissions,
         storeManager: this.storeManager
       })
       debug({ appendOnly })

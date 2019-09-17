@@ -60,7 +60,7 @@ export class GlobReadHandler implements IOperation {
             isContainer: false,
             webId,
             origin: await wacLdpTask.origin(),
-            requiredPermissions: [ ACL.Read ],
+            requiredPermissions: new PermissionSet({ read: true }),
             storeManager
           } as AccessCheckTask) // may throw if access is denied
         }

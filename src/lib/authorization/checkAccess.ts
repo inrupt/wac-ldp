@@ -7,6 +7,7 @@ import { TaskType } from '../api/http/HttpParser'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { StoreManager } from '../rdf/StoreManager'
 import { ACL_SUFFIX, AclManager } from './AclManager'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 
 const debug = Debug('checkAccess')
 
@@ -39,7 +40,7 @@ export interface AccessCheckTask {
   url: URL
   webId: URL | undefined
   origin: string
-  requiredPermissions: Array<URL>
+  requiredPermissions: PermissionSet
   storeManager: StoreManager
 }
 
@@ -63,8 +64,25 @@ function urlEquals (one: URL, two: URL) {
   return one.toString() === two.toString()
 }
 export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
+  const permissionSetUrlArr = []
+  if (task.requiredPermissions.read) {
+    permissionSetUrlArr.push(ACL.Read)
+  }
+  if (task.requiredPermissions.write) {
+    permissionSetUrlArr.push(ACL.Write)
+  }
+  if (task.requiredPermissions.append) {
+    permissionSetUrlArr.push(ACL.Append)
+  }
+  if (task.requiredPermissions.write) {
+    permissionSetUrlArr.push(ACL.Write)
+  }
+  if (task.requiredPermissions.control) {
+    permissionSetUrlArr.push(ACL.Control)
+  }
+
   debug('AccessCheckTask', task.url.toString(), task.webId ? task.webId.toString() : undefined, task.origin)
-  debug(task.requiredPermissions.map(url => url.toString()))
+  debug(permissionSetUrlArr.map(url => url.toString()))
   let baseResourceUrl: URL
   let resourceIsAclDocument
   if (urlHasSuffix(task.url, ACL_SUFFIX)) {
@@ -91,7 +109,7 @@ export async function checkAccess (task: AccessCheckTask): Promise<boolean> {
   if (resourceIsAclDocument) {
     requiredPermissions = [ ACL.Control ]
   } else {
-    requiredPermissions = task.requiredPermissions
+    requiredPermissions = permissionSetUrlArr
   }
   let appendOnly = false
 
