@@ -24,13 +24,14 @@ import { NssCompatResourceStore, DefaultOperationFactory, AclBasedAuthorizer } f
 import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
 import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
+import { StoreManager } from './lib/rdf/StoreManager'
 
 const debug = Debug('server')
 
 const dataDir = process.env.PORT || './data'
 
 class Server {
-  resourceStore: IResourceStore
+  highLevelResourceStore: IResourceStore
   operationFactory: IOperationFactory
   authorizer: IAuthorizer
   server: http.Server
@@ -38,12 +39,15 @@ class Server {
   wacLdp: WacLdp
   constructor (port: number, aud: string, skipWac: boolean) {
     this.port = port
-    this.resourceStore = new NssCompatResourceStore()
-    this.operationFactory = new DefaultOperationFactory(this.resourceStore)
-    this.authorizer = new AclBasedAuthorizer(this.resourceStore)
+    const lowLevelResourceStore = new NssCompatResourceStore(dataDir)
+    const midLevelResourceStore = new QuadAndBlobStore(lowLevelResourceStore) // singleton on-disk storage
+    const serverRootDomain: string = new URL(aud).host
+    this.highLevelResourceStore = new StoreManager(serverRootDomain, midLevelResourceStore)
+    this.operationFactory = new DefaultOperationFactory(this.highLevelResourceStore)
+    this.authorizer = new AclBasedAuthorizer(this.highLevelResourceStore as StoreManager)
 
     this.wacLdp = new WacLdp(this.operationFactory, this.authorizer, {
-      storage: new QuadAndBlobStore(new BlobTreeNssCompat(dataDir)), // singleton in-memory storage
+      storage: midLevelResourceStore,
       aud,
       updatesViaUrl: new URL('wss://localhost:8443'),
       skipWac,

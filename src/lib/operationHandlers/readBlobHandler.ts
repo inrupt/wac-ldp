@@ -14,6 +14,12 @@ import { Store } from 'n3'
 
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { ACL } from '../rdf/rdf-constants'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('read-blob-handler')
 
@@ -62,10 +68,24 @@ async function applyQuery (dataset: any, sparqlQuery: string): Promise<string> {
   })
 }
 
-export const readBlobHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobRead),
-  requiredAccessModes: [ ACL.Read ],
-  handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class ReadBlobHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  resourceStore: IResourceStore
+  operationOptions: any
+  async execute (): Promise<ResponseDescription> {
+    return this.handle(this.preferences as WacLdpTask, this.resourceStore as StoreManager,
+        this.operationOptions.aud, this.operationOptions.skipWac, this.operationOptions.appendOnly)
+  }
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager, operationOptions?: any) {
+    this.preferences = representationPreferences
+    this.target = target
+    this.resourceStore = resourceStore
+    this.operationOptions = operationOptions
+  }
+  canHandle = () => ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.blobRead)
+  requiredPermissions = new PermissionSet({ read: true })
+  handle = async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceData = await getResourceDataAndCheckETag(task, storeManager)
     debug('operation readBlob!', task.rdfType())
     let result = {

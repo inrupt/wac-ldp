@@ -5,6 +5,8 @@ import Debug from 'debug'
 import MIMEType from 'whatwg-mimetype'
 import { determineWebIdAndOrigin } from '../authentication/determineWebIdAndOrigin'
 import { RdfType, determineRdfType } from '../../rdf/ResourceDataUtils'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
 const debug = Debug('HttpParser')
 
 export enum TaskType {
@@ -29,7 +31,9 @@ function determineOriginFromHeaders (headers: http.IncomingHttpHeaders): string 
   }
 }
 
-export class WacLdpTask {
+export class WacLdpTask implements IRepresentationPreferences {
+  method: string
+  target: IResourceIdentifier
   cache: {
     bearerToken?: { value: string | undefined },
     isContainer?: { value: boolean },
@@ -54,6 +58,12 @@ export class WacLdpTask {
 
   httpReq: http.IncomingMessage
   constructor (defaultHost: string, httpReq: http.IncomingMessage, usesHttps: boolean) {
+    this.method = httpReq.method || 'UNDEFINED'
+    this.target = {
+      domain: '',
+      path: '',
+      isAcl: false
+    } as IResourceIdentifier
     this.defaultHost = defaultHost
     this.httpReq = httpReq
     this.cache = {}

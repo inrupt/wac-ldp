@@ -3,18 +3,8 @@ import Debug from 'debug'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
 import { WacLdpTask } from '../api/http/HttpParser'
 import { sendHttpResponse, WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpResponder'
-import { optionsHandler } from '../operationHandlers/optionsHandler'
 import { EventEmitter } from 'events'
 import { StoreManager } from '../rdf/StoreManager'
-import { globReadHandler } from '../operationHandlers/globReadHandler'
-import { containerMemberAddHandler } from '../operationHandlers/containerMemberAddHandler'
-import { readContainerHandler } from '../operationHandlers/readContainerHandler'
-import { deleteContainerHandler } from '../operationHandlers/deleteContainerHandler'
-import { readBlobHandler } from '../operationHandlers/readBlobHandler'
-import { writeBlobHandler } from '../operationHandlers/writeBlobHandler'
-import { updateBlobHandler } from '../operationHandlers/updateBlobHandler'
-import { deleteBlobHandler } from '../operationHandlers/deleteBlobHandler'
-import { unknownOperationCatchAll } from '../operationHandlers/unknownOperationCatchAll'
 import { checkAccess, AccessCheckTask } from '../authorization/checkAccess'
 import { getAppModes } from '../authorization/appIsTrustedForMode'
 import { setAppModes } from '../rdf/setAppModes'
@@ -24,6 +14,9 @@ import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
 import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
 import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
 import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
+import { DefaultOperationFactory } from './DefaultOperationFactory'
+import { ACL } from '../rdf/rdf-constants'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
@@ -36,11 +29,6 @@ function addBearerToken (baseUrl: URL, bearerToken: string | undefined): URL {
   }
   return ret
 }
-interface OperationHandler {
-  canHandle: (wacLdpTask: WacLdpTask) => boolean
-  requiredAccessModes: Array<URL>
-  handle: (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean) => Promise<WacLdpResponse>
-}
 
 export interface WacLdpOptions {
   storage: QuadAndBlobStore
@@ -52,16 +40,19 @@ export interface WacLdpOptions {
 }
 
 export class WacLdp extends EventEmitter implements IHttpHandler {
+  operationFactory: IOperationFactory
+  authorizer: IAuthorizer
   aud: string
   storeManager: StoreManager
   aclManager: AclManager
   updatesViaUrl: URL
   skipWac: boolean
-  operationHandlers: Array<OperationHandler>
   idpHost: string
   usesHttps: boolean
   constructor (operationFactory: IOperationFactory, authorizer: IAuthorizer, options: WacLdpOptions) {
     super()
+    this.operationFactory = operationFactory
+    this.authorizer = authorizer
     const serverRootDomain: string = new URL(options.aud).host
     debug({ serverRootDomain })
     this.storeManager = new StoreManager(serverRootDomain, options.storage)
@@ -71,18 +62,6 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
     this.skipWac = options.skipWac
     this.idpHost = options.idpHost
     this.usesHttps = options.usesHttps
-    this.operationHandlers = [
-      optionsHandler,
-      globReadHandler,
-      containerMemberAddHandler,
-      readContainerHandler,
-      deleteContainerHandler,
-      readBlobHandler,
-      writeBlobHandler,
-      updateBlobHandler,
-      deleteBlobHandler,
-      unknownOperationCatchAll
-    ]
   }
   setRootAcl (storageRoot: URL, owner: URL) {
     return this.aclManager.setRootAcl(storageRoot, owner)
@@ -96,26 +75,6 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
   containerExists (url: URL) {
     return this.storeManager.getLocalContainer(url).exists()
   }
-  async handleOperation (task: WacLdpTask): Promise<WacLdpResponse> {
-    for (let i = 0; i < this.operationHandlers.length; i++) {
-      if (this.operationHandlers[i].canHandle(task)) {
-        let appendOnly = false
-        if (!this.skipWac) {
-          appendOnly = await checkAccess({
-            url: task.fullUrl(),
-            isContainer: task.isContainer(),
-            webId: await task.webId(),
-            origin: await task.origin(),
-            requiredAccessModes: this.operationHandlers[i].requiredAccessModes,
-            storeManager: this.storeManager
-          } as AccessCheckTask) // may throw if access is denied
-        }
-        debug('calling operation handler', i, task, this.storeManager, this.aud, this.skipWac, appendOnly)
-        return this.operationHandlers[i].handle(task, this.storeManager, this.aud, this.skipWac, appendOnly)
-      }
-    }
-    throw new ErrorResult(ResultType.InternalServerError)
-  }
 
   async canHandle (httpReq: http.IncomingMessage): Promise<boolean> {
     return true
@@ -124,6 +83,35 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
   // legacy synonym:
   async handler (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
     return this.handle(httpReq, httpRes)
+  }
+
+  async handleOperation (task: WacLdpTask, skipWac: boolean, aud: string): Promise<WacLdpResponse> {
+    let handler = (this.operationFactory as DefaultOperationFactory).createOperation(task.method, task.target, task, {
+      aud: this.aud,
+      appendOnly: false,
+      skipWac: this.skipWac
+    })
+    let appendOnly = false
+    if (!skipWac) {
+      appendOnly = await checkAccess({
+        url: task.fullUrl(),
+        isContainer: task.isContainer(),
+        webId: await task.webId(),
+        origin: await task.origin(),
+        requiredPermissions: handler.requiredPermissions,
+        storeManager: this.storeManager
+      } as AccessCheckTask) // may throw if access is denied
+    }
+    if (appendOnly) {
+      handler = (this.operationFactory as DefaultOperationFactory).createOperation(task.method, task.target, task, {
+        aud: this.aud,
+        appendOnly: true,
+        skipWac: this.skipWac
+      })
+    }
+    // debug('calling operation handler', i, task, this.aud, skipWac, appendOnly)
+    const responseDescription = await handler.execute()
+    return responseDescription as WacLdpResponse
   }
 
   async handle (httpReq: http.IncomingMessage, httpRes: http.ServerResponse): Promise<void> {
@@ -138,7 +126,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
       storageOrigin = wacLdpTask.storageOrigin()
       requestOrigin = await wacLdpTask.origin()
       bearerToken = wacLdpTask.bearerToken()
-      response = await this.handleOperation(wacLdpTask)
+      response = await this.handleOperation(wacLdpTask, this.skipWac, this.aud)
       debug('resourcesChanged', response.resourceData)
       if (response.resourcesChanged) {
         response.resourcesChanged.forEach((url: URL) => {
@@ -175,11 +163,24 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
     return setAppModes(webId, origin, modes, this.storeManager.storage)
   }
   async hasAccess (webId: URL, origin: string, url: URL, mode: URL): Promise<boolean> {
+    let requiredPermissions: PermissionSet
+    if (url === ACL.Read) {
+      requiredPermissions = new PermissionSet({ read: true })
+    } else if (url === ACL.Append) {
+      requiredPermissions = new PermissionSet({ append: true })
+    } else if (url === ACL.Write) {
+      requiredPermissions = new PermissionSet({ write: true })
+    } else if (url === ACL.Control) {
+      requiredPermissions = new PermissionSet({ control: true })
+    } else {
+      debug('mode not recognized!')
+      return false
+    }
     debug('hasAccess calls checkAccess', {
       url,
       webId,
       origin,
-      requiredAccessModes: [ mode ],
+      requiredPermissions,
       storeManager: 'this.storeManager'
     })
     try {
@@ -187,7 +188,7 @@ export class WacLdp extends EventEmitter implements IHttpHandler {
         url,
         webId,
         origin,
-        requiredAccessModes: [ mode ],
+        requiredPermissions,
         storeManager: this.storeManager
       })
       debug({ appendOnly })

@@ -7,13 +7,35 @@ import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
 import { makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { ACL } from '../rdf/rdf-constants'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('write-blob-handler')
 
-export const writeBlobHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.blobWrite),
-  requiredAccessModes: [ ACL.Write ],
-  handle: async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class WriteBlobHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  resourceStore: IResourceStore
+  operationOptions: any
+  async execute (): Promise<ResponseDescription> {
+    debug('executing write blob handler', this.operationOptions)
+    return this.handle(this.preferences as WacLdpTask, this.resourceStore as StoreManager,
+      this.operationOptions.aud, this.operationOptions.skipWac, this.operationOptions.appendOnly)
+  }
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager, operationOptions: any) {
+    debug('constructing write blob handler', operationOptions)
+    this.preferences = representationPreferences
+    this.target = target
+    this.resourceStore = resourceStore
+    this.operationOptions = operationOptions
+  }
+  canHandle = () => ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.blobWrite)
+  requiredPermissions = new PermissionSet({ write: true })
+  handle = async function (task: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     const resourceDataBefore = await getResourceDataAndCheckETag(task, storeManager)
     const blobExists: boolean = !!resourceDataBefore
     debug('operation writeBlob!', blobExists)

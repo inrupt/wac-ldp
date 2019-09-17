@@ -7,15 +7,36 @@ import { AccessCheckTask, checkAccess } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
 import { ACL } from '../rdf/rdf-constants'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('glob-read-handler')
 
-export const globReadHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => {
-    return (wacLdpTask.wacLdpTaskType() === TaskType.globRead)
-  },
-  requiredAccessModes: [ ACL.Read ],
-  handle: async function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class GlobReadHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  resourceStore: IResourceStore
+  operationOptions: any
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager, operationOptions: any) {
+    this.preferences = representationPreferences
+    this.target = target
+    this.resourceStore = resourceStore
+    this.operationOptions = operationOptions
+  }
+  canHandle = () => {
+    debug('canHandle called for glob read handler', (this.preferences as WacLdpTask).wacLdpTaskType(), TaskType)
+    return ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.globRead)
+  }
+  requiredPermissions = PermissionSet.READ_ONLY
+  async execute (): Promise<ResponseDescription> {
+    return this.handle(this.preferences as WacLdpTask, this.resourceStore as StoreManager,
+      this.operationOptions.aud, this.operationOptions.skipWac, this.operationOptions.appendOnly)
+  }
+  handle = async function (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // At this point will have checked read access over the
     // container, but need to collect all RDF sources, filter on access, and then
     // concatenate them.
@@ -41,7 +62,7 @@ export const globReadHandler = {
             isContainer: false,
             webId,
             origin: await wacLdpTask.origin(),
-            requiredAccessModes: [ ACL.Read ],
+            requiredPermissions: new PermissionSet({ read: true }),
             storeManager
           } as AccessCheckTask) // may throw if access is denied
         }
@@ -56,11 +77,13 @@ export const globReadHandler = {
       }
     }))
 
-    return {
+    const ret: WacLdpResponse = {
       resultType: (wacLdpTask.omitBody() ? ResultType.OkayWithoutBody : ResultType.OkayWithBody),
       resourceData: await mergeRdfSources(rdfSources, wacLdpTask.rdfType()),
       createdLocation: undefined,
       isContainer: true
-    } as WacLdpResponse
+    }
+    debug('glob-read returns', ret)
+    return ret
   }
 }

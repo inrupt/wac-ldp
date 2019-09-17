@@ -7,21 +7,47 @@ import Debug from 'debug'
 import { streamToObject, makeResourceData, objectToStream } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
-import { writeBlobHandler } from './writeBlobHandler'
+import { WriteBlobHandler } from './WriteBlobHandler'
 import { ACL } from '../rdf/rdf-constants'
+import OperationHandler from './OperationHandler'
+import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
+import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
 
 const debug = Debug('container-member-add-handler')
 
-export const containerMemberAddHandler = {
-  canHandle: (wacLdpTask: WacLdpTask) => (wacLdpTask.wacLdpTaskType() === TaskType.containerMemberAdd),
-  requiredAccessModes: [ ACL.Append ],
-  handle: async function executeTask (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
+export class ContainerMemberAddHandler implements IOperation {
+  preferences: IRepresentationPreferences
+  target: IResourceIdentifier
+  method: string
+  resourceStore: IResourceStore
+  operationOptions: any
+  async execute (): Promise<ResponseDescription> {
+    return this.handle(this.preferences as WacLdpTask, this.resourceStore as StoreManager,
+      this.operationOptions.aud, this.operationOptions.skipWac, this.operationOptions.appendOnly)
+  }
+  canHandle () {
+    return ((this.preferences as WacLdpTask).wacLdpTaskType() === TaskType.containerMemberAdd)
+  }
+  requiredPermissions: PermissionSet
+  constructor (method: string, target: IResourceIdentifier, representationPreferences: IRepresentationPreferences, resourceStore: StoreManager, operationOptions: any) {
+    this.preferences = representationPreferences
+    this.requiredPermissions = new PermissionSet({ append: true })
+    this.target = target
+    this.method = method
+    this.resourceStore = resourceStore
+    this.operationOptions = operationOptions
+  }
+  async handle (wacLdpTask: WacLdpTask, storeManager: StoreManager, aud: string, skipWac: boolean, appendOnly: boolean): Promise<WacLdpResponse> {
     // We will convert ContainerMemberAdd tasks to WriteBlob tasks on the new child
     // but notice that access check for this is append on the container,
     // write access on the Blob is not required!
     // See https://github.com/solid/web-access-control-spec#aclappend
 
     wacLdpTask.convertToBlobWrite(wacLdpTask.childNameToCreate())
-    return writeBlobHandler.handle(wacLdpTask, storeManager, aud, skipWac, appendOnly)
+    return (new WriteBlobHandler(this.method, this.target, this.preferences, this.resourceStore as StoreManager, this.operationOptions)).handle(wacLdpTask, storeManager, aud, skipWac, appendOnly)
   }
 }
