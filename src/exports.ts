@@ -5,6 +5,7 @@ export { BlobTreeInMem } from './lib/storage/BlobTreeInMem'
 export { BlobTreeNssCompat } from './lib/storage/BlobTreeNssCompat'
 export { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
 export { ACL } from './lib/rdf/rdf-constants'
+export { StoreManager } from './lib/rdf/StoreManager'
 export { DefaultOperationFactory } from './lib/core/DefaultOperationFactory'
 
 export { BlobTreeNssCompat as NssCompatResourceStore } from './lib/storage/BlobTreeNssCompat'
