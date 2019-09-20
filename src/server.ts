@@ -28,7 +28,7 @@ import { StoreManager } from './lib/rdf/StoreManager'
 
 const debug = Debug('server')
 
-const dataDir = process.env.PORT || './data'
+const dataDir = process.env.DATA_DIR || './data'
 
 class Server {
   highLevelResourceStore: IResourceStore
