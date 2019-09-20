@@ -32,7 +32,7 @@ test('delete blob', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await (new DeleteBlobHandler('', {} as IResourceIdentifier, {}, storeManager)).handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new DeleteBlobHandler('', {} as IResourceIdentifier, {}, storeManager, task)).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -94,7 +94,7 @@ test('delete container', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await (new DeleteContainerHandler('', {} as IResourceIdentifier, {}, storeManager)).handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new DeleteContainerHandler('', {} as IResourceIdentifier, {}, storeManager, task)).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).delete.mock.calls).toEqual([
     []
   ])
@@ -242,7 +242,7 @@ test('read container (omit body)', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await (new ReadContainerHandler('', {} as IResourceIdentifier, {}, storeManager)).handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new ReadContainerHandler('', {} as IResourceIdentifier, {}, storeManager, task)).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
@@ -279,7 +279,7 @@ test('read container (with body)', async () => {
     headers: {}
   } as http.IncomingMessage, true)
   const storeManager = new StoreManager('example.com', storage as QuadAndBlobStore)
-  const result: WacLdpResponse = await (new ReadContainerHandler('', {} as IResourceIdentifier, {}, storeManager)).handle(task, storeManager, 'https://example.com', false, false)
+  const result: WacLdpResponse = await (new ReadContainerHandler('', {} as IResourceIdentifier, {}, storeManager, task)).handle(task, storeManager, 'https://example.com', false, false)
   expect((node as any).getMembers.mock.calls).toEqual([
     []
   ])
