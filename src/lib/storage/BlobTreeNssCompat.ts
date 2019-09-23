@@ -57,6 +57,9 @@ class NodeNssCompat {
 
 class ContainerNssCompat extends NodeNssCompat implements Container {
   async getMembers () {
+    if (!await this.exists()) {
+      return []
+    }
     const dirents = await fsPromises.readdir(this.filePath, { withFileTypes: true })
     return dirents.map((dirent: Dirent) => {
       return {
