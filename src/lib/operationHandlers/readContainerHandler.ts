@@ -9,13 +9,7 @@ import { streamToObject } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { Member } from '../storage/Container'
 import { membersListAsResourceData } from '../storage/membersListAsResourceData'
-import { ACL } from '../rdf/rdf-constants'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
-import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceIdentifier, IOperation, IRepresentationPreferences, IResourceStore, ResponseDescription, PermissionSet } from 'solid-server-ts'
 
 const debug = Debug('read-container-handler')
 

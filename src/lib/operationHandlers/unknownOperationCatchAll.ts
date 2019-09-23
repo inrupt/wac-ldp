@@ -3,13 +3,7 @@ import { ResultType, WacLdpResponse, ErrorResult } from '../api/http/HttpRespond
 
 import Debug from 'debug'
 import { StoreManager } from '../rdf/StoreManager'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
-import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
-import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceIdentifier, IOperation, IRepresentationPreferences, IResourceStore, ResponseDescription, PermissionSet } from 'solid-server-ts'
 
 const debug = Debug('unknown-operation-catch-all')
 

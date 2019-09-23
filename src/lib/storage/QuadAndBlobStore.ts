@@ -5,14 +5,7 @@ import { membersListAsQuadStream } from './membersListAsResourceData'
 import { quadStreamFromBlob } from '../rdf/StoreManager'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
 import { RdfType, objectToStream, streamToBuffer, makeResourceData, streamToObject } from '../rdf/ResourceDataUtils'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import Conditions from 'solid-server-ts/src/ldp/Conditions'
-import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
-import uuid from 'uuid'
-import IPatch from 'solid-server-ts/src/ldp/IPatch'
-import applyPatch from '../rdf/applyPatch'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceIdentifier, IResourceStore, IRepresentationPreferences, Conditions, IRepresentation, IPatch } from 'solid-server-ts'
 
 const debug = Debug('quad-and-blob-store')
 

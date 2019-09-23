@@ -2,7 +2,7 @@ import * as http from 'http'
 import Debug from 'debug'
 import { ResourceData } from '../../rdf/ResourceDataUtils'
 import { LDP } from '../../rdf/rdf-constants'
-import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
+import ResponseDescription from 'solid-server-ts'
 const Link = require('http-link-header')
 
 const debug = Debug('HttpResponder')
@@ -29,7 +29,7 @@ export class ErrorResult extends Error {
     this.resultType = resultType
   }
 }
-export interface WacLdpResponse extends ResponseDescription {
+export interface WacLdpResponse /* extends ResponseDescription */ {
   resourcesChanged?: Array<URL>
   resultType: ResultType
   resourceData?: ResourceData

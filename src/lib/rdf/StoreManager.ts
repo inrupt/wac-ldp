@@ -12,12 +12,7 @@ import { ResourceData, streamToObject, determineRdfType, RdfType, makeResourceDa
 import { Container } from '../storage/Container'
 import { ResultType, ErrorResult } from '../api/http/HttpResponder'
 import { QuadAndBlobStore } from '../storage/QuadAndBlobStore'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import Conditions from 'solid-server-ts/src/ldp/Conditions'
-import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
-import IPatch from 'solid-server-ts/src/ldp/IPatch'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceIdentifier, IResourceStore, IRepresentationPreferences, Conditions, IRepresentation, IPatch } from 'solid-server-ts'
 
 const debug = Debug('StoreManager')
 

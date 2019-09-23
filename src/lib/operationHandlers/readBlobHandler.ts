@@ -1,11 +1,9 @@
-import { Blob } from '../storage/Blob'
-
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
 
 import Debug from 'debug'
 
-import { streamToObject, makeResourceData } from '../rdf/ResourceDataUtils'
+import { makeResourceData } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { resourceDataToRdf } from '../rdf/mergeRdfSources'
 import { rdfToResourceData } from '../rdf/rdfToResourceData'
@@ -13,13 +11,7 @@ import { newEngine } from '@comunica/actor-init-sparql-rdfjs'
 import { Store } from 'n3'
 
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
-import { ACL } from '../rdf/rdf-constants'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
-import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceIdentifier, IOperation, IRepresentationPreferences, IResourceStore, ResponseDescription, PermissionSet } from 'solid-server-ts'
 
 const debug = Debug('read-blob-handler')
 

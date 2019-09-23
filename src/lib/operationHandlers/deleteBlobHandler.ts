@@ -2,20 +2,10 @@ import { Blob } from '../storage/Blob'
 
 import { WacLdpTask, TaskType } from '../api/http/HttpParser'
 import { WacLdpResponse, ResultType } from '../api/http/HttpResponder'
-
 import Debug from 'debug'
-
-import { streamToObject, makeResourceData, objectToStream, ResourceData } from '../rdf/ResourceDataUtils'
 import { StoreManager } from '../rdf/StoreManager'
 import { getResourceDataAndCheckETag } from './getResourceDataAndCheckETag'
-import { ACL } from '../rdf/rdf-constants'
-import OperationHandler from './OperationHandler'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
-import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceIdentifier, IRepresentationPreferences, IOperation, ResponseDescription, PermissionSet, IResourceStore } from 'solid-server-ts'
 
 const debug = Debug('delete-blob-handler')
 

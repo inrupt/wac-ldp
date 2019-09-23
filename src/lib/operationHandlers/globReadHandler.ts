@@ -7,12 +7,7 @@ import { AccessCheckTask, checkAccess } from '../authorization/checkAccess'
 import { ResourceData, streamToObject } from '../rdf/ResourceDataUtils'
 import { mergeRdfSources } from '../rdf/mergeRdfSources'
 import { ACL } from '../rdf/rdf-constants'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
-import ResponseDescription from 'solid-server-ts/src/http/ResponseDescription'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceIdentifier,IRepresentationPreferences, IOperation, PermissionSet, ResponseDescription, IResourceStore } from 'solid-server-ts'
 
 const debug = Debug('glob-read-handler')
 

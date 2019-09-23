@@ -11,12 +11,9 @@ import { setAppModes } from '../rdf/setAppModes'
 import { BlobTree } from '../storage/BlobTree'
 import { AclManager } from '../authorization/AclManager'
 import { objectToStream, makeResourceData } from '../rdf/ResourceDataUtils'
-import IHttpHandler from 'solid-server-ts/src/ldp/IHttpHandler'
-import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
-import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
+import { IHttpHandler, IOperationFactory, IAuthorizer, PermissionSet } from 'solid-server-ts'
 import { DefaultOperationFactory } from './DefaultOperationFactory'
 import { ACL } from '../rdf/rdf-constants'
-import { PermissionSet } from 'solid-server-ts'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 

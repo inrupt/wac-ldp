@@ -1,11 +1,7 @@
 import { BlobTreeInMem } from '../../../src/lib/storage/BlobTreeInMem'
 import { BlobTreeNssCompat } from '../../../src/lib/storage/BlobTreeNssCompat'
-import IRepresentation from 'solid-server-ts/src/ldp/IRepresentation'
-import IRepresentationMetadata from 'solid-server-ts/src/ldp/IRepresentationMetadata'
+import { IRepresentation, IRepresentationMetadata, Conditions, IResourceIdentifier, IRepresentationPreferences } from 'solid-server-ts'
 import { bufferToStream, streamToBuffer } from '../../../src/lib/rdf/ResourceDataUtils'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import Conditions from 'solid-server-ts/src/ldp/Conditions'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
 import rimraf = require('rimraf')
 
 const stores = {

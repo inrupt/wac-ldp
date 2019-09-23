@@ -7,7 +7,7 @@ import { TaskType } from '../api/http/HttpParser'
 import { ErrorResult, ResultType } from '../api/http/HttpResponder'
 import { StoreManager } from '../rdf/StoreManager'
 import { ACL_SUFFIX, AclManager } from './AclManager'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import PermissionSet from 'solid-server-ts'
 
 const debug = Debug('checkAccess')
 
@@ -40,7 +40,7 @@ export interface AccessCheckTask {
   url: URL
   webId: URL | undefined
   origin: string
-  requiredPermissions: PermissionSet
+  requiredPermissions: any /* PermissionSet */
   storeManager: StoreManager
 }
 

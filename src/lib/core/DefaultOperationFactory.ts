@@ -1,5 +1,4 @@
-import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IOperationFactory, IResourceStore, IResourceIdentifier, IRepresentationPreferences, IOperation } from 'solid-server-ts'
 import { OptionsHandler } from '../operationHandlers/OptionsHandler'
 import { GlobReadHandler } from '../operationHandlers/GlobReadHandler'
 import { ContainerMemberAddHandler } from '../operationHandlers/ContainerMemberAddHandler'
@@ -16,10 +15,6 @@ import { WacLdpResponse, ErrorResult, ResultType } from '../api/http/HttpRespond
 import { checkAccess, AccessCheckTask } from '../authorization/checkAccess'
 import debug from 'debug'
 import OperationHandler from '../operationHandlers/OperationHandler'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
-import IOperation from 'solid-server-ts/src/ldp/operations/IOperation'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
 
 export class DefaultOperationFactory implements IOperationFactory {
   resourceStore: IResourceStore

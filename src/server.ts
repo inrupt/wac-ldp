@@ -21,9 +21,7 @@ import { WacLdp } from './lib/core/WacLdp'
 import { BlobTree, Path } from './lib/storage/BlobTree'
 import { QuadAndBlobStore } from './lib/storage/QuadAndBlobStore'
 import { NssCompatResourceStore, DefaultOperationFactory, AclBasedAuthorizer } from './exports'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
-import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFactory'
-import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
+import { IResourceStore, IOperationFactory, IAuthorizer } from 'solid-server-ts'
 import { StoreManager } from './lib/rdf/StoreManager'
 
 const debug = Debug('server')

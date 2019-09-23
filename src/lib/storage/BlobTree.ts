@@ -2,7 +2,7 @@ import * as events from 'events'
 import Debug from 'debug'
 import { Container } from './Container'
 import { Blob } from './Blob'
-import IResourceStore from 'solid-server-ts/src/ldp/IResourceStore'
+import { IResourceStore } from 'solid-server-ts'
 
 const debug = Debug('BlobTree')
 

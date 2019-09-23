@@ -11,7 +11,7 @@ import { QuadAndBlobStore } from '../../../src/lib/storage/QuadAndBlobStore'
 import { DeleteContainerHandler } from '../../../src/lib/operationHandlers/DeleteContainerHandler'
 import { ReadBlobHandler } from '../../../src/lib/operationHandlers/ReadBlobHandler'
 import { DeleteBlobHandler } from '../../../src/lib/operationHandlers/DeleteBlobHandler'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
+import { IResourceIdentifier } from 'solid-server-ts'
 
 test('delete blob', async () => {
   const node: Blob = {

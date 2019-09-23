@@ -2,10 +2,7 @@ import Debug from 'debug'
 import { urlToPath } from '../storage/BlobTree'
 import { StoreManager, getEmptyGraph, getGraphLocal } from '../rdf/StoreManager'
 import { makeResourceData, bufferToStream } from '../rdf/ResourceDataUtils'
-import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
-import ICredentials from 'solid-server-ts/src/auth/ICredentials'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import { IAuthorizer, ICredentials, IResourceIdentifier, PermissionSet } from 'solid-server-ts'
 
 // Example ACL file, this one is on https://michielbdejong.inrupt.net/.acl:
 

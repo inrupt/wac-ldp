@@ -2,11 +2,10 @@ import * as http from 'http'
 import { URL } from 'url'
 import uuid from 'uuid/v4'
 import Debug from 'debug'
-import MIMEType from 'whatwg-mimetype'
 import { determineWebIdAndOrigin } from '../authentication/determineWebIdAndOrigin'
 import { RdfType, determineRdfType } from '../../rdf/ResourceDataUtils'
-import IResourceIdentifier from 'solid-server-ts/src/ldp/IResourceIdentifier'
-import IRepresentationPreferences from 'solid-server-ts/src/ldp/IRepresentationPreferences'
+import { IResourceIdentifier, IRepresentationPreferences } from 'solid-server-ts'
+
 const debug = Debug('HttpParser')
 
 export enum TaskType {
