@@ -16,7 +16,7 @@ import IOperationFactory from 'solid-server-ts/src/ldp/operations/IOperationFact
 import IAuthorizer from 'solid-server-ts/src/auth/IAuthorizer'
 import { DefaultOperationFactory } from './DefaultOperationFactory'
 import { ACL } from '../rdf/rdf-constants'
-import PermissionSet from 'solid-server-ts/src/permissions/PermissionSet'
+import { PermissionSet } from 'solid-server-ts'
 
 export const BEARER_PARAM_NAME = 'bearer_token'
 
