@@ -85,7 +85,7 @@ class BlobNssCompat extends NodeNssCompat implements Blob {
 
     const existsAs = await this.existsAs()
     if (!existsAs) {
-      throw new Error('not found')
+      return undefined // not found
     }
     const buffer: Buffer = await fsPromises.readFile(existsAs)
     const resourceData: ResourceData = {
