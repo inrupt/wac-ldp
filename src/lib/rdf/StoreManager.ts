@@ -133,7 +133,7 @@ export class StoreManager implements IResourceStore {
     if (url.host.endsWith(this.serverRootDomain)) {
       debug('getResourceData local!', url.toString())
       const blob: Blob = this.getLocalBlob(url)
-      const data = await blob.getData()
+      const data = await blob.getData() // getData should resolve with undefined if the blob does not exist
       if (data) {
         return streamToObject(data)
       }
