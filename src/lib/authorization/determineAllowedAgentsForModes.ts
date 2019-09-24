@@ -135,6 +135,7 @@ export async function determineAllowedAgentsForModes (task: ModesCheckTask): Pro
         }
         break
       case accessPredicate:
+      case accessPredicate + 'ForNew': // See https://github.com/inrupt/wac-ldp/issues/154
         // Three cases: adjacent (doc), adjacent (container), non-adjacent (parent):
         // * resource https://example.com/c1/c2/c3/doc
         //  * target https://example.com/c1/c2/c3/doc, acl doc https://example.com/c1/c2/c3/doc.acl (adjacent, doc)
