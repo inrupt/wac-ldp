@@ -27,6 +27,11 @@ async function modeAllowed (mode: URL, allowedAgentsForModes: AccessModes, webId
     debug('no origin header, allowed')
     return true
   }
+  if (!webId) {
+    // See https://github.com/inrupt/wac-ldp/issues/169
+    debug('no webId, origin header irrelevant')
+    return true
+  }
   // then check origin:
   debug('checking origin!')
   return appIsTrustedForMode({
