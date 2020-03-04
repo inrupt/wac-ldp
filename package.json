@@ -32,7 +32,7 @@
     "rdflib": "^1.0.4",
     "solid-server-ts": "^0.1.1",
     "sparqljs": "^2.2.3",
-    "uuid": "^3.3.3",
+    "uuid": "^7.0.2",
     "whatwg-mimetype": "^2.3.0"
   },
   "devDependencies": {
