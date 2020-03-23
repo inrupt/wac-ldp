@@ -29,7 +29,7 @@
     "rdf-formats-common": "^1.4.0",
     "rdf-parser-jsonld": "^1.1.0",
     "rdf-parser-n3": "^1.1.1",
-    "rdflib": "^1.0.4",
+    "rdflib": "^1.1.0",
     "solid-server-ts": "^0.1.1",
     "sparqljs": "^2.2.3",
     "uuid": "^3.3.3",
