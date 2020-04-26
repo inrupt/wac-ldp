@@ -11,7 +11,7 @@
     "@types/glob": "^7.1.1",
     "@types/jsonwebtoken": "^8.3.2",
     "@types/mime-types": "^2.1.0",
-    "@types/n3": "^1.1.1",
+    "@types/n3": "^1.1.6",
     "@types/node": "^12.7.4",
     "@types/node-fetch": "^2.5.0",
     "@types/node-rsa": "^1.0.0",
