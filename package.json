@@ -9,7 +9,7 @@
     "@types/debug": "^4.1.4",
     "@types/events": "^3.0.0",
     "@types/glob": "^7.1.1",
-    "@types/jsonwebtoken": "^8.3.2",
+    "@types/jsonwebtoken": "^8.5.0",
     "@types/mime-types": "^2.1.0",
     "@types/n3": "^1.1.1",
     "@types/node": "^12.7.4",
