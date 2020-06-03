@@ -5,7 +5,7 @@
   "main": "dist/exports.js",
   "dependencies": {
     "@comunica/actor-init-sparql": "^1.7.2",
-    "@comunica/actor-init-sparql-rdfjs": "^1.7.2",
+    "@comunica/actor-init-sparql-rdfjs": "^1.13.0",
     "@types/debug": "^4.1.4",
     "@types/events": "^3.0.0",
     "@types/glob": "^7.1.1",
