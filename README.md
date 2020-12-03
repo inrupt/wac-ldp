@@ -1,3 +1,9 @@
+-----
+
+**⚠️ This project is obsolete. Please use the [Community Solid Server](https://github.com/solid/community-server) instead. ⚠️**
+
+-----
+
 # wac-ldp
 
 [![Build Status](https://travis-ci.org/inrupt/wac-ldp.svg?branch=master)](https://travis-ci.org/inrupt/wac-ldp) [![Coverage Status](https://coveralls.io/repos/github/inrupt/wac-ldp/badge.svg?branch=master)](https://coveralls.io/github/inrupt/wac-ldp?branch=master) [![Greenkeeper badge](https://badges.greenkeeper.io/inrupt/wac-ldp.svg)](https://greenkeeper.io/)
